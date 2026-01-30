@@ -1,0 +1,58 @@
+[
+  {
+    "Name": "Cube IDE",
+    "FilePath": "C:\\ST\\STM32CubeIDE_1.13.1\\STM32CubeIDE\\stm32cubeide.exe"
+  },
+  {
+    "Name": "Embarcadero IDE",
+    "FilePath": "D:\\Program Files (x86)\\Embarcadero\\Studio\\23.0\\bin\\bds.exe"
+  },
+  {
+    "Name": "Visual Studio",
+    "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe"
+  },
+  {
+    "Name": "Rider",
+    "FilePath": "C:\\Program Files\\JetBrains\\JetBrains Rider 2025.1\\bin\\rider64.exe"
+  },
+  {
+    "Name": "QtCreator",
+    "FilePath": "C:\\Qt\\Qt5.12.12\\Tools\\QtCreator\\bin\\qtcreator.exe"
+  },
+  {
+    "Name": "Delphi 7",
+    "FilePath": "C:\\Program Files (x86)\\Borland\\Delphi7\\Bin\\delphi32.exe"
+  },
+  {
+    "Name": "Lazarus",
+    "FilePath": "C:\\lazarus\\lazarus.exe"
+  },
+  {
+    "Name": "VS Code",
+    "FilePath": "C:\\Users\\17264\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+  },
+  {
+    "Name": "WinMerge",
+    "FilePath": "C:\\Program Files\\WinMerge\\WinMergeU.exe"
+  },
+  {
+    "Name": "HEX Editor HxD",
+    "FilePath": "C:\\Program Files\\HxD\\HxD.exe"
+  },
+  {
+    "Name": "Notepad PP",
+    "FilePath": "C:\\Program Files\\Notepad\u002B\u002B\\notepad\u002B\u002B.exe"
+  },
+  {
+    "Name": "Total commander",
+    "FilePath": "C:\\Program Files\\Total Commander 9.50\\TOTALCMD64.EXE"
+  },
+  {
+    "Name": "SourceTree",
+    "FilePath": "C:\\Users\\17264\\AppData\\Local\\SourceTree\\SourceTree.exe"
+  },
+  {
+    "Name": "SDFViewer.exe",
+    "FilePath": "C:\\Program Files (x86)\\Flyhoward\\SDF Viewer\\SDFViewer.exe"
+  }
+]

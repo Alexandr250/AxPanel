@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "AxPanelWinFormsTest/1.0.0": {
+        "dependencies": {
+          "AxPanel": "1.0.0"
+        },
+        "runtime": {
+          "AxPanelWinFormsTest.dll": {}
+        }
+      },
+      "AxPanel/1.0.0": {
+        "runtime": {
+          "AxPanel.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AxPanelWinFormsTest/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "AxPanel/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

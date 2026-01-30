@@ -1,0 +1,9 @@
+System.DllNotFoundException: Unable to load library 'libSkiaSharp'.
+   в SkiaSharp.LibraryLoader.LoadLocalLibrary[T](String libraryName)
+   в SkiaSharp.SkiaApi.<>c.<.cctor>b__1761_0()
+   в System.Lazy`1.CreateValue()
+   в System.Lazy`1.LazyInitValue()
+   в System.Lazy`1.get_Value()
+   в SkiaSharp.SkiaApi.sk_compatpaint_new()
+   в SkiaSharp.SKPaint..ctor()
+   в Solar.CoordinateTable.WinForms.SkiaControls.SkiaCameraPictureBox.OnCreateControl()

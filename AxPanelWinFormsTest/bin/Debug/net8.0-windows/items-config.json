@@ -1,0 +1,31 @@
+{
+  "Containers": [
+    {
+      "Items": [
+        {
+          "Name": "WinMerge",
+          "FilePath": "C:\\Program Files\\WinMerge\\WinMergeU.exe",
+          "ClicksCount": 2,
+          "Id": 0,
+          "Height": 0
+        },
+        {
+          "Name": "notepad.exe",
+          "FilePath": "C:\\Windows\\notepad.exe",
+          "ClicksCount": 5,
+          "Id": 1,
+          "Height": 0
+        },
+        {
+          "Name": "calc.exe",
+          "FilePath": "C:\\Windows\\System32\\calc.exe",
+          "ClicksCount": 9,
+          "Id": 2,
+          "Height": 0
+        }
+      ],
+      "Name": "\u041F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u044B",
+      "Type": 0
+    }
+  ]
+}

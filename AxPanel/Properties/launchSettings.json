@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Debug": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\17264\\source\\repos\\AxPanel\\AxPanel\\bin\\Debug\\net8.0-windows\\AxPanel.exe"
+    }
+  }
+}
