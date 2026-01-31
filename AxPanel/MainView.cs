@@ -123,34 +123,6 @@ public partial class MainView : Form
 
         if ( oldHover != _hoverBtn ) 
             Invalidate( new Rectangle( Width - BtnWidth * 2, 0, BtnWidth * 2, _headerHeight ) );
-
-        //if ( _mouseDown )
-        //{
-        //    if ( e.Y < Height )
-        //    {
-        //        Point point = new( Location.X - _lastLocation.X + e.X, Location.Y - _lastLocation.Y + e.Y );
-
-        //        if ( point.X < 0 )
-        //            point.X = 0;
-
-        //        if ( point.Y < 0 )
-        //            point.Y = 0;
-
-        //        if ( point.X + Width > Screen.PrimaryScreen.Bounds.Width )
-        //        {
-        //            point.X = Screen.PrimaryScreen.Bounds.Width - Width;
-        //        }
-
-        //        if ( point.Y + Height > Screen.PrimaryScreen.Bounds.Height )
-        //        {
-        //            point.Y = Screen.PrimaryScreen.Bounds.Height - Height;
-        //        }
-
-        //        Location = point;
-
-        //        Update();
-        //    }
-        //}
     }
 
     protected override void OnMouseLeave( EventArgs e )

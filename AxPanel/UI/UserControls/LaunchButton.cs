@@ -149,4 +149,49 @@ public class LaunchButton : BaseControl
             Invalidate();
         }
     }
+
+    public void UpdateState( bool isRunning, float cpuUsage, float ramMb, DateTime? startTime )
+    {
+        // Увеличили порог до 0.5f, чтобы интерфейс не дергался от микро-изменений
+        bool changed = IsRunning != isRunning ||
+                       Math.Abs( CpuUsage - cpuUsage ) > 0.5f ||
+                       Math.Abs( RamUsage - ramMb ) > 0.5f ||
+                       StartTime != startTime;
+
+        if ( changed )
+        {
+            this.IsRunning = isRunning;
+            this.CpuUsage = isRunning ? cpuUsage : 0;
+            this.RamUsage = isRunning ? ramMb : 0;
+            this.StartTime = isRunning ? startTime : null;
+
+            if ( this.InvokeRequired )
+                this.BeginInvoke( new Action( Invalidate ) );
+            else
+                this.Invalidate();
+        }
+    }
+
+    //public void UpdateState( bool isRunning, float cpuUsage, float ramMb, DateTime? startTime )
+    //{
+    //    // Обновляем только если значения реально изменились, чтобы избежать лишних перерисовок
+    //    bool changed = IsRunning != isRunning ||
+    //                   Math.Abs( CpuUsage - cpuUsage ) > 0.1f ||
+    //                   Math.Abs( RamUsage - ramMb ) > 0.1f ||
+    //                   StartTime != startTime;
+
+    //    if ( changed )
+    //    {
+    //        this.IsRunning = isRunning;
+    //        this.CpuUsage = isRunning ? cpuUsage : 0;
+    //        this.RamUsage = isRunning ? ramMb : 0;
+    //        this.StartTime = isRunning ? startTime : null;
+
+    //        // Принудительная перерисовка кнопки в UI-потоке
+    //        if ( this.InvokeRequired )
+    //            this.BeginInvoke( new Action( Invalidate ) );
+    //        else
+    //            this.Invalidate();
+    //    }
+    //}
 }

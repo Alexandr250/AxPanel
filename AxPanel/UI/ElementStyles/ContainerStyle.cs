@@ -19,22 +19,32 @@ public class ContainerStyle : IDisposable
 
     public void Dispose()
     {
+        // Очищаем все графические ресурсы
+        DisposeResource( BorderLightPen );
+        DisposeResource( BorderDarkPen );
         DisposeResource( HeaderBrush );
+        DisposeResource( ForeBrush );
+
+        // Шрифты тоже нужно очищать, если они не системные
+        if ( !ReferenceEquals( Font, SystemFonts.DefaultFont ) )
+        {
+            Font?.Dispose();
+        }
+
         GC.SuppressFinalize( this );
     }
 
-    private void DisposeResource( object resource )
+    private void DisposeResource( IDisposable resource )
     {
-        // Вспомогательный метод для безопасной очистки только наших ресурсов
-        if ( resource is IDisposable disposable && !IsSystemResource( resource ) )
+        // Если ресурс не null и не является системным статиком — удаляем
+        if ( resource != null && !IsSystemResource( resource ) )
         {
-            disposable.Dispose();
+            resource.Dispose();
         }
     }
 
     private bool IsSystemResource( object resource )
     {
-        // Простая проверка, чтобы не убить статические кисти/шрифты
         return ReferenceEquals( resource, Brushes.White ) ||
                ReferenceEquals( resource, Pens.Black ) ||
                ReferenceEquals( resource, SystemFonts.DefaultFont );
