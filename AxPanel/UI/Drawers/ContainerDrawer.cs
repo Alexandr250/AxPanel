@@ -31,6 +31,6 @@ public class ContainerDrawer
         g.DrawLine( _theme.ContainerStyle.BorderDarkPen, 0, rect.Bottom, rect.Right, rect.Bottom );
 
         rect = new Rectangle( 0 + 16, 0, control.Width - 1 - 16, /*Height - 1*/ _theme.ContainerStyle.HeaderHeight );
-        g.DrawString( control.Path, _theme.ContainerStyle.Font, _theme.ContainerStyle.ForeBrush, rect, format );
+        g.DrawString( control.BaseControlPath, _theme.ContainerStyle.Font, _theme.ContainerStyle.ForeBrush, rect, format );
     }
 }

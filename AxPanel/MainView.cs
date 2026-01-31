@@ -259,19 +259,7 @@ public partial class MainView : Form
 
     protected override void WndProc( ref Message m )
     {
-        // WM_NCHITTEST (0x84) — "Запрос на проверку области". Windows отправляет его при каждом движении мыши,
-        // чтобы понять: курсор над фоном (HTCLIENT), над заголовком (HTCAPTION) или над рамкой ресайза.
-        const int WM_NCHITTEST = 0x84;
-
-        // HTBOTTOMRIGHT (17) — Код области "нижний правый угол". Возвращая его, мы заставляем Windows
-        // думать, что в этой точке находится край рамки, что включает системный ресайз окна по диагонали.
-        const int HTBOTTOMRIGHT = 17;
-
-        // HTCLIENT (1) — Код "рабочей области". Мы возвращаем его, когда мышь над нашими кнопками (свернуть/закрыть),
-        // чтобы Windows не перехватывала клики как перетаскивание, а передавала их в наш OnMouseDown.
-        const int HTCLIENT = 1;
-
-        if ( m.Msg == WM_NCHITTEST )
+        if ( m.Msg == Win32Api.WM_NCHITTEST )
         {
             // Извлекаем экранные координаты и переводим их в локальные (относительно окна)
             int x = ( int )( short )( m.LParam.ToInt32() & 0xFFFF );
@@ -281,14 +269,14 @@ public partial class MainView : Form
             // Приоритет 1: Если мышь над кнопками управления — отдаем управление кнопкам
             if ( _btnMinRect.Contains( pos ) || _btnCloseRect.Contains( pos ) )
             {
-                m.Result = ( IntPtr )HTCLIENT;
+                m.Result = ( IntPtr )Win32Api.HTCLIENT;
                 return;
             }
 
             // Приоритет 2: Если мышь в нижнем правом углу — включаем изменение размера
             if ( pos.X >= ClientSize.Width - GripSideWidth && pos.Y >= ClientSize.Height - GripSideWidth )
             {
-                m.Result = ( IntPtr )HTBOTTOMRIGHT;
+                m.Result = ( IntPtr )Win32Api.HTBOTTOMRIGHT;
                 return;
             }
         }

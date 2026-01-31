@@ -47,7 +47,7 @@ public class AxPanelMainContainer : Panel
         var container = new AxPanelContainer( _theme )
         {
             PanelName = name,
-            Path = name,
+            BaseControlPath = name,
             Width = this.Width,
             Height = _theme.ContainerStyle.HeaderHeight
         };
@@ -78,7 +78,7 @@ public class AxPanelMainContainer : Panel
         foreach ( var container in Containers )
         {
             container.Top = currentTop;
-            container.Width = this.Width;
+            //container.Width = this.Width;
 
             int targetH = ( container == Selected ) ? _targetSelectedHeight : _theme.ContainerStyle.HeaderHeight;
 
@@ -107,7 +107,7 @@ public class AxPanelMainContainer : Panel
         {
             container.Top = currentTop;
             container.Height = ( container == Selected ) ? selHeight : _theme.ContainerStyle.HeaderHeight;
-            container.Width = this.Width;
+            //container.Width = this.Width;
             currentTop += container.Height;
         }
     }

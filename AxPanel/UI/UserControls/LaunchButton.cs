@@ -13,17 +13,20 @@ public class LaunchButton : BaseControl
     private KeyboardState _keyboardState = new();
     private Point _lastLocation;
 
+    // Свойства состояния процесса
     public bool IsRunning { get; set; }
     public float CpuUsage { get; set; }
     public float RamUsage { get; set; }
     public DateTime? StartTime { get; set; }
+    //public string Path { get; set; } // Ключ для мониторинга
 
-    // Используем события вместо публичных Action
+    // События
     public event Action<LaunchButton> ButtonLeftClick;
     public event Action<LaunchButton> ButtonMiddleClick;
     public event Action<LaunchButton> ButtonRightClick;
     public event Action<LaunchButton> DeleteButtonClick;
 
+    // Устаревшее, теперь позицией управляет LayoutEngine через контейнер
     public Func<int> RequestPosition;
 
     public LaunchButton( ITheme theme )
@@ -36,16 +39,21 @@ public class LaunchButton : BaseControl
                        ControlStyles.UserPaint |
                        ControlStyles.OptimizedDoubleBuffer |
                        ControlStyles.ResizeRedraw, true );
+
+        this.Dock = DockStyle.None;      // Категорически отключаем Dock
+        this.Anchor = AnchorStyles.None;  // Отключаем Anchor, чтобы Left/Top работали свободно
+        this.AutoSize = false;
     }
 
     protected override void OnParentChanged( EventArgs e )
     {
         base.OnParentChanged( e );
-        if ( Parent != null ) Width = Parent.Width;
+        // Удалено принудительное растягивание на всю ширину для поддержки сетки
     }
 
     protected override void OnPaint( PaintEventArgs e )
     {
+        // Передаем текущий размер кнопки (Width/Height) в отрисовщик
         _buttonDrawer.Draw( this, _mouseState, _keyboardState, e, IsRunning ? CpuUsage : 0 );
     }
 
@@ -59,14 +67,17 @@ public class LaunchButton : BaseControl
     protected override void OnMouseDown( MouseEventArgs e )
     {
         _lastLocation = e.Location;
-        if ( e.Button == MouseButtons.Left ) BringToFront();
-        if ( e.Button == MouseButtons.Left ) this.Capture = true;
+        if ( e.Button == MouseButtons.Left )
+        {
+            BringToFront();
+            this.Capture = true;
+        }
         base.OnMouseDown( e );
     }
 
     protected override void OnMouseMove( MouseEventArgs e )
     {
-        // Проверка зоны кнопки удаления
+        // Проверка зоны кнопки удаления (адаптирована под динамическую ширину)
         bool isInsideDeleteZone = e.X > Width - _theme.ButtonStyle.DeleteButtonWidth;
         if ( _mouseState.MouseInDeleteButton != isInsideDeleteZone )
         {
@@ -74,12 +85,15 @@ public class LaunchButton : BaseControl
             Invalidate();
         }
 
-        if ( e.Button == MouseButtons.Left )
+        if ( e.Button == MouseButtons.Left && this.Capture )
         {
+            int deltaX = e.X - _lastLocation.X;
             int deltaY = e.Y - _lastLocation.Y;
-            if ( deltaY != 0 )
+
+            if ( deltaX != 0 || deltaY != 0 )
             {
                 _mouseState.ButtonMoved = true;
+                this.Left += deltaX;
                 this.Top += deltaY;
             }
         }
@@ -88,11 +102,10 @@ public class LaunchButton : BaseControl
 
     protected override void OnMouseUp( MouseEventArgs e )
     {
-        this.Capture = false;
-
         if ( e.Button == MouseButtons.Left )
         {
-            // 1. Сначала обрабатываем клик, если смещения почти не было
+            this.Capture = false;
+
             if ( !_mouseState.ButtonMoved )
             {
                 if ( _mouseState.MouseInDeleteButton )
@@ -101,14 +114,9 @@ public class LaunchButton : BaseControl
                     ButtonLeftClick?.Invoke( this );
             }
 
-            // 2. ВАЖНО: Возвращаем кнопку на "законное" место
-            // Это сбросит результат перетаскивания (this.Top += deltaY)
-            if ( RequestPosition != null && !_mouseState.ButtonMoved )
-            {
-                // Если клик был без движения, принудительно возвращаем (или даем таймеру довести)
-                // Но лучше оставить для мгновенного отклика при клике:
-                this.Top = RequestPosition();
-            }
+            // ВАЖНО: Мы больше не вызываем RequestPosition здесь вручную.
+            // Контейнер AxPanelContainer.AnimateStep сам плавно вернет кнопку 
+            // в позицию, рассчитанную текущим LayoutEngine.
         }
         else if ( e.Button == MouseButtons.Right )
         {
@@ -142,7 +150,6 @@ public class LaunchButton : BaseControl
 
     public void RaiseKeyUp( KeyEventArgs keyArgs )
     {
-        // Keys.Menu — это системный код клавиши Alt
         if ( keyArgs.KeyCode == Keys.Menu || keyArgs.KeyCode == Keys.Alt )
         {
             _keyboardState.AltPressed = false;
@@ -152,7 +159,6 @@ public class LaunchButton : BaseControl
 
     public void UpdateState( bool isRunning, float cpuUsage, float ramMb, DateTime? startTime )
     {
-        // Увеличили порог до 0.5f, чтобы интерфейс не дергался от микро-изменений
         bool changed = IsRunning != isRunning ||
                        Math.Abs( CpuUsage - cpuUsage ) > 0.5f ||
                        Math.Abs( RamUsage - ramMb ) > 0.5f ||
@@ -171,27 +177,4 @@ public class LaunchButton : BaseControl
                 this.Invalidate();
         }
     }
-
-    //public void UpdateState( bool isRunning, float cpuUsage, float ramMb, DateTime? startTime )
-    //{
-    //    // Обновляем только если значения реально изменились, чтобы избежать лишних перерисовок
-    //    bool changed = IsRunning != isRunning ||
-    //                   Math.Abs( CpuUsage - cpuUsage ) > 0.1f ||
-    //                   Math.Abs( RamUsage - ramMb ) > 0.1f ||
-    //                   StartTime != startTime;
-
-    //    if ( changed )
-    //    {
-    //        this.IsRunning = isRunning;
-    //        this.CpuUsage = isRunning ? cpuUsage : 0;
-    //        this.RamUsage = isRunning ? ramMb : 0;
-    //        this.StartTime = isRunning ? startTime : null;
-
-    //        // Принудительная перерисовка кнопки в UI-потоке
-    //        if ( this.InvokeRequired )
-    //            this.BeginInvoke( new Action( Invalidate ) );
-    //        else
-    //            this.Invalidate();
-    //    }
-    //}
 }

@@ -25,7 +25,18 @@ public class ConfigManager
 
     public static MainConfig? ReadMainConfig()
     {
-        if ( !File.Exists( ConfigFile ) ) return new MainConfig();
+        if ( !File.Exists( ConfigFile ) )
+        {
+            var defaultConfig = new MainConfig
+            {
+                Width = 400,
+                Height = 600,
+                HeaderHeight = 30,
+                BorderWidth = 5
+            };
+            SaveMainConfig( defaultConfig ); // Создаем файл сразу
+            return defaultConfig;
+        }
 
         try
         {
@@ -61,6 +72,7 @@ public class ConfigManager
     {
         MainModel? panelModel = null;
 
+        // 1. Попытка чтения из файла
         if ( File.Exists( ItemsConfigFile ) )
         {
             try
@@ -68,22 +80,46 @@ public class ConfigManager
                 string json = File.ReadAllText( ItemsConfigFile );
                 panelModel = JsonSerializer.Deserialize<MainModel>( json );
             }
-            catch ( Exception ex ) { Debug.WriteLine( ex.Message ); }
-        }
-
-        // Если файла нет или он битый — создаем пустую модель
-        panelModel ??= new MainModel { Containers = new List<ContainerItem>() };
-
-        foreach ( ContainerItem container in panelModel.Containers )
-        {
-            for ( int index = 0; index < container.Items.Count; index++ )
+            catch ( Exception ex )
             {
-                LaunchItem? item = container.Items[ index ];
-                if ( item != null ) item.Id = index;
+                Debug.WriteLine( $"Ошибка загрузки: {ex.Message}" );
             }
         }
 
-        panelModel.Containers.Add( BuildStandatrContainer() );
+        // 2. Если файла нет, он пуст или в нем нет контейнеров — создаем один пустой
+        if ( panelModel == null || panelModel.Containers == null || panelModel.Containers.Count == 0 )
+        {
+            panelModel = new MainModel { Containers = new List<ContainerItem>() };
+
+            // Создаем абсолютно пустой контейнер (без кнопок)
+            var emptyContainer = new ContainerItem
+            {
+                Name = "Новая панель",
+                Items = new List<LaunchItem>(),
+                Type = ContainerType.Normal // Предполагаем, что это обычный тип
+            };
+
+            panelModel.Containers.Add( emptyContainer );
+
+            // Сохраняем, чтобы файл физически появился на диске
+            SaveItemsConfig( panelModel );
+        }
+
+        // 3. Индексация существующих элементов (если они есть)
+        foreach ( var container in panelModel.Containers )
+        {
+            if ( container.Items == null ) continue;
+            for ( int i = 0; i < container.Items.Count; i++ )
+            {
+                if ( container.Items[ i ] != null ) container.Items[ i ].Id = i;
+            }
+        }
+
+        // Принудительное добавление системного контейнера (если ваша логика это требует)
+        if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) )
+        {
+            panelModel.Containers.Add( BuildStandatrContainer() );
+        }
 
         return panelModel;
     }
@@ -97,44 +133,42 @@ public class ConfigManager
             Items = new List<LaunchItem>()
         };
 
-        // Вспомогательный список для удобного наполнения
         var groups = new Dictionary<string, List<(string Name, string Path)>>
     {
         { "Основные", new() {
-            ("Проводник", "explorer.exe"),
-            ("Блокнот", "notepad.exe"),
-            ("Калькулятор", "calc.exe"),
-            ("Диспетчер задач", "taskmgr.exe")
+            ("Проводник", Environment.GetEnvironmentVariable("windir") + "\\explorer.exe"),
+            ("Блокнот", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\notepad.exe"),
+            ("Калькулятор", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\calc.exe"),
+            ("Диспетчер задач", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\taskmgr.exe")
         }},
         { "Администрирование", new() {
-            ("Командная строка", "cmd.exe"),
-            ("PowerShell", "powershell.exe"),
-            ("Редактор реестра", "regedit.exe"),
-            ("Службы", "services.msc"),
-            ("Управление компьютером", "compmgmt.msc")
+            ("Командная строка", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\cmd.exe"),
+            ("PowerShell", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\WindowsPowerShell\\v1.0\\powershell.exe"),
+            ("Редактор реестра", Environment.GetEnvironmentVariable("windir") + "\\regedit.exe"),
+            ("Службы", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\services.msc"),
+            ("Управление компьютером", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\compmgmt.msc")
         }},
         { "Сеть и Настройка", new() {
-            ("Сетевые подключения", "ncpa.cpl"),
-            ("Панель управления", "control.exe"),
-            ("Удаление программ", "appwiz.cpl"),
-            ("Параметры звука", "mmsys.cpl")
+            ("Сетевые подключения", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\ncpa.cpl"),
+            ("Панель управления", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\control.exe"),
+            ("Удаление программ", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\appwiz.cpl"),
+            ("Параметры звука", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\mmsys.cpl")
         }},
         { "Диагностика", new() {
-            ("Монитор ресурсов", "resmon.exe"),
-            ("Управление дисками", "diskmgmt.msc"),
-            ("Просмотр событий", "eventvwr.msc"),
-            ("Очистка диска", "cleanmgr.exe")
+            ("Монитор ресурсов", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\resmon.exe"),
+            ("Управление дисками", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\diskmgmt.msc"),
+            ("Просмотр событий", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\eventvwr.msc"),
+            ("Очистка диска", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\cleanmgr.exe")
         }}
     };
 
         foreach ( var group in groups )
         {
-            // Добавляем заголовок группы (можно отрисовать иначе в ButtonDrawer)
+            // Разделитель группы (FilePath пустой — отрисуется как разделитель)
             container.Items.Add( new LaunchItem
             {
                 Name = $"--- {group.Key} ---",
-                FilePath = string.Empty, // Помечаем как неактивный
-                IsSeparator = true // Если добавите такое свойство в модель
+                FilePath = string.Empty
             } );
 
             foreach ( var item in group.Value )
@@ -142,229 +176,13 @@ public class ConfigManager
                 container.Items.Add( new LaunchItem
                 {
                     Name = item.Name,
-                    FilePath = item.Path
+                    FilePath = item.Path // Теперь здесь ПОЛНЫЙ ПУТЬ
                 } );
             }
         }
 
-        // Проставляем ID
         for ( int i = 0; i < container.Items.Count; i++ ) container.Items[ i ].Id = i;
 
         return container;
     }
-
-    //private static ContainerItem BuildStandatrContainer()
-    //{
-    //    ContainerItem container = new()
-    //    {
-    //        Name = "Стандартные Windows",
-    //        Type = ContainerType.System,
-    //        Items = new List<LaunchItem>()
-    //    };
-
-    //    // Используем системные переменные вместо хардкода "C:\\"
-    //    string win = Environment.GetFolderPath( Environment.SpecialFolder.Windows );
-    //    string sys32 = Environment.GetFolderPath( Environment.SpecialFolder.System );
-
-    //    container.Items.AddRange( new List<LaunchItem>
-    //    {
-    //        new() { Name = "Regedit", FilePath = Path.Combine(win, "regedit.exe") },
-    //        new() { Name = "Проводник", FilePath = Path.Combine(win, "explorer.exe") },
-    //        new() { Name = "Блокнот", FilePath = Path.Combine(sys32, "notepad.exe") },
-    //        new() { Name = "Командная строка", FilePath = Path.Combine(sys32, "cmd.exe") },
-    //        new() { Name = "Paint", FilePath = Path.Combine(sys32, "mspaint.exe") },
-    //        new() { Name = "Диспетчер задач", FilePath = Path.Combine(sys32, "Taskmgr.exe") },
-    //        new() { Name = "Панель управления", FilePath = Path.Combine(sys32, "control.exe") },
-    //        new() { Name = "Калькулятор", FilePath = Path.Combine(sys32, "calc.exe") },
-    //        new() { Name = "Конфигурация системы", FilePath = Path.Combine(sys32, "msconfig.exe") },
-    //        new() { Name = "Подключение к удаленому рабочему столу", FilePath = Path.Combine(sys32, "mstsc.exe") },
-    //        new() { Name = "Управление компьютером", FilePath = Path.Combine(sys32, "compmgmt.msc") },
-    //        new() { Name = "Удаление или изменение программ", FilePath = Path.Combine(sys32, "appwiz.cpl") },
-
-    //        // Категория: Мониторинг и диагностика
-    //        new() { Name = "Монитор ресурсов", FilePath = "resmon.exe" },
-    //        new() { Name = "Просмотр событий", FilePath = "eventvwr.msc" },
-    //        new() { Name = "Сведения о системе", FilePath = "msinfo32.exe" },
-    //        //new() { Name = "Средство диагностики DirectX", FilePath = "dxdiag.exe" },
-
-    //        // Категория: Управление железом и сетью
-    //        new() { Name = "Диспетчер устройств", FilePath = "devmgmt.msc" },
-    //        new() { Name = "Управление дисками", FilePath = "diskmgmt.msc" },
-    //        new() { Name = "Сетевые подключения", FilePath = "ncpa.cpl" },
-    //        new() { Name = "Службы", FilePath = "services.msc" },
-
-    //        // Категория: Настройки системы
-    //        new() { Name = "Редактор групповых политик", FilePath = "gpedit.msc" },
-    //        new() { Name = "Параметры звука", FilePath = "mmsys.cpl" },
-    //        new() { Name = "Свойства системы (Дополнительно)", FilePath = "SystemPropertiesAdvanced.exe" },
-    //        new() { Name = "Очистка диска", FilePath = "cleanmgr.exe" }
-    //    } );
-
-    //    // Проставляем ID системным элементам
-    //    for ( int i = 0; i < container.Items.Count; i++ ) container.Items[ i ].Id = i;
-
-    //    return container;
-    //}
 }
-
-//public class ConfigManager
-//{
-//    private const string ItemsConfigFile = "items-config.json";
-//    private const string ConfigFile = "config.json";
-
-//    public static void SaveMainConfig(MainConfig mainConfig)
-//    {
-//        string jsonString = JsonSerializer.Serialize(mainConfig, new JsonSerializerOptions { WriteIndented = true });
-//        File.WriteAllText(ConfigFile, jsonString);
-//    }
-
-//    public static MainConfig? ReadMainConfig()
-//    {
-//        MainConfig? config = JsonSerializer.Deserialize<MainConfig>(File.ReadAllText(ConfigFile));
-
-//        return config;
-//    }
-
-//    public static void SaveItemsConfig( /*List<ConfigItem> configItems*/ MainModel panelModel)
-//    {
-//        /*AxPanelModel panelModel = new AxPanelModel();
-//        var container = new ContainerItem();
-//        container.Items = new List<ConfigItem>();
-//        container.Items.Add( new  ConfigItem(){ Name = "visual"} );
-
-//        panelModel.Containers = [ container ];*/
-
-//        MainModel panelModelClone = new MainModel
-//        {
-//            Containers = panelModel.Containers.Where(c => c.Type != ContainerType.System).ToList()
-//        };
-
-
-//        string jsonString = JsonSerializer.Serialize(panelModelClone, new JsonSerializerOptions { WriteIndented = true });
-//        File.WriteAllText(ItemsConfigFile, jsonString);
-//    }
-
-//    [Obsolete]
-//    public static MainModel ReadItemsConfig()
-//    {
-//        /*List<ConfigItem>? items = JsonSerializer.Deserialize<List<ConfigItem>>( File.ReadAllText( ItemsConfigFile ) );*/
-
-//        MainModel panelModel = JsonSerializer.Deserialize<MainModel>(File.ReadAllText(ItemsConfigFile));
-
-//        foreach (var container in panelModel.Containers)
-//        {
-//            for (int index = 0; index < container.Items.Count; index++)
-//            {
-//                LaunchItem? item = container.Items[index];
-//                item.Id = index;
-//            }
-//        }
-
-
-//        return panelModel;
-//    }
-
-//    public static MainModel ReadModel()
-//    {
-//        MainModel panelModel = JsonSerializer.Deserialize<MainModel>(File.ReadAllText(ItemsConfigFile));
-
-//        foreach (ContainerItem container in panelModel.Containers)
-//        {
-//            for (int index = 0; index < container.Items.Count; index++)
-//            {
-//                LaunchItem? item = container.Items[index];
-//                item.Id = index;
-//            }
-//        }
-
-//        panelModel.Containers.Add(BuildStandatrContainer());
-
-//        return panelModel;
-//    }
-
-//    private static ContainerItem BuildStandatrContainer()
-//    {
-//        ContainerItem container = new()
-//        {
-//            Name = "Стандартные Windows",
-//            Type = ContainerType.System
-//        };
-
-//        int itemIndex = 0;
-
-//        container.Items.AddRange([
-//            new LaunchItem
-//            {
-//                Name = "Regedit",
-//                FilePath = "C:\\Windows\\regedit.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem {
-//                Name = "Проводник",
-//                FilePath = "C:\\Windows\\explorer.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Блокнот",
-//                FilePath = "C:\\Windows\\System32\\notepad.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Командная строка",
-//                FilePath = "C:\\Windows\\System32\\cmd.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Paint",
-//                FilePath = "C:\\Windows\\System32\\mspaint.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Диспетчер задач",
-//                FilePath = "C:\\Windows\\System32\\Taskmgr.exe",
-//                Id = itemIndex++
-//            },
-//             new LaunchItem
-//            {
-//                Name = "Панель управления",
-//                FilePath = "C:\\Windows\\System32\\control.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Калькулятор",
-//                FilePath = "C:\\Windows\\System32\\calc.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Конфигурация системы",
-//                FilePath = "C:\\Windows\\System32\\msconfig.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Подключение к удаленому рабочему столу",
-//                FilePath = "C:\\Windows\\System32\\mstsc.exe",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Управление компьютером",
-//                FilePath = "C:\\Windows\\System32\\compmgmt.msc",
-//                Id = itemIndex++
-//            },
-//            new LaunchItem
-//            {
-//                Name = "Удаление или изменение программ",
-//                FilePath = "C:\\Windows\\System32\\appwiz.cpl",
-//                Id = itemIndex++
-//            } ]);
-
-//        return container;
-//    }
-//}

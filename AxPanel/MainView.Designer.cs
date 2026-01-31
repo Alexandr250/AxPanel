@@ -42,27 +42,16 @@ partial class MainView
         // 
         // MainView
         // 
-        AutoScaleDimensions = new SizeF( 7F, 15F );
+        AutoScaleDimensions = new SizeF( 10F, 25F );
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(     64,     64,     64 );
-        ClientSize = new Size( 247, 347 );
+        ClientSize = new Size( 353, 578 );
         FormBorderStyle = FormBorderStyle.None;
-        KeyPreview = true;
+        Margin = new Padding( 4, 5, 4, 5 );
         Name = "MainView";
-        Padding = new Padding( 0, 30, 0, 0 );
+        Padding = new Padding( 0, 50, 0, 0 );
         StartPosition = FormStartPosition.Manual;
         Text = "MainPanel";
-        //FormClosed +=  Form1_FormClosed ;
-        //ResizeEnd +=  Form1_ResizeEnd ;
-        //Scroll +=  Form1_Scroll ;
-        //Paint +=  MainView_Paint ;
-        //KeyDown +=  MainView_KeyDown ;
-        //KeyUp +=  MainView_KeyUp ;
-        //MouseClick +=  Form1_MouseClick ;
-        //MouseDown +=  Form1_MouseDown ;
-        //MouseMove +=  Form1_MouseMove ;
-        //MouseUp +=  Form1_MouseUp ;
-        //Resize +=  Form1_Resize ;
         ResumeLayout( false );
     }
 

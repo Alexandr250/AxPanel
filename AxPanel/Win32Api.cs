@@ -1,17 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AxPanel
 {
+
     /// <summary>
     /// Содержит низкоуровневые функции Windows API для работы с системными процессами.
     /// </summary>
     public static class Win32Api
     {
+        /// <summary>
+        /// Флаг указывает функции SHGetFileInfo, что необходимо извлечь дескриптор иконки (hIcon).
+        /// Если этот флаг установлен, вы обязаны вызвать DestroyIcon для освобождения ресурсов.
+        /// </summary>
+        public const uint SHGFI_ICON = 0x100;
+
+        /// <summary>
+        /// Флаг указывает, что необходимо получить "большую" системную иконку (обычно 32x32 или 48x48 пикселей).
+        /// Значение 0x0 является стандартным (Large Icon) и используется по умолчанию, если не указан SHGFI_SMALLICON.
+        /// </summary>
+        public const uint SHGFI_LARGEICON = 0x0;
+
+        /// <summary>
+        /// WM_NCHITTEST (0x84) — "Запрос на проверку области". Windows отправляет его при каждом движении мыши,
+        /// чтобы понять: курсор над фоном (HTCLIENT), над заголовком (HTCAPTION) или над рамкой ресайза.
+        /// </summary>
+        public const int WM_NCHITTEST = 0x84;
+
+        /// <summary>
+        /// HTBOTTOMRIGHT (17) — Код области "нижний правый угол". Возвращая его, мы заставляем Windows
+        /// думать, что в этой точке находится край рамки, что включает системный ресайз окна по диагонали.
+        /// </summary>
+        public const int HTBOTTOMRIGHT = 17;
+
+        /// <summary>
+        /// HTCLIENT (1) — Код "рабочей области". Мы возвращаем его, когда мышь над нашими кнопками (свернуть/закрыть),
+        /// чтобы Windows не перехватывала клики как перетаскивание, а передавала их в наш OnMouseDown.
+        /// </summary>
+        public const int HTCLIENT = 1;
+
+        /// <summary>
+        /// Содержит информацию об объекте файловой системы, полученную через функцию SHGetFileInfo.
+        /// </summary>
+        [StructLayout( LayoutKind.Sequential, CharSet = CharSet.Auto )]
+        public struct SHFILEINFO
+        {
+            /// <summary>
+            /// Дескриптор иконки, представляющей файл. 
+            /// После использования необходимо обязательно освободить через DestroyIcon.
+            /// </summary>
+            public IntPtr hIcon;
+
+            /// <summary>
+            /// Индекс иконки в системном списке изображений (System Image List).
+            /// </summary>
+            public int iIcon;
+
+            /// <summary>
+            /// Набор флагов, описывающих атрибуты объекта (например, сжатый, скрытый, папка и т.д.).
+            /// </summary>
+            public uint dwAttributes;
+
+            /// <summary>
+            /// Имя файла в том виде, в котором оно отображается в Windows Explorer (может включать или не включать расширение).
+            /// </summary>
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 260 )]
+            public string szDisplayName;
+
+            /// <summary>
+            /// Строка, описывающая тип файла (например, "Текстовый документ", "Приложение" или "Папка с файлами").
+            /// </summary>
+            [MarshalAs( UnmanagedType.ByValTStr, SizeConst = 80 )]
+            public string szTypeName;
+        }
+
+        /// <summary>
+        /// Получает информацию об объекте файловой системы (файл, папка, диск).
+        /// </summary>
+        /// <param name="pszPath">Полный путь к объекту или указатель на список идентификаторов (PIDL).</param>
+        /// <param name="dwFileAttributes">Атрибуты файла (используется только вместе с флагом SHGFI_USEFILEATTRIBUTES, в остальных случаях — 0).</param>
+        /// <param name="psfi">Ссылка на структуру <see cref="SHFILEINFO"/>, которая будет заполнена данными.</param>
+        /// <param name="cbSizeFileInfo">Размер структуры <see cref="SHFILEINFO"/> в байтах.</param>
+        /// <param name="uFlags">Комбинация флагов (например, <see cref="SHGFI_ICON"/>), определяющая, какую именно информацию нужно извлечь.</param>
+        /// <returns>Значение, зависящее от флагов <paramref name="uFlags"/>. Если извлекается иконка, возвращает ненулевое значение при успехе.</returns>
+        [DllImport( "shell32.dll", CharSet = CharSet.Auto )]
+        public static extern IntPtr SHGetFileInfo( string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags );
+
+        /// <summary>
+        /// Уничтожает дескриптор иконки и освобождает память, которую она занимала.
+        /// </summary>
+        /// <param name="hIcon">Дескриптор (Handle) иконки, которую необходимо уничтожить.</param>
+        /// <returns>Возвращает <see langword="true"/>, если иконка была успешно уничтожена.</returns>
+        /// <remarks>
+        /// ВАЖНО: Вызов этого метода обязателен для каждого дескриптора hIcon, 
+        /// полученного через <see cref="SHGetFileInfo"/> с флагом SHGFI_ICON, чтобы избежать утечек памяти GDI.
+        /// </remarks>
+        [DllImport( "user32.dll" )]
+        public static extern bool DestroyIcon( IntPtr hIcon );
+
+
         /// <summary>
         /// Флаг доступа к процессу: позволяет опрашивать ограниченную информацию (путь к файлу, статус).
         /// В отличие от PROCESS_QUERY_INFORMATION, работает даже для процессов с более высокими правами доступа.

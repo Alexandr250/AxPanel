@@ -1,10 +1,10 @@
 {
-  "Top": 2,
-  "Left": 1659,
-  "Width": 261,
-  "Height": 983,
-  "ScroolValueIncrement": 10,
-  "HeaderHeight": 18,
+  "Top": 4,
+  "Left": 1517,
+  "Width": 401,
+  "Height": 1004,
+  "ScroolValueIncrement": 0,
+  "HeaderHeight": 30,
   "ContainerHeaderHeight": 0,
-  "BorderWidth": 3
+  "BorderWidth": 5
 }

@@ -16,10 +16,7 @@
       },
       "AxPanel/1.0.0": {
         "runtime": {
-          "AxPanel.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "AxPanel.dll": {}
         }
       }
     }
