@@ -10,7 +10,7 @@ namespace AxPanel.UI.UserControls;
 public partial class AxPanelContainer : BasePanelControl
 {
     // Поле для движка (по умолчанию список)
-    public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine();
+    public ILayoutEngine LayoutEngine { get; set; } = new ListLayoutEngine();
 
     // Сервисы и отрисовка
     private readonly ProcessMonitor _monitor;
@@ -52,6 +52,42 @@ public partial class AxPanelContainer : BasePanelControl
         ElevatedDragDropManager.Instance.ElevatedDragDrop += OnElevatedDragDrop;
 
         MouseWheel += HandleMouseWheel;
+
+        this.AllowDrop = true;
+        this.DragEnter += ( s, e ) => {
+            if ( e.Data.GetDataPresent( typeof( LaunchButton ) ) )
+                e.Effect = DragDropEffects.Move;
+        };
+
+        this.DragDrop += ( s, e ) => {
+            var droppedBtn = ( LaunchButton )e.Data.GetData( typeof( LaunchButton ) );
+
+            // Если бросили в другой контейнер
+            if ( droppedBtn.Parent != this )
+            {
+                MoveButtonToThisContainer( droppedBtn );
+            }
+        };
+    }
+
+    private void MoveButtonToThisContainer( LaunchButton btn )
+    {
+        var oldParent = btn.Parent as AxPanelContainer;
+
+        // 1. Удаляем из старой логики
+        oldParent?._buttons.Remove( btn );
+        oldParent?.Controls.Remove( btn );
+
+        // 2. Добавляем в новую логику
+        _buttons.Add( btn );
+        this.Controls.Add( btn );
+
+        // 3. Обновляем иерархию и мониторинг
+        SyncState();
+        oldParent?.SyncState();
+
+        // 4. Генерируем событие для сохранения конфига (если нужно)
+        ItemCollectionChanged?.Invoke( null );
     }
 
     #region Логика обновления состояния
@@ -270,6 +306,26 @@ public partial class AxPanelContainer : BasePanelControl
         var items = e.Files.Select( f => new LaunchItem { FilePath = f, Name = System.IO.Path.GetFileName( f ), Id = _itemsCount++ } ).ToList();
         AddButtons( items );
         ItemCollectionChanged?.Invoke( items );
+    }
+
+    public void StartProcessGroup( LaunchButton separator )
+    {
+        int startIndex = _buttons.IndexOf( separator );
+        if ( startIndex == -1 ) return;
+
+        for ( int i = startIndex + 1; i < _buttons.Count; i++ )
+        {
+            var btn = _buttons[ i ];
+
+            // Если встретили следующий разделитель — останавливаемся
+            if ( string.IsNullOrEmpty( btn.BaseControlPath ) ) break;
+
+            // Запускаем, если есть путь
+            if ( !string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
+            {
+                StartProcess( btn.BaseControlPath );
+            }
+        }
     }
 
     protected override void Dispose( bool disposing )

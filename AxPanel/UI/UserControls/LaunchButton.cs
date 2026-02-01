@@ -97,6 +97,30 @@ public class LaunchButton : BaseControl
                 this.Top += deltaY;
             }
         }
+
+        // Если это разделитель (нет пути)
+        if ( string.IsNullOrEmpty( this.BaseControlPath ) )
+        {
+            // Проверяем попадание в зону кнопки Play (правый край)
+            bool isInsidePlayZone = e.X > Width - 40;
+            if ( _mouseState.MouseInGroupPlay != isInsidePlayZone )
+            {
+                _mouseState.MouseInGroupPlay = isInsidePlayZone;
+                Invalidate(); // Перерисовываем для эффекта подсветки
+            }
+        }
+
+        if ( e.Button == MouseButtons.Left )
+        {
+            // Если протащили кнопку достаточно далеко (например, 10 пикселей)
+            if ( Math.Abs( e.Y - _lastLocation.Y ) > 10 || Math.Abs( e.X - _lastLocation.X ) > 10 )
+            {
+                _mouseState.ButtonMoved = true;
+                // Начинаем системный Drag&Drop. Передаем саму кнопку как данные.
+                this.DoDragDrop( this, DragDropEffects.Move );
+            }
+        }
+
         base.OnMouseMove( e );
     }
 
@@ -137,6 +161,27 @@ public class LaunchButton : BaseControl
         _mouseState.MouseInDeleteButton = false;
         Invalidate();
         base.OnMouseLeave( e );
+    }
+
+    protected override void OnMouseClick( MouseEventArgs e )
+    {
+        base.OnMouseClick( e );
+
+        // Если это разделитель и клик был в правой части
+        if ( string.IsNullOrEmpty( this.BaseControlPath ) && e.X > Width - 40 )
+        {
+            // Вызываем специальное событие или действие
+            StartGroupLaunch();
+        }
+    }
+
+    private void StartGroupLaunch()
+    {
+        // Находим родительский контейнер и просим его запустить группу
+        if ( Parent is AxPanelContainer container )
+        {
+            container.StartProcessGroup( this );
+        }
     }
 
     public void RaiseKeyDown( KeyEventArgs keyArgs )

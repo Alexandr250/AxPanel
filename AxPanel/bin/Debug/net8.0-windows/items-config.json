@@ -1,33 +1,22 @@
 {
   "Containers": [
     {
+      "Items": [],
+      "Name": "\u041D\u043E\u0432\u0430\u044F \u043F\u0430\u043D\u0435\u043B\u044C",
+      "Type": 0
+    },
+    {
       "Items": [
         {
-          "Name": "bpkswitcher.exe",
-          "FilePath": "C:\\Users\\av.bushkevich\\source\\projects\\sksprojects\\bpkswitcher\\bpkswitcher\\bin\\x86\\Debug\\bpkswitcher.exe",
+          "Name": "StartApp.exe",
+          "FilePath": "C:\\Program Files (x86)\\\u041D\u043E\u0432\u044B\u0439 \u043F\u043E\u0432\u043E\u0440\u043E\u0442\\PDD32_Educ\\StartApp.exe",
           "ClicksCount": 0,
           "Id": 0,
           "Height": 0,
           "IsSeparator": false
-        },
-        {
-          "Name": "notepad.exe",
-          "FilePath": "C:\\Windows\\notepad.exe",
-          "ClicksCount": 0,
-          "Id": 1,
-          "Height": 0,
-          "IsSeparator": false
-        },
-        {
-          "Name": "devenv.exe",
-          "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
-          "ClicksCount": 0,
-          "Id": 2,
-          "Height": 0,
-          "IsSeparator": false
         }
       ],
-      "Name": "\u041D\u043E\u0432\u0430\u044F \u043F\u0430\u043D\u0435\u043B\u044C",
+      "Name": "\u041D\u043E\u0432\u0430\u044F \u043F\u0430\u043D\u0435\u043B\u044C 2",
       "Type": 0
     }
   ]

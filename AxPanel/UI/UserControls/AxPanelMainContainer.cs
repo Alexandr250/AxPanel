@@ -95,6 +95,17 @@ public class AxPanelMainContainer : Panel
         }
 
         if ( !stillAnimating ) _animationTimer.Stop();
+
+        // Проверка: если над свернутой панелью что-то тащат — раскрываем
+        foreach ( var container in Containers )
+        {
+            Point clientPos = container.PointToClient( Cursor.Position );
+            if ( container.DisplayRectangle.Contains( clientPos ) && Selected != container )
+            {
+                // Раскрываем панель "на лету"
+                Selected = container;
+            }
+        }
     }
 
     public void ArrangeContainers()

@@ -20,7 +20,7 @@ public class ButtonDrawer
         // 1. Отрисовка разделителя (если путь пустой)
         if ( string.IsNullOrEmpty( control.BaseControlPath ) )
         {
-            DrawSeparator( g, control, rect );
+            DrawSeparator( g, control, rect, mouseState );
             return;
         }
 
@@ -137,7 +137,7 @@ public class ButtonDrawer
         TextRenderer.DrawText( g, text, font, rect, Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter );
     }
 
-    private void DrawSeparator( Graphics g, BaseControl control, Rectangle rect )
+    private void DrawSeparator( Graphics g, BaseControl control, Rectangle rect, MouseState mouseState )
     {
         g.FillRectangle( _theme.ButtonStyle.UnselectedBrush, rect );
         string cleanText = control.Text.Replace( "-", "" ).Trim().ToUpper();
@@ -151,6 +151,29 @@ public class ButtonDrawer
 
         using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
         g.DrawString( cleanText, font, _theme.ButtonStyle.AdditionalFontBrush, rect, format );
+
+        // Рисуем кнопку группового запуска справа
+        int btnSize = 16;
+        int margin = 10;
+        Rectangle playRect = new Rectangle( rect.Width - btnSize - margin, ( rect.Height - btnSize ) / 2, btnSize, btnSize );
+
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        using var playBrush = new SolidBrush( Color.FromArgb( 180, Color.LimeGreen ) );
+
+        // Рисуем треугольник
+        Point[] points = {
+            new Point(playRect.X + 4, playRect.Y + 3),
+            new Point(playRect.X + 4, playRect.Y + btnSize - 3),
+            new Point(playRect.X + btnSize - 2, playRect.Y + btnSize / 2)
+        };
+        g.FillPolygon( playBrush, points );
+
+        // Добавляем легкое свечение вокруг при наведении
+        if ( mouseState.MouseInGroupPlay )
+        {
+            using var glowPen = new Pen( Color.FromArgb( 100, Color.LimeGreen ), 2 );
+            g.DrawEllipse( glowPen, playRect );
+        }
     }
 
     private void DrawDeleteButton( Graphics g, BaseControl control, StringFormat format )
