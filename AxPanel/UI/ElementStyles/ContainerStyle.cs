@@ -10,6 +10,10 @@ public class ContainerStyle : IDisposable
     public int ScrollValueIncrement { get; set; } = 10;
     public int HeaderHeight { get; set; } = 26;
 
+    public int ButtonSize { get; set; } = 16;
+    public int ButtonMargin { get; set; } = 3;
+    public Brush ButtonSelectedBrush { get; set; } = Brushes.Crimson;
+
     public Color BackColor { get; set; } = Color.FromArgb( 60, 60, 60 );
     public Font Font { get; set; } = SystemFonts.DefaultFont;
 

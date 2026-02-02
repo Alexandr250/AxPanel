@@ -13,7 +13,7 @@ public abstract class BaseControl : Control
     {
         DoubleBuffered = true;
 
-        this.SetStyle( ControlStyles.AllPaintingInWmPaint |  // Игнорировать WM_ERASEBKGND для уменьшения мерцания
+        SetStyle( ControlStyles.AllPaintingInWmPaint |  // Игнорировать WM_ERASEBKGND для уменьшения мерцания
                        ControlStyles.UserPaint |             // Контрол рисует себя сам
                        ControlStyles.OptimizedDoubleBuffer | // Использовать буфер в памяти
                        ControlStyles.ResizeRedraw, true );   // Перерисовывать при изменении размера
@@ -60,7 +60,7 @@ public abstract class BaseControl : Control
             // 3. Проверяем, не изменился ли путь, пока мы ждали
             if ( !token.IsCancellationRequested )
             {
-                this.Icon = loadedIcon;
+                Icon = loadedIcon;
             }
             else
             {
@@ -71,7 +71,7 @@ public abstract class BaseControl : Control
         catch ( Exception ex )
         {
             Debug.WriteLine( $"Icon load error: {ex.Message}" );
-            this.Icon = null;
+            Icon = null;
         }
     }
 
@@ -92,7 +92,7 @@ public abstract class BaseControl : Control
 
             if ( shinfo.hIcon != IntPtr.Zero )
             {
-                Icon result = ( Icon )System.Drawing.Icon.FromHandle( shinfo.hIcon ).Clone();
+                Icon result = ( Icon )Icon.FromHandle( shinfo.hIcon ).Clone();
                 Win32Api.DestroyIcon( shinfo.hIcon );
                 return result;
             }

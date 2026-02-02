@@ -1,33 +1,36 @@
 ﻿using AxPanel.Contracts;
 using AxPanel.Model;
-using AxPanel.SL;
 using AxPanel.UI.Drawers;
 using AxPanel.UI.Themes;
-using System.Diagnostics;
 
 namespace AxPanel.UI.UserControls;
 
-public partial class AxPanelContainer : BasePanelControl
+public partial class AxPanelContainer : BasePanelControl, IAnimatable
 {
-    // Поле для движка (по умолчанию список)
-    public ILayoutEngine LayoutEngine { get; set; } = new ListLayoutEngine();
-
     // Сервисы и отрисовка
-    private readonly ProcessMonitor _monitor;
     private readonly ContainerDrawer _containerDrawer;
     private readonly ITheme _theme;
 
     // UI Состояние
-    private readonly System.Windows.Forms.Timer _animationTimer;
-    private List<LaunchButton> _buttons = new();
+    private List<LaunchButton> _buttons = [];
     private int _scrollValue = 0;
     private int _itemsCount = 0;
+
+    private MouseState _mouseState = new();
+
+    public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine();
+    public IReadOnlyList<LaunchButton> Buttons => _buttons;
+    public string PanelName { get; set; }
+    public int ScrollValue => _scrollValue;
+    ITheme IAnimatable.Theme => _theme;
 
     // События
     public event Action<AxPanelContainer> ContainerSelected;
     public event Action<List<LaunchItem>> ItemCollectionChanged;
-
-    public string PanelName { get; set; }
+    public event Action<AxPanelContainer> ContainerDeleteRequested;
+    public event Action<LaunchButton> ProcessStartRequested;
+    public event Action<LaunchButton> GroupStartRequested;
+    public event Action<string> ExplorerOpenRequested;
 
     public AxPanelContainer( ITheme theme )
     {
@@ -36,16 +39,6 @@ public partial class AxPanelContainer : BasePanelControl
 
         // Базовые стили применяются автоматически через BasePanelControl
         BackColor = _theme.ContainerStyle.BackColor;
-
-        // 1. Инициализация мониторинга (Service Layer)
-        _monitor = new ProcessMonitor();
-        _monitor.StatisticsUpdated += OnStatsReceived;
-        _monitor.Start();
-
-        // 2. Инициализация анимации (~60 FPS)
-        _animationTimer = new System.Windows.Forms.Timer { Interval = 16 };
-        _animationTimer.Tick += ( s, e ) => AnimateStep();
-        _animationTimer.Start();
 
         // 3. Регистрация внешних интеграций
         ElevatedDragDropManager.Instance.EnableDragDrop( Handle );
@@ -92,28 +85,13 @@ public partial class AxPanelContainer : BasePanelControl
 
     #region Логика обновления состояния
 
-    private void SyncState()
-    {
-        UpdateMonitorPaths();
-        ReorderButtons();
-    }
-
-    private void UpdateMonitorPaths()
-    {
-        _monitor.TargetPaths = _buttons
-            .Where( b => !string.IsNullOrEmpty( b.BaseControlPath ) )
-            .Select( b => b.BaseControlPath )
-            .ToHashSet( StringComparer.OrdinalIgnoreCase );
-    }
-
-    private void OnStatsReceived( Dictionary<string, ProcessStats> stats )
+    public void ApplyStats( Dictionary<string, ProcessStats> stats )
     {
         bool changed = false;
         foreach ( var btn in _buttons )
         {
             if ( btn.BaseControlPath != null && stats.TryGetValue( btn.BaseControlPath, out var s ) )
             {
-                // Метод UpdateState внутри LaunchButton сам проверит дельту изменений
                 btn.UpdateState( s.IsRunning, s.CpuUsage, s.RamMb, s.StartTime );
                 changed = true;
             }
@@ -121,40 +99,19 @@ public partial class AxPanelContainer : BasePanelControl
         if ( changed ) Invalidate( true );
     }
 
+    private void SyncState()
+    {
+        ReorderButtons();
+        ItemCollectionChanged?.Invoke( null ); // Оповещаем MainContainer об изменении путей
+    }
+
     #endregion
 
     #region Анимация и позиционирование
 
-    private void AnimateStep()
-    {
-        for ( int i = 0; i < _buttons.Count; i++ )
-        {
-            var btn = _buttons[ i ];
-            if ( btn.Capture ) continue;
-
-            // Получаем расчетные данные
-            var layout = LayoutEngine.GetLayout( i, _scrollValue, this.Width, btn, _theme );
-
-            // ТЕСТ: Нажмите F5 и посмотрите в окно Output (Вывод) в Visual Studio.
-            // Если TargetX там не 0, значит математика работает, и проблема в WinForms.
-            if ( i == 1 ) Debug.WriteLine( $"Btn 1: TargetX={layout.Location.X}, CurrentX={btn.Left}" );
-
-            // Плавная интерполяция
-            if ( Math.Abs( btn.Top - layout.Location.Y ) > 0.5 )
-                btn.Top += ( layout.Location.Y - btn.Top ) / 4;
-
-            if ( Math.Abs( btn.Left - layout.Location.X ) > 0.5 )
-                btn.Left += ( layout.Location.X - btn.Left ) / 4;
-
-            if ( Math.Abs( btn.Width - layout.Width ) > 0.5 )
-                btn.Width += ( layout.Width - btn.Width ) / 4;
-        }
-    }
-
     public void ReorderButtons()
     {
         // Принудительный вызов, если таймер спит
-        AnimateStep();
         Invalidate();
     }
 
@@ -204,23 +161,15 @@ public partial class AxPanelContainer : BasePanelControl
             };
 
             // Остальные подписки
-            btn.ButtonLeftClick += b => StartProcess( b.BaseControlPath );
+            btn.ButtonLeftClick += b => ProcessStartRequested?.Invoke( b );
+            btn.ButtonRightClick += b => ExplorerOpenRequested?.Invoke( b.BaseControlPath );
+
             btn.DeleteButtonClick += b => {
                 _buttons.Remove( b ); // Убираем из внутреннего списка
                 Controls.Remove( b );
                 b.Dispose();
                 SyncState(); // Обновляем пути монитора и вызываем пересчет
             };
-            // Теперь клик правой кнопкой по ЛЮБОЙ кнопке переключит режим
-            //btn.ButtonRightClick += b => {
-            //    if ( LayoutEngine is ListLayoutEngine )
-            //        LayoutEngine = new GridLayoutEngine { Columns = 3 };
-            //    else
-            //        LayoutEngine = new ListLayoutEngine();
-
-            //    SyncState();
-            //};
-
 
             btn.MouseMove += ( s, e ) =>
             {
@@ -245,27 +194,43 @@ public partial class AxPanelContainer : BasePanelControl
         ReorderButtons();
     }
 
-    
-
-    private void StartProcess( string path, bool runAsAdmin = false )
-    {
-        try
-        {
-            if ( string.IsNullOrEmpty( path ) ) return;
-            Process.Start( new ProcessStartInfo( path ) { UseShellExecute = true, Verb = runAsAdmin ? "runas" : "" } );
-
-            // МГНОВЕННЫЙ ОТКЛИК: Находим кнопку и помечаем как запущенную
-            var btn = _buttons.FirstOrDefault( b => b.BaseControlPath.Equals( path, StringComparison.OrdinalIgnoreCase ) );
-            if ( btn != null ) { btn.IsRunning = true; btn.Invalidate(); }
-        }
-        catch ( Exception ex ) { Debug.WriteLine( $"Run error: {ex.Message}" ); }
-    }
-
     #endregion
 
     #region Переопределения WinForms
 
-    protected override void OnPaint( PaintEventArgs e ) => _containerDrawer.Draw( this, new MouseState(), e );
+    protected override void OnMouseMove( MouseEventArgs e )
+    {
+        base.OnMouseMove( e );
+
+        // Определяем прямоугольник кнопки удаления
+        Rectangle deleteRect = DeleteButtonRect;
+
+        // Обновляем MouseState
+        bool wasInDeleteButton = _mouseState.MouseInDeleteButton;
+        _mouseState.MouseInDeleteButton = deleteRect.Contains( e.Location );
+
+        if ( wasInDeleteButton != _mouseState.MouseInDeleteButton )
+        {
+            // Перерисовываем только заголовок
+            Invalidate( new Rectangle( 0, 0, Width, _theme.ContainerStyle.HeaderHeight ) );
+        }
+    }
+
+    protected override void OnMouseLeave( EventArgs e )
+    {
+        base.OnMouseLeave( e );
+
+        if ( _mouseState.MouseInDeleteButton )
+        {
+            _mouseState.MouseInDeleteButton = false;
+            Invalidate( new Rectangle( 0, 0, Width, _theme.ContainerStyle.HeaderHeight ) );
+        }
+    }
+
+    protected override void OnPaint( PaintEventArgs e ) => 
+        _containerDrawer.Draw( this, _mouseState, e );
+
+    void IAnimatable.UpdateVisual() => Invalidate();
 
     protected override void OnResize( EventArgs e )
     {
@@ -277,28 +242,29 @@ public partial class AxPanelContainer : BasePanelControl
     protected override void OnMouseClick( MouseEventArgs e )
     {
         base.OnMouseClick( e );
+        
+        Rectangle deleteRect = DeleteButtonRect;
+
+        if ( e.Button == MouseButtons.Left && deleteRect.Contains( e.Location ) )
+        {
+            OnDeleteRequested();
+            return; // Не вызываем ContainerSelected при клике на удаление
+        }
+
         SyncState();
 
         ContainerSelected?.Invoke( this );
     }
 
-    public void RaiseKeyDown( KeyEventArgs e )
-    {
-        // ТЕСТ: Нажмите пробел или букву G
-        if ( e.KeyCode == Keys.Space || e.KeyCode == Keys.G )
-        {
-            if ( LayoutEngine is ListLayoutEngine )
-                LayoutEngine = new GridLayoutEngine { Columns = 3 };
-            else
-                LayoutEngine = new ListLayoutEngine();
+    private Rectangle DeleteButtonRect => new(
+        Width - _theme.ContainerStyle.ButtonSize - _theme.ContainerStyle.ButtonMargin,
+        ( _theme.ContainerStyle.HeaderHeight - _theme.ContainerStyle.ButtonSize ) / 2,
+        _theme.ContainerStyle.ButtonSize,
+        _theme.ContainerStyle.ButtonSize
+    );
 
-            SyncState();
-            return;
-        }
-
-        foreach ( var b in Controls.OfType<LaunchButton>() ) b.RaiseKeyDown( e );
-    }
-    public void RaiseKeyUp( KeyEventArgs e ) { foreach ( var b in Controls.OfType<LaunchButton>() ) b.RaiseKeyUp( e ); }
+    private void OnDeleteRequested() => 
+        ContainerDeleteRequested?.Invoke( this );
 
     private void OnElevatedDragDrop( object sender, ElevatedDragDropArgs e )
     {
@@ -308,35 +274,14 @@ public partial class AxPanelContainer : BasePanelControl
         ItemCollectionChanged?.Invoke( items );
     }
 
-    public void StartProcessGroup( LaunchButton separator )
-    {
-        int startIndex = _buttons.IndexOf( separator );
-        if ( startIndex == -1 ) return;
-
-        for ( int i = startIndex + 1; i < _buttons.Count; i++ )
-        {
-            var btn = _buttons[ i ];
-
-            // Если встретили следующий разделитель — останавливаемся
-            if ( string.IsNullOrEmpty( btn.BaseControlPath ) ) break;
-
-            // Запускаем, если есть путь
-            if ( !string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
-            {
-                StartProcess( btn.BaseControlPath );
-            }
-        }
-    }
+    public void StartProcessGroup( LaunchButton separator ) => 
+        GroupStartRequested?.Invoke( separator );
 
     protected override void Dispose( bool disposing )
     {
         if ( disposing )
         {
             ElevatedDragDropManager.Instance.ElevatedDragDrop -= OnElevatedDragDrop;
-            _animationTimer?.Stop();
-            _animationTimer?.Dispose();
-            _monitor?.Stop();
-            _monitor?.Dispose();
         }
         base.Dispose( disposing );
     }

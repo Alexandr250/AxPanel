@@ -14,7 +14,7 @@ namespace AxPanel
         /// <summary>
         /// Межстрочный и межколоночный интервал (пиксели)
         /// </summary>
-        public int Gap { get; set; } = 10;
+        public int Gap { get; set; } = 3;
 
         public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, LaunchButton btn, ITheme theme )
         {

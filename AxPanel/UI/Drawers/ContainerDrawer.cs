@@ -32,5 +32,38 @@ public class ContainerDrawer
 
         rect = new Rectangle( 0 + 16, 0, control.Width - 1 - 16, /*Height - 1*/ _theme.ContainerStyle.HeaderHeight );
         g.DrawString( control.BaseControlPath, _theme.ContainerStyle.Font, _theme.ContainerStyle.ForeBrush, rect, format );
+
+        if( mouseState.MouseInDeleteButton )
+            DrawDeleteButton( g, control, mouseState.MouseInDeleteButton );
+    }
+
+    private void DrawDeleteButton( Graphics g, BaseControl control, bool hovered )
+    {
+        int buttonSize = _theme.ContainerStyle.ButtonSize;
+        int margin = _theme.ContainerStyle.ButtonMargin;
+        int x = control.Width - buttonSize - margin;
+        int y = ( _theme.ContainerStyle.HeaderHeight - buttonSize ) / 2;
+
+        Rectangle deleteRect = new Rectangle( x, y, buttonSize, buttonSize );
+
+        // Фон кнопки
+        //using ( var brush = new SolidBrush( hovered ?
+        //           Color.FromArgb( 255, 50, 50 ) :
+        //           Color.FromArgb( 255, 50, 50 ) ) )
+        //{
+            g.FillRectangle( _theme.ContainerStyle.ButtonSelectedBrush, deleteRect );
+        //}
+
+        // Крестик
+        using ( var crossPen = new Pen( Color.White, 1f ) )
+        {
+            int pad = 5;
+            g.DrawLine( crossPen,
+                x + pad, y + pad,
+                x + buttonSize - pad, y + buttonSize - pad );
+            g.DrawLine( crossPen,
+                x + buttonSize - pad, y + pad,
+                x + pad, y + buttonSize - pad );
+        }
     }
 }

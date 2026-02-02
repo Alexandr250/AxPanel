@@ -135,13 +135,13 @@ public partial class MainView : Form
     protected override void OnKeyDown( KeyEventArgs e )
     {
         base.OnKeyDown( e );
-        MainContainer?.RaiseKeyDown( e );
+        //MainContainer?.RaiseKeyDown( e );
     }
 
     protected override void OnKeyUp( KeyEventArgs e )
     {
         base.OnKeyUp( e );
-        MainContainer?.RaiseKeyUp( e );
+        //MainContainer?.RaiseKeyUp( e );
     }
 
     protected override void OnResize( EventArgs e )

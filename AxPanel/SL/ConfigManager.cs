@@ -49,7 +49,7 @@ public class ConfigManager
     public static void SaveItemsConfig( MainModel panelModel )
     {
         // Оставляем логику клонирования без системных контейнеров
-        MainModel panelModelClone = new MainModel
+        MainModel panelModelClone = new()
         {
             Containers = panelModel.Containers.Where( c => c.Type != ContainerType.System ).ToList()
         };
@@ -95,7 +95,7 @@ public class ConfigManager
             var emptyContainer = new ContainerItem
             {
                 Name = "Новая панель",
-                Items = new List<LaunchItem>(),
+                Items = [],
                 Type = ContainerType.Normal // Предполагаем, что это обычный тип
             };
 
@@ -130,36 +130,40 @@ public class ConfigManager
         {
             Name = "Системные инструменты",
             Type = ContainerType.System,
-            Items = new List<LaunchItem>()
+            Items = []
         };
 
         var groups = new Dictionary<string, List<(string Name, string Path)>>
     {
-        { "Основные", new() {
-            ("Проводник", Environment.GetEnvironmentVariable("windir") + "\\explorer.exe"),
-            ("Блокнот", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\notepad.exe"),
-            ("Калькулятор", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\calc.exe"),
-            ("Диспетчер задач", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\taskmgr.exe")
-        }},
-        { "Администрирование", new() {
-            ("Командная строка", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\cmd.exe"),
-            ("PowerShell", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\WindowsPowerShell\\v1.0\\powershell.exe"),
-            ("Редактор реестра", Environment.GetEnvironmentVariable("windir") + "\\regedit.exe"),
-            ("Службы", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\services.msc"),
-            ("Управление компьютером", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\compmgmt.msc")
-        }},
-        { "Сеть и Настройка", new() {
-            ("Сетевые подключения", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\ncpa.cpl"),
-            ("Панель управления", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\control.exe"),
-            ("Удаление программ", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\appwiz.cpl"),
-            ("Параметры звука", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\mmsys.cpl")
-        }},
-        { "Диагностика", new() {
-            ("Монитор ресурсов", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\resmon.exe"),
-            ("Управление дисками", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\diskmgmt.msc"),
-            ("Просмотр событий", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\eventvwr.msc"),
-            ("Очистка диска", Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\cleanmgr.exe")
-        }}
+        { "Основные", [
+                ( "Проводник", Environment.GetEnvironmentVariable( "windir" ) + "\\explorer.exe" ),
+                ( "Блокнот", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\notepad.exe" ),
+                ( "Калькулятор", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\calc.exe" ),
+                ( "Диспетчер задач", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\taskmgr.exe" )
+            ]
+        },
+        { "Администрирование", [
+                ( "Командная строка", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\cmd.exe" ),
+                ( "PowerShell", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\WindowsPowerShell\\v1.0\\powershell.exe" ),
+                ( "Редактор реестра", Environment.GetEnvironmentVariable( "windir" ) + "\\regedit.exe" ),
+                ( "Службы", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\services.msc" ),
+                ( "Управление компьютером", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\compmgmt.msc" )
+            ]
+        },
+        { "Сеть и Настройка", [
+                ( "Сетевые подключения", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\ncpa.cpl" ),
+                ( "Панель управления", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\control.exe" ),
+                ( "Удаление программ", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\appwiz.cpl" ),
+                ( "Параметры звука", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\mmsys.cpl" )
+            ]
+        },
+        { "Диагностика", [
+                ( "Монитор ресурсов", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\resmon.exe" ),
+                ( "Управление дисками", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\diskmgmt.msc" ),
+                ( "Просмотр событий", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\eventvwr.msc" ),
+                ( "Очистка диска", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\cleanmgr.exe" )
+            ]
+        }
     };
 
         foreach ( var group in groups )
@@ -181,7 +185,8 @@ public class ConfigManager
             }
         }
 
-        for ( int i = 0; i < container.Items.Count; i++ ) container.Items[ i ].Id = i;
+        for ( int i = 0; i < container.Items.Count; i++ ) 
+            container.Items[ i ].Id = i;
 
         return container;
     }

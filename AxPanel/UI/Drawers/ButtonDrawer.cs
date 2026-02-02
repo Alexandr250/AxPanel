@@ -178,6 +178,7 @@ public class ButtonDrawer
 
     private void DrawDeleteButton( Graphics g, BaseControl control, StringFormat format )
     {
+        return;
         int margin = 4;
         var delRect = new Rectangle( control.Width - _theme.ButtonStyle.DeleteButtonWidth - margin, margin, _theme.ButtonStyle.DeleteButtonWidth, control.Height - ( margin * 2 ) );
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;

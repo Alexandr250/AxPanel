@@ -12,12 +12,16 @@ public class LaunchButton : BaseControl
     private MouseState _mouseState = new();
     private KeyboardState _keyboardState = new();
     private Point _lastLocation;
+    private Point _lastScreenLocation;
+    private Point _dragStartMousePos; // Позиция мыши в момент нажатия (экранная)
+    private Point _dragStartControlPos; // Позиция кнопки в момент нажатия (локальная)
 
     // Свойства состояния процесса
     public bool IsRunning { get; set; }
     public float CpuUsage { get; set; }
     public float RamUsage { get; set; }
     public DateTime? StartTime { get; set; }
+    public bool IsDragging { get; set; } // Флаг для аниматора
     //public string Path { get; set; } // Ключ для мониторинга
 
     // События
@@ -34,15 +38,9 @@ public class LaunchButton : BaseControl
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _buttonDrawer = new ButtonDrawer( _theme );
 
-        DoubleBuffered = true;
-        this.SetStyle( ControlStyles.AllPaintingInWmPaint |
-                       ControlStyles.UserPaint |
-                       ControlStyles.OptimizedDoubleBuffer |
-                       ControlStyles.ResizeRedraw, true );
-
-        this.Dock = DockStyle.None;      // Категорически отключаем Dock
-        this.Anchor = AnchorStyles.None;  // Отключаем Anchor, чтобы Left/Top работали свободно
-        this.AutoSize = false;
+        Dock = DockStyle.None;      // Категорически отключаем Dock
+        Anchor = AnchorStyles.None;  // Отключаем Anchor, чтобы Left/Top работали свободно
+        AutoSize = false;
     }
 
     protected override void OnParentChanged( EventArgs e )
@@ -67,57 +65,74 @@ public class LaunchButton : BaseControl
     protected override void OnMouseDown( MouseEventArgs e )
     {
         _lastLocation = e.Location;
+        _lastScreenLocation = Cursor.Position;
         if ( e.Button == MouseButtons.Left )
         {
+            _dragStartMousePos = Cursor.Position; // Запоминаем экранную позицию мыши
+            _dragStartControlPos = this.Location; // Запоминаем где стояла кнопка
             BringToFront();
-            this.Capture = true;
+            Capture = true;
         }
         base.OnMouseDown( e );
     }
 
     protected override void OnMouseMove( MouseEventArgs e )
     {
-        // Проверка зоны кнопки удаления (адаптирована под динамическую ширину)
-        bool isInsideDeleteZone = e.X > Width - _theme.ButtonStyle.DeleteButtonWidth;
-        if ( _mouseState.MouseInDeleteButton != isInsideDeleteZone )
+        // 1. ЗОНА УДАЛЕНИЯ (для обычных кнопок)
+        if ( !string.IsNullOrEmpty( BaseControlPath ) )
         {
-            _mouseState.MouseInDeleteButton = isInsideDeleteZone;
-            Invalidate();
-        }
-
-        if ( e.Button == MouseButtons.Left && this.Capture )
-        {
-            int deltaX = e.X - _lastLocation.X;
-            int deltaY = e.Y - _lastLocation.Y;
-
-            if ( deltaX != 0 || deltaY != 0 )
+            bool isInsideDeleteZone = e.X > Width - _theme.ButtonStyle.DeleteButtonWidth;
+            if ( _mouseState.MouseInDeleteButton != isInsideDeleteZone )
             {
-                _mouseState.ButtonMoved = true;
-                this.Left += deltaX;
-                this.Top += deltaY;
+                _mouseState.MouseInDeleteButton = isInsideDeleteZone;
+                Invalidate();
             }
         }
 
-        // Если это разделитель (нет пути)
-        if ( string.IsNullOrEmpty( this.BaseControlPath ) )
+        // 2. ЗОНА ГРУППОВОГО ЗАПУСКА (для разделителей)
+        if ( string.IsNullOrEmpty( BaseControlPath ) )
         {
-            // Проверяем попадание в зону кнопки Play (правый край)
             bool isInsidePlayZone = e.X > Width - 40;
             if ( _mouseState.MouseInGroupPlay != isInsidePlayZone )
             {
                 _mouseState.MouseInGroupPlay = isInsidePlayZone;
-                Invalidate(); // Перерисовываем для эффекта подсветки
+                Invalidate();
+                // Меняем курсор для визуального отклика
+                Cursor = isInsidePlayZone ? Cursors.Hand : Cursors.Default;
             }
         }
-
-        if ( e.Button == MouseButtons.Left )
+        else
         {
-            // Если протащили кнопку достаточно далеко (например, 10 пикселей)
-            if ( Math.Abs( e.Y - _lastLocation.Y ) > 10 || Math.Abs( e.X - _lastLocation.X ) > 10 )
+            // Сброс курсора, если ушли с зоны Play на обычную кнопку
+            if ( Cursor == Cursors.Hand ) Cursor = Cursors.Default;
+        }
+
+        // 3. ЛОГИКА ПЕРЕМЕЩЕНИЯ (Drag & Drop)
+        if ( e.Button == MouseButtons.Left && Capture )
+        {
+            Point currentMousePos = Cursor.Position;
+            int deltaX = currentMousePos.X - _dragStartMousePos.X;
+            int deltaY = currentMousePos.Y - _dragStartMousePos.Y;
+
+            // Если сдвинули хоть немного — двигаем физически
+            if ( Math.Abs( deltaX ) > 2 || Math.Abs( deltaY ) > 2 )
             {
                 _mouseState.ButtonMoved = true;
-                // Начинаем системный Drag&Drop. Передаем саму кнопку как данные.
-                this.DoDragDrop( this, DragDropEffects.Move );
+
+                // Устанавливаем позицию напрямую от стартовой точки
+                // Это исключает "накопление ошибки" при быстрых рывках
+                this.Left = _dragStartControlPos.X + deltaX;
+                this.Top = _dragStartControlPos.Y + deltaY;
+
+                // Если протащили достаточно для системного DragDrop
+                //if ( Math.Abs( deltaX ) > 20 || Math.Abs( deltaY ) > 20 )
+                //{
+                //    IsDragging = true; // Для аниматора
+                //    Capture = false;
+                //    DoDragDrop( this, DragDropEffects.Move );
+                //    IsDragging = false;
+                //    return;
+                //}
             }
         }
 
@@ -128,12 +143,14 @@ public class LaunchButton : BaseControl
     {
         if ( e.Button == MouseButtons.Left )
         {
-            this.Capture = false;
+            Capture = false;
 
             if ( !_mouseState.ButtonMoved )
             {
-                if ( _mouseState.MouseInDeleteButton )
+                if( false && _mouseState.MouseInDeleteButton )
+                {
                     DeleteButtonClick?.Invoke( this );
+                }
                 else
                     ButtonLeftClick?.Invoke( this );
             }
@@ -159,6 +176,7 @@ public class LaunchButton : BaseControl
     {
         _mouseState.MouseInControl = false;
         _mouseState.MouseInDeleteButton = false;
+        _mouseState.MouseInGroupPlay = false;
         Invalidate();
         base.OnMouseLeave( e );
     }
@@ -168,7 +186,7 @@ public class LaunchButton : BaseControl
         base.OnMouseClick( e );
 
         // Если это разделитель и клик был в правой части
-        if ( string.IsNullOrEmpty( this.BaseControlPath ) && e.X > Width - 40 )
+        if ( string.IsNullOrEmpty( BaseControlPath ) && e.X > Width - 40 )
         {
             // Вызываем специальное событие или действие
             StartGroupLaunch();
@@ -211,15 +229,15 @@ public class LaunchButton : BaseControl
 
         if ( changed )
         {
-            this.IsRunning = isRunning;
-            this.CpuUsage = isRunning ? cpuUsage : 0;
-            this.RamUsage = isRunning ? ramMb : 0;
-            this.StartTime = isRunning ? startTime : null;
+            IsRunning = isRunning;
+            CpuUsage = isRunning ? cpuUsage : 0;
+            RamUsage = isRunning ? ramMb : 0;
+            StartTime = isRunning ? startTime : null;
 
-            if ( this.InvokeRequired )
-                this.BeginInvoke( new Action( Invalidate ) );
+            if ( InvokeRequired )
+                BeginInvoke( Invalidate );
             else
-                this.Invalidate();
+                Invalidate();
         }
     }
 }
