@@ -39,7 +39,7 @@ public class GlobalAnimator : IDisposable
             var btn = buttons[ i ];
             if ( btn.Capture || btn.IsDragging ) continue;
 
-            var layout = container.LayoutEngine.GetLayout( i, container.ScrollValue, container.Width, btn, container.Theme );
+            var layout = container.LayoutEngine.GetLayout( i, container.ScrollValue, container.Width, buttons, container.Theme );
 
             btn.Left = ( int )Lerp( btn.Left, layout.Location.X, out bool m1 );
             btn.Top = ( int )Lerp( btn.Top, layout.Location.Y, out bool m2 );

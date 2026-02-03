@@ -5,34 +5,35 @@ using AxPanel.UI.Themes;
 
 namespace AxPanel.UI.UserControls;
 
-public partial class AxPanelContainer : BasePanelControl, IAnimatable
+public partial class ButtonContainerView : BasePanelControl, IAnimatable
 {
     // Сервисы и отрисовка
     private readonly ContainerDrawer _containerDrawer;
     private readonly ITheme _theme;
 
     // UI Состояние
-    private List<LaunchButton> _buttons = [];
+    private List<LaunchButtonView> _buttons = [];
     private int _scrollValue = 0;
     private int _itemsCount = 0;
 
     private MouseState _mouseState = new();
 
     public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine();
-    public IReadOnlyList<LaunchButton> Buttons => _buttons;
+    public IReadOnlyList<LaunchButtonView> Buttons => _buttons;
     public string PanelName { get; set; }
     public int ScrollValue => _scrollValue;
     ITheme IAnimatable.Theme => _theme;
 
     // События
-    public event Action<AxPanelContainer> ContainerSelected;
+    public event Action<ButtonContainerView> ContainerSelected;
     public event Action<List<LaunchItem>> ItemCollectionChanged;
-    public event Action<AxPanelContainer> ContainerDeleteRequested;
-    public event Action<LaunchButton> ProcessStartRequested;
-    public event Action<LaunchButton> GroupStartRequested;
+    public event Action<ButtonContainerView> ContainerDeleteRequested;
+    public event Action<LaunchButtonView> ProcessStartRequested;
+    public event Action<LaunchButtonView> ProcessStartAsAdminRequested;
+    public event Action<LaunchButtonView> GroupStartRequested;
     public event Action<string> ExplorerOpenRequested;
 
-    public AxPanelContainer( ITheme theme )
+    public ButtonContainerView( ITheme theme )
     {
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _containerDrawer = new ContainerDrawer( _theme );
@@ -48,12 +49,12 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
 
         this.AllowDrop = true;
         this.DragEnter += ( s, e ) => {
-            if ( e.Data.GetDataPresent( typeof( LaunchButton ) ) )
+            if ( e.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
                 e.Effect = DragDropEffects.Move;
         };
 
         this.DragDrop += ( s, e ) => {
-            var droppedBtn = ( LaunchButton )e.Data.GetData( typeof( LaunchButton ) );
+            var droppedBtn = ( LaunchButtonView )e.Data.GetData( typeof( LaunchButtonView ) );
 
             // Если бросили в другой контейнер
             if ( droppedBtn.Parent != this )
@@ -63,9 +64,9 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
         };
     }
 
-    private void MoveButtonToThisContainer( LaunchButton btn )
+    private void MoveButtonToThisContainer( LaunchButtonView btn )
     {
-        var oldParent = btn.Parent as AxPanelContainer;
+        var oldParent = btn.Parent as ButtonContainerView;
 
         // 1. Удаляем из старой логики
         oldParent?._buttons.Remove( btn );
@@ -119,7 +120,7 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
     {
         int delta = e.Delta > 0 ? _theme.ContainerStyle.ScrollValueIncrement : -_theme.ContainerStyle.ScrollValueIncrement;
 
-        int totalHeight = LayoutEngine.GetTotalContentHeight( _buttons.Count, _theme );
+        int totalHeight = LayoutEngine.GetTotalContentHeight( Buttons, Width, _theme );
         int visibleHeight = this.Height;
 
         _scrollValue += delta;
@@ -149,7 +150,7 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
 
         foreach ( var item in ordered )
         {
-            var btn = new LaunchButton( _theme )
+            var btn = new LaunchButtonView( _theme )
             {
                 // Начальная ширина (будет скорректирована аниматором)
                 Dock = DockStyle.None, // Прямой запрет на стыковку
@@ -161,8 +162,9 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
             };
 
             // Остальные подписки
-            btn.ButtonLeftClick += b => ProcessStartRequested?.Invoke( b );
+            btn.ButtonLeftClick += ( button ) => ProcessStartRequested?.Invoke( button );
             btn.ButtonRightClick += b => ExplorerOpenRequested?.Invoke( b.BaseControlPath );
+            btn.ButtonMiddleClick += ( button ) => ProcessStartAsAdminRequested?.Invoke( button );
 
             btn.DeleteButtonClick += b => {
                 _buttons.Remove( b ); // Убираем из внутреннего списка
@@ -184,7 +186,7 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
             // Устанавливаем начальные координаты сразу через LayoutEngine,
             // чтобы кнопки не "прыгали" из нулевой точки при создании.
             int currentIndex = _buttons.Count - 1;
-            var layout = LayoutEngine.GetLayout( currentIndex, _scrollValue, this.Width, btn, _theme );
+            var layout = LayoutEngine.GetLayout( currentIndex, _scrollValue, this.Width, _buttons, _theme );
 
             btn.Location = layout.Location;
             btn.Width = layout.Width;
@@ -227,8 +229,16 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
         }
     }
 
-    protected override void OnPaint( PaintEventArgs e ) => 
-        _containerDrawer.Draw( this, _mouseState, e );
+    protected override void OnPaint( PaintEventArgs e )
+    {
+        //_containerDrawer.Draw( this, _movingButtonRectangle, _mouseState, e );
+
+        // Находим кнопку, которая сейчас в режиме перемещения (Capture или IsDragging)
+        var draggedBtn = _buttons.FirstOrDefault( b => b.Capture || b.IsDragging );
+
+        // Передаем её в отрисовщик контейнера
+        _containerDrawer.Draw( this, draggedBtn, _mouseState, e );
+    }
 
     void IAnimatable.UpdateVisual() => Invalidate();
 
@@ -274,7 +284,7 @@ public partial class AxPanelContainer : BasePanelControl, IAnimatable
         ItemCollectionChanged?.Invoke( items );
     }
 
-    public void StartProcessGroup( LaunchButton separator ) => 
+    public void StartProcessGroup( LaunchButtonView separator ) => 
         GroupStartRequested?.Invoke( separator );
 
     protected override void Dispose( bool disposing )

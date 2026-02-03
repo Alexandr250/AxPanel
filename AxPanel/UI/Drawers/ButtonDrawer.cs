@@ -1,4 +1,5 @@
-﻿using AxPanel.UI.Themes;
+﻿using System.Diagnostics;
+using AxPanel.UI.Themes;
 using AxPanel.UI.UserControls;
 
 namespace AxPanel.UI.Drawers;
@@ -45,7 +46,7 @@ public class ButtonDrawer
         }
 
         // 3. Подсветка запущенного процесса (Пульсация)
-        if ( control is LaunchButton lbPulse && lbPulse.IsRunning )
+        if ( control is LaunchButtonView lbPulse && lbPulse.IsRunning )
         {
             float speedMultiplier = cpuUsage > 50 ? 2.0f : 1.0f;
             float pulse = ( float )( Math.Sin( Environment.TickCount * 0.005 * speedMultiplier ) + 1.0 ) / 2.0f;
@@ -59,7 +60,7 @@ public class ButtonDrawer
         }
 
         // 4. Индикаторы CPU/RAM (только в режиме списка)
-        if ( !isCompact && control is LaunchButton lb && lb.IsRunning )
+        if ( !isCompact && control is LaunchButtonView lb && lb.IsRunning )
         {
             int margin = 4;
             int indicatorWidth = 40;
@@ -81,7 +82,7 @@ public class ButtonDrawer
 
         // 6. Текст и иконка
         int iconAreaSize = _theme.ButtonStyle.DefaultHeight;
-        int reservedRight = ( isCompact || !( control is LaunchButton lbtn && lbtn.IsRunning ) ) ? 0 : 100;
+        int reservedRight = ( isCompact || !( control is LaunchButtonView lbtn && lbtn.IsRunning ) ) ? 0 : 100;
 
         if ( isCompact )
         {
@@ -116,7 +117,7 @@ public class ButtonDrawer
         }
 
         // 8. Маркер активности (синяя полоса слева)
-        if ( control is LaunchButton runBtn && runBtn.IsRunning )
+        if ( control is LaunchButtonView runBtn && runBtn.IsRunning )
         {
             using var runningBrush = new SolidBrush( Color.FromArgb( 0, 120, 215 ) );
             g.FillRectangle( runningBrush, 0, 2, 3, control.Height - 4 );

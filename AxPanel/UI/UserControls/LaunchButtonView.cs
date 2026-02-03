@@ -5,7 +5,7 @@ using AxPanel.UI.Themes;
 
 namespace AxPanel.UI.UserControls;
 
-public class LaunchButton : BaseControl
+public class LaunchButtonView : BaseControl
 {
     private readonly ITheme _theme;
     private readonly ButtonDrawer _buttonDrawer;
@@ -24,16 +24,21 @@ public class LaunchButton : BaseControl
     public bool IsDragging { get; set; } // Флаг для аниматора
     //public string Path { get; set; } // Ключ для мониторинга
 
+    public bool IsSeparator => string.IsNullOrEmpty( BaseControlPath );
+
     // События
-    public event Action<LaunchButton> ButtonLeftClick;
-    public event Action<LaunchButton> ButtonMiddleClick;
-    public event Action<LaunchButton> ButtonRightClick;
-    public event Action<LaunchButton> DeleteButtonClick;
+    public event Action<LaunchButtonView> ButtonLeftClick;
+    public event Action<LaunchButtonView> ButtonMiddleClick;
+    public event Action<LaunchButtonView> ButtonRightClick;
+    public event Action<LaunchButtonView> DeleteButtonClick;
+    public event Action<Rectangle?> MovingChanged;
 
     // Устаревшее, теперь позицией управляет LayoutEngine через контейнер
     public Func<int> RequestPosition;
 
-    public LaunchButton( ITheme theme )
+    public LaunchButtonView() : this( new DarkTheme() ) {}
+
+    public LaunchButtonView( ITheme theme )
     {
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _buttonDrawer = new ButtonDrawer( _theme );
@@ -47,6 +52,11 @@ public class LaunchButton : BaseControl
     {
         base.OnParentChanged( e );
         // Удалено принудительное растягивание на всю ширину для поддержки сетки
+
+        if ( InvokeRequired )
+            BeginInvoke( Invalidate );
+        else
+            Invalidate();
     }
 
     protected override void OnPaint( PaintEventArgs e )
@@ -79,7 +89,7 @@ public class LaunchButton : BaseControl
     protected override void OnMouseMove( MouseEventArgs e )
     {
         // 1. ЗОНА УДАЛЕНИЯ (для обычных кнопок)
-        if ( !string.IsNullOrEmpty( BaseControlPath ) )
+        if ( !IsSeparator )
         {
             bool isInsideDeleteZone = e.X > Width - _theme.ButtonStyle.DeleteButtonWidth;
             if ( _mouseState.MouseInDeleteButton != isInsideDeleteZone )
@@ -90,7 +100,7 @@ public class LaunchButton : BaseControl
         }
 
         // 2. ЗОНА ГРУППОВОГО ЗАПУСКА (для разделителей)
-        if ( string.IsNullOrEmpty( BaseControlPath ) )
+        if ( IsSeparator )
         {
             bool isInsidePlayZone = e.X > Width - 40;
             if ( _mouseState.MouseInGroupPlay != isInsidePlayZone )
@@ -117,22 +127,18 @@ public class LaunchButton : BaseControl
             // Если сдвинули хоть немного — двигаем физически
             if ( Math.Abs( deltaX ) > 2 || Math.Abs( deltaY ) > 2 )
             {
+                if( !_mouseState.ButtonMoved )
+                    MovingChanged?.Invoke( new Rectangle( Left, Top, Width, Height ) );
+
                 _mouseState.ButtonMoved = true;
+                
+
+                IsDragging = true;
 
                 // Устанавливаем позицию напрямую от стартовой точки
                 // Это исключает "накопление ошибки" при быстрых рывках
                 this.Left = _dragStartControlPos.X + deltaX;
                 this.Top = _dragStartControlPos.Y + deltaY;
-
-                // Если протащили достаточно для системного DragDrop
-                //if ( Math.Abs( deltaX ) > 20 || Math.Abs( deltaY ) > 20 )
-                //{
-                //    IsDragging = true; // Для аниматора
-                //    Capture = false;
-                //    DoDragDrop( this, DragDropEffects.Move );
-                //    IsDragging = false;
-                //    return;
-                //}
             }
         }
 
@@ -141,6 +147,8 @@ public class LaunchButton : BaseControl
 
     protected override void OnMouseUp( MouseEventArgs e )
     {
+        IsDragging = false;
+
         if ( e.Button == MouseButtons.Left )
         {
             Capture = false;
@@ -154,10 +162,6 @@ public class LaunchButton : BaseControl
                 else
                     ButtonLeftClick?.Invoke( this );
             }
-
-            // ВАЖНО: Мы больше не вызываем RequestPosition здесь вручную.
-            // Контейнер AxPanelContainer.AnimateStep сам плавно вернет кнопку 
-            // в позицию, рассчитанную текущим LayoutEngine.
         }
         else if ( e.Button == MouseButtons.Right )
         {
@@ -169,6 +173,7 @@ public class LaunchButton : BaseControl
         }
 
         _mouseState.ButtonMoved = false;
+
         base.OnMouseUp( e );
     }
 
@@ -186,7 +191,7 @@ public class LaunchButton : BaseControl
         base.OnMouseClick( e );
 
         // Если это разделитель и клик был в правой части
-        if ( string.IsNullOrEmpty( BaseControlPath ) && e.X > Width - 40 )
+        if ( IsSeparator && e.X > Width - 40 )
         {
             // Вызываем специальное событие или действие
             StartGroupLaunch();
@@ -196,7 +201,7 @@ public class LaunchButton : BaseControl
     private void StartGroupLaunch()
     {
         // Находим родительский контейнер и просим его запустить группу
-        if ( Parent is AxPanelContainer container )
+        if ( Parent is ButtonContainerView container )
         {
             container.StartProcessGroup( this );
         }

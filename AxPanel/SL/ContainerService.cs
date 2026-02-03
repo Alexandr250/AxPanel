@@ -7,11 +7,20 @@ public class ContainerService
     /// <summary>
     /// Запуск одиночного процесса с обновлением состояния кнопки
     /// </summary>
-    public void RunProcess( LaunchButton btn )
+    public void RunProcess( LaunchButtonView btn )
     {
-        if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) ) return;
+        RunProcess( btn, false );
+    }
 
-        if ( ProcessManager.Start( btn.BaseControlPath ) )
+    /// <summary>
+    /// Запуск одиночного процесса с обновлением состояния кнопки
+    /// </summary>
+    public void RunProcess( LaunchButtonView btn, bool rusAsAdmin )
+    {
+        if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
+            return;
+
+        if ( ProcessManager.Start( btn.BaseControlPath, rusAsAdmin ) )
         {
             // Мгновенная визуальная отдача
             btn.IsRunning = true;
@@ -22,7 +31,7 @@ public class ContainerService
     /// <summary>
     /// Запускает переданный список кнопок
     /// </summary>
-    public void RunProcessGroup( IEnumerable<LaunchButton> groupButtons )
+    public void RunProcessGroup( IEnumerable<LaunchButtonView> groupButtons )
     {
         foreach ( var btn in groupButtons )
         {

@@ -30,6 +30,8 @@ public partial class MainView : Form
 
     private MainConfig? _config;
 
+    public MainModel MainModel { get; set; }
+
     public MainView()
     {
         InitializeComponent();
@@ -43,7 +45,16 @@ public partial class MainView : Form
         _headerHeight = _config?.HeaderHeight ?? 30;
         _borderWidth = _config?.BorderWidth ?? 5;
 
-        MainContainer = new AxPanelMainContainer( theme );
+        MainContainer = new RootContainerView( theme );
+        MainContainer.OnSaveConfigRequered += () =>
+        {
+            ConfigManager.SaveMainConfig( _config );
+            if( MainModel != null )
+            {
+                ConfigManager.SaveItemsConfig( MainModel );
+            }
+        };
+
         UpdateContainerBounds();
         MainContainer.Visible = true;
         Controls.Add( MainContainer );

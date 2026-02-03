@@ -15,6 +15,8 @@ internal static class Program
         MainModel panelModel = ConfigManager.ReadModel();
 
         MainView view = new();
+        view.MainModel = panelModel;
+        
         ConfigureMainPanelView( view, config, panelModel );
         view.Move += ( sender, args ) =>
         {
@@ -45,7 +47,7 @@ internal static class Program
 
             foreach ( ContainerItem containerItem in panelModel.Containers )
             {
-                AxPanelContainer uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
+                ButtonContainerView uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
                 uiContainer.ItemCollectionChanged += list =>
                 {
                     if( list != null )

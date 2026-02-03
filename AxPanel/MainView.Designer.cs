@@ -58,5 +58,5 @@ partial class MainView
     #endregion
 
     private System.Windows.Forms.Timer TimerClicksCounter;
-    public AxPanelMainContainer MainContainer;
+    public RootContainerView MainContainer;
 }

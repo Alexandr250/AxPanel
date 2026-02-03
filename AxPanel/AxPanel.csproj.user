@@ -4,16 +4,16 @@
     <Compile Update="MainView.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="UI\UserControls\AxPanelContainer.cs">
+    <Compile Update="UI\UserControls\ButtonContainerView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="UI\UserControls\AxPanelMainContainer.cs">
+    <Compile Update="UI\UserControls\RootContainerView.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="UI\UserControls\BaseControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="UI\UserControls\LaunchButton.cs">
+    <Compile Update="UI\UserControls\LaunchButtonView.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="UI\UserControls\BasePanelControl.cs">

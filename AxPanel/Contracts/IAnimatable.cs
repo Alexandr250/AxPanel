@@ -5,7 +5,7 @@ namespace AxPanel.Contracts;
 
 public interface IAnimatable
 {
-    IReadOnlyList<LaunchButton> Buttons { get; }
+    IReadOnlyList<LaunchButtonView> Buttons { get; }
     ILayoutEngine LayoutEngine { get; }
     ITheme Theme { get; }
     int ScrollValue { get; }

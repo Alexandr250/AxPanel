@@ -6,26 +6,35 @@ namespace AxPanel
 {
     public class ListLayoutEngine : ILayoutEngine
     {
-        public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, LaunchButton btn, ITheme theme )
+        public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )
         {
-            // В списке кнопка всегда прижата к левому краю
+            // В списке кнопки всегда занимают всю ширину (от края до края)
             int x = 0;
+            int currentY = theme.ContainerStyle.HeaderHeight + scrollValue;
 
-            // Позиция Y зависит только от индекса
-            int y = theme.ContainerStyle.HeaderHeight +
-                   ( btn.Height + theme.ButtonStyle.SpaceHeight ) * index +
-                   scrollValue;
+            // Суммируем высоты всех предыдущих кнопок
+            for ( int i = 0; i < index; i++ )
+            {
+                currentY += allButtons[ i ].Height + theme.ButtonStyle.SpaceHeight;
+            }
 
-            // Ширина кнопки — это вся ширина контейнера
-            int width = containerWidth;
-
-            return (new Point( x, y ), width);
+            // Возвращаем координаты текущей кнопки
+            return (new Point( x, currentY ), containerWidth);
         }
 
-        public int GetTotalContentHeight( int itemsCount, ITheme theme )
+        public int GetTotalContentHeight( IReadOnlyList<LaunchButtonView> allButtons, int containerWidth, ITheme theme )
         {
-            return theme.ContainerStyle.HeaderHeight +
-                   ( theme.ButtonStyle.DefaultHeight + theme.ButtonStyle.SpaceHeight ) * itemsCount;
+            if ( allButtons.Count == 0 ) return theme.ContainerStyle.HeaderHeight;
+
+            int totalHeight = theme.ContainerStyle.HeaderHeight;
+
+            // Суммируем высоты всех кнопок с учетом межстрочного интервала
+            foreach ( var btn in allButtons )
+            {
+                totalHeight += btn.Height + theme.ButtonStyle.SpaceHeight;
+            }
+
+            return totalHeight;
         }
     }
 }

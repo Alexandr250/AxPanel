@@ -5,18 +5,15 @@ namespace AxPanel.Contracts
 {
     public interface ILayoutEngine
     {
-        /// <summary>
-        /// Вычисляет целевой Y (или X) для кнопки на основе её индекса и состояния прокрутки.
-        /// </summary>
-        //int GetTargetPosition( int index, int scrollValue, LaunchButton button, ITheme theme );
-        
-        // Возвращает: X, Y и Width для кнопки
-        (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, LaunchButton btn, ITheme theme );
+            // Теперь передаем список всех кнопок для анализа контекста
+            (Point Location, int Width) GetLayout(
+                int index,
+                int scrollValue,
+                int containerWidth,
+                IReadOnlyList<LaunchButtonView> allButtons,
+                ITheme theme );
 
-        /// <summary>
-        /// Общая высота всего контента (нужна для ограничения прокрутки).
-        /// </summary>
-        int GetTotalContentHeight( int itemsCount, ITheme theme );
-        
+            // Высота теперь считается на основе реального контента, а не просто числа
+            int GetTotalContentHeight( IReadOnlyList<LaunchButtonView> allButtons, int containerWidth, ITheme theme );
     }
 }

@@ -16,7 +16,7 @@ public partial class Form1 : Form
 
         foreach ( ContainerItem container in panelModel.Containers )
         {
-            AxPanelContainer uiContainer = axPanelMainContainer1.AddContainer( container.Name, container.Items );
+            ButtonContainerView uiContainer = axPanelMainContainer1.AddContainer( container.Name, container.Items );
             uiContainer.ItemCollectionChanged += list =>
             {
                 if( list is { Count: > 0 } )

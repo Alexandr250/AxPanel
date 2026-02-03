@@ -56,6 +56,68 @@ public static class ProcessManager
         }
     }
 
+    public static void Shutdown()
+    {
+        //Process.Start( "shutdown", "/s /t 0" );
+
+        Thread.Sleep( 200 );
+        if( MessageBox.Show( "Выключить копьютер? Будет дано 60 секунд на сохранение файлов.", "Выключение компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+        {
+            // MessageBox.Show( "Shutdown" );
+            // Process.Start( "shutdown", "/s /t 60" );
+
+            Process.Start( new ProcessStartInfo( "shutdown", "/s /t 60 /c \"Сохраните работу! Автоматическое выключение через 60 секунд.\"" )
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false
+            } );
+        }
+    }
+    //public static void Restart() => Process.Start( "shutdown", "/r /t 30" );
+    public static void Restart()
+    {
+        //Process.Start( "shutdown", "/r /t 0" );
+        Thread.Sleep( 200 );
+
+        if ( MessageBox.Show( "Перезагрузить компьютер копьютер?", "Перезагрузка компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+        {
+            //MessageBox.Show( "Restart" );
+            // Process.Start( "shutdown", "/r /t 60 /c \"Сохраните работу! Автоматическое выключение через 60 секунд.\"" );
+
+            Process.Start( new ProcessStartInfo( "shutdown", "/r /t 60 /c \"Перезагрузка через 60 секунд. Сохраните важные документы!\"" )
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false
+            } );
+        }
+    }
+
+    public static void Sleep()
+    {
+        //Application.SetSuspendState( PowerState.Suspend, true, true );
+        Thread.Sleep( 200 );
+
+        bool supportsHibernate = SystemInformation.PowerStatus.BatteryFullLifetime != -1;
+
+        if( !supportsHibernate )
+        {
+            MessageBox.Show( "Спящий режим недоступен." );
+        }
+        else
+        {
+            if( MessageBox.Show( "Перевести копьютер в спящий режим? \r\n Любое приложение может прервать процесс (например, если открыт несохраненный документ).", "Спящий режим", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+            {
+                Application.SetSuspendState( PowerState.Suspend, false, false );
+            }
+        }
+    }
+
+    public static void Abort()
+    {
+        // Экстренная отмена, если нажали случайно
+        Process.Start( new ProcessStartInfo( "shutdown", "/a" ) { CreateNoWindow = true } );
+    }
+
     private static string GetExistingParent( string path )
     {
         string dir = Path.GetDirectoryName( path );

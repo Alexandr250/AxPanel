@@ -31,24 +31,30 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
+        launchButton1 = new LaunchButtonView();
         SuspendLayout();
-        axPanelMainContainer1 = new AxPanelMainContainer( new DarkTheme() );
         // 
-        // axPanelMainContainer1
+        // launchButton1
         // 
-        axPanelMainContainer1.BackColor = Color.FromArgb(     64,     64,     64 );
-        axPanelMainContainer1.Dock = DockStyle.Fill;
-        axPanelMainContainer1.Location = new Point( 0, 0 );
-        axPanelMainContainer1.Name = "axPanelMainContainer1";
-        axPanelMainContainer1.Size = new Size( 331, 622 );
-        axPanelMainContainer1.TabIndex = 0;
+        launchButton1.Anchor = AnchorStyles.None;
+        launchButton1.BaseControlPath = null;
+        launchButton1.CpuUsage = 0F;
+        launchButton1.IsDragging = false;
+        launchButton1.IsRunning = false;
+        launchButton1.Location = new Point( 12, 12 );
+        launchButton1.Name = "launchButton1";
+        launchButton1.RamUsage = 0F;
+        launchButton1.Size = new Size( 58, 53 );
+        launchButton1.StartTime = null;
+        launchButton1.TabIndex = 0;
+        launchButton1.Text = "launchButton1";
         // 
         // Form1
         // 
         AutoScaleDimensions = new SizeF( 7F, 15F );
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size( 331, 622 );
-        Controls.Add( axPanelMainContainer1 );
+        ClientSize = new Size( 250, 223 );
+        Controls.Add( launchButton1 );
         KeyPreview = true;
         Name = "Form1";
         Text = "Form1";
@@ -59,5 +65,5 @@ partial class Form1
 
     #endregion
 
-    private AxPanelMainContainer axPanelMainContainer1;
+    private LaunchButtonView launchButton1;
 }

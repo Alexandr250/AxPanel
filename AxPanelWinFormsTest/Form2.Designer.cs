@@ -31,7 +31,7 @@ partial class Form2
     /// </summary>
     private void InitializeComponent()
     {
-        axPanelButton1 = new AxPanel.UI.UserControls.LaunchButton( new DarkTheme() );
+        axPanelButton1 = new AxPanel.UI.UserControls.LaunchButtonView( new DarkTheme() );
         SuspendLayout();
         // 
         // axPanelButton1
@@ -56,5 +56,5 @@ partial class Form2
 
     #endregion
 
-    private LaunchButton axPanelButton1;
+    private LaunchButtonView axPanelButton1;
 }

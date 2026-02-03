@@ -1,10 +1,11 @@
 ﻿using AxPanel.Model;
 using AxPanel.SL;
 using AxPanel.UI.Themes;
+using System.Diagnostics;
 
 namespace AxPanel.UI.UserControls;
 
-public class AxPanelMainContainer : Panel
+public class RootContainerView : Panel
 {
     private readonly ContainerService _containerService = new();
     private readonly ProcessMonitor _globalMonitor = new();
@@ -14,13 +15,22 @@ public class AxPanelMainContainer : Panel
     private readonly ITheme _theme;
     private readonly Brush _backBrush;
 
-    private AxPanelContainer _selected;
+    private ButtonContainerView _selected;
     private int _targetSelectedHeight;
 
-    // Оптимизированный доступ к контейнерам без создания лишних списков
-    public IEnumerable<AxPanelContainer> Containers => Controls.OfType<AxPanelContainer>();
+    private readonly int _footerHeight = 25; // Высота футера
+    private readonly Brush _footerBrush;
 
-    public AxPanelContainer Selected
+    public MainModel MainModel { get; set; }
+
+    public event Action OnSaveConfigRequered;
+
+    // Оптимизированный доступ к контейнерам без создания лишних списков
+    public IEnumerable<ButtonContainerView> Containers => Controls.OfType<ButtonContainerView>();
+
+    private List<(Rectangle Rect, Action Action, string Tooltip)> _footerButtons = new();
+
+    public ButtonContainerView Selected
     {
         get => _selected;
         private set
@@ -31,13 +41,17 @@ public class AxPanelMainContainer : Panel
         }
     }
 
-    public AxPanelMainContainer( ITheme theme )
+    public RootContainerView( ITheme theme )
     {
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _backBrush = new SolidBrush( _theme.WindowStyle.BackColor );
+        _footerBrush = new SolidBrush( Color.FromArgb( 45, 45, 48 ) );
+
+        InitFooterButtons();
 
         DoubleBuffered = true;
         SetStyle( ControlStyles.ResizeRedraw | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true );
+        SetStyle( ControlStyles.StandardClick | ControlStyles.StandardDoubleClick, true );
         BackColor = _theme.WindowStyle.BackColor;
 
         // Использование UI-таймера исключает ошибки потоков и Invoke
@@ -48,9 +62,31 @@ public class AxPanelMainContainer : Panel
         _globalMonitor.Start();
     }
 
-    public AxPanelContainer AddContainer( string name, List<LaunchItem>? items )
+    private void InitFooterButtons()
     {
-        var container = new AxPanelContainer( _theme )
+        int btnWidth = 30;
+        int x = Width - 10; // Начинаем справа
+
+        // Кнопка Выключения
+        x -= btnWidth;
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
+            ProcessManager.Shutdown, "Выключение") );
+
+        // Кнопка Перезагрузки
+        x -= btnWidth;
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
+            ProcessManager.Restart, "Перезагрузка") );
+
+        // Кнопка Спящего режима
+        x -= btnWidth;
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
+            ProcessManager.Sleep, "Спящий режим") );
+    }
+
+
+    public ButtonContainerView AddContainer( string name, List<LaunchItem>? items )
+    {
+        var container = new ButtonContainerView( _theme )
         {
             PanelName = name,
             BaseControlPath = name,
@@ -67,12 +103,17 @@ public class AxPanelMainContainer : Panel
 
         Controls.Add( container );
 
-        if ( Selected == null ) Selected = container;
+        if ( Selected == null ) 
+            Selected = container;
         else ArrangeContainers(); // Мгновенная расстановка при добавлении
 
         // Привязываем запуск одиночного процесса
         container.ProcessStartRequested += btn =>
             _containerService.RunProcess( btn );
+
+        // Привязываем запуск одиночного процесса от имени администратора
+        container.ProcessStartAsAdminRequested += btn =>
+            _containerService.RunProcess( btn, true );
 
         // Привязываем открытие проводника
         container.ExplorerOpenRequested += path =>
@@ -82,7 +123,7 @@ public class AxPanelMainContainer : Panel
         container.GroupStartRequested += separator =>
         {
             // Берем кнопки прямо из контролов панели, чтобы типы совпали
-            var allButtons = container.Controls.OfType<LaunchButton>().ToList();
+            var allButtons = container.Controls.OfType<LaunchButtonView>().ToList();
             int startIndex = allButtons.IndexOf( separator );
 
             if ( startIndex != -1 )
@@ -131,16 +172,16 @@ public class AxPanelMainContainer : Panel
         }
     }
 
-    private void DeleteContainer( AxPanelContainer container )
+    private void DeleteContainer( ButtonContainerView container )
     {
         // Не удаляем, если это последний контейнер
-        if ( Controls.OfType<AxPanelContainer>().Count() <= 1 )
+        if ( Controls.OfType<ButtonContainerView>().Count() <= 1 )
             return;
 
         // Если удаляем выбранный контейнер, выбираем другой
         if ( Selected == container )
         {
-            var otherContainer = Controls.OfType<AxPanelContainer>()
+            var otherContainer = Controls.OfType<ButtonContainerView>()
                 .FirstOrDefault( c => c != container );
             Selected = otherContainer;
         }
@@ -156,7 +197,10 @@ public class AxPanelMainContainer : Panel
 
     private void StartAnimateArrange()
     {
-        _targetSelectedHeight = Height - ( Controls.Count - 1 ) * _theme.ContainerStyle.HeaderHeight;
+        _targetSelectedHeight = Height -
+                                ( ( Controls.OfType<ButtonContainerView>().Count() - 1 ) * _theme.ContainerStyle.HeaderHeight ) -
+                                _footerHeight;
+        //_targetSelectedHeight = Height - ( Controls.Count - 1 ) * _theme.ContainerStyle.HeaderHeight;
         _animationTimer.Start();
     }
 
@@ -201,17 +245,116 @@ public class AxPanelMainContainer : Panel
 
     public void ArrangeContainers()
     {
-        _animationTimer.Stop(); // Прерываем анимацию при жесткой расстановке
+        _animationTimer.Stop();
         int currentTop = 0;
-        int selHeight = Height - ( Controls.Count - 1 ) * _theme.ContainerStyle.HeaderHeight;
+        int selHeight = Height - ( ( Containers.Count() - 1 ) * _theme.ContainerStyle.HeaderHeight ) - _footerHeight;
 
         foreach ( var container in Containers )
         {
             container.Top = currentTop;
             container.Height = ( container == Selected ) ? selHeight : _theme.ContainerStyle.HeaderHeight;
-            //container.Width = this.Width;
             currentTop += container.Height;
         }
+        Invalidate(); // Чтобы перерисовать футер
+    }
+
+    private Rectangle GetFooterBtnRect( int index )
+    {
+        int count = 3;
+        int btnWidth = Width / count; // Базовая ширина кнопки
+        int x = index * btnWidth;
+
+        // Если это последняя кнопка, растягиваем её до самого края (убираем щель от деления)
+        int actualWidth = ( index == count - 1 ) ? Width - x : btnWidth;
+
+        return new Rectangle( x, Height - _footerHeight, actualWidth, _footerHeight );
+    }
+
+    protected override void OnMouseClick( MouseEventArgs e )
+    {
+        base.OnMouseClick( e );
+        Invalidate(); // Обновить визуальное состояние
+    }
+
+    protected override void OnDoubleClick( EventArgs e )
+    {
+        base.OnDoubleClick( e );
+
+        // Проверяем каждую кнопку футера
+        //for ( int i = 0; i < 3; i++ )
+        //{
+        //    if ( GetFooterBtnRect( i ).Contains( e.Location ) )
+        //    {
+        //        ExecuteCommand( i );
+        //        break;
+        //    }
+        //}
+    }
+
+    protected override void OnMouseDown( MouseEventArgs e )
+    {
+        base.OnMouseDown( e );
+
+        // e.Clicks == 2 означает двойной клик в ту же точку
+        if ( e.Button == MouseButtons.Left && e.Clicks == 2 )
+        {
+            for ( int i = 0; i < 3; i++ )
+            {
+                if ( GetFooterBtnRect( i ).Contains( e.Location ) )
+                {
+                    ExecuteCommand( i );
+                    break;
+                }
+            }
+        }
+        else if ( e.Button == MouseButtons.Right )
+        {
+            ProcessManager.Abort(); // Отмена
+            MessageBox.Show( "Выключение отменено", "Выключение отменено", MessageBoxButtons.OK, MessageBoxIcon.Information );
+            Invalidate();
+        }
+    }
+
+    private void ExecuteCommand( int index )
+    {
+        OnSaveConfigRequered?.Invoke();
+
+        switch ( index )
+        {
+            case 0: ProcessManager.Shutdown(); break;
+            case 1: ProcessManager.Restart(); break;
+            case 2: ProcessManager.Sleep(); break;
+        }
+    }
+
+    protected override void OnMouseMove( MouseEventArgs e )
+    {
+        base.OnMouseMove( e );
+
+        // Проверяем, находится ли курсор над любой из кнопок футера
+        bool isOverAnyBtn = false;
+        for ( int i = 0; i < 3; i++ )
+        {
+            if ( GetFooterBtnRect( i ).Contains( e.Location ) )
+            {
+                isOverAnyBtn = true;
+                break;
+            }
+        }
+
+        // Если мышь в зоне футера — перерисовываем его для обновления подсветки
+        if ( e.Y >= Height - _footerHeight )
+        {
+            // Перерисовываем только область футера, чтобы не грузить систему
+            Invalidate( new Rectangle( 0, Height - _footerHeight, Width, _footerHeight ) );
+        }
+    }
+
+    // Также важно сбросить подсветку, когда мышь уходит с панели
+    protected override void OnMouseLeave( EventArgs e )
+    {
+        base.OnMouseLeave( e );
+        Invalidate( new Rectangle( 0, Height - _footerHeight, Width, _footerHeight ) );
     }
 
     protected override void OnResize( EventArgs e )
@@ -222,7 +365,50 @@ public class AxPanelMainContainer : Panel
 
     protected override void OnPaint( PaintEventArgs e )
     {
-        e.Graphics.FillRectangle( _backBrush, ClientRectangle );
+        base.OnPaint( e );
+        var g = e.Graphics;
+        var mousePos = PointToClient( Cursor.Position );
+
+        string[] icons = { "\uE7E8", "\uE777", "\uE708" };
+        string[] texts = { "Завершение работы", "Перезагрузка", "Спящий режим" };
+
+        using var iconFont = new Font( "Segoe MDL2 Assets", 10 );
+        using var textFont = new Font( "Segoe UI", 9f );
+
+        for ( int i = 0; i < 3; i++ )
+        {
+            Rectangle btnRect = GetFooterBtnRect( i );
+            bool isHovered = btnRect.Contains( mousePos );
+
+            // 1. Подсветка фона
+            if ( isHovered )
+            {
+                Color hoverColor = ( i == 0 ) ? Color.FromArgb( 100, 232, 17, 35 ) : Color.FromArgb( 50, 255, 255, 255 );
+                using var brush = new SolidBrush( hoverColor );
+                g.FillRectangle( brush, btnRect );
+            }
+
+            // 2. Отрисовка контента
+            if ( isHovered )
+            {
+                // Рисуем текст по центру (иконку можно скрыть или сдвинуть влево)
+                TextRenderer.DrawText( g, texts[ i ], textFont, btnRect, Color.White,
+                    TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter | TextFormatFlags.EndEllipsis );
+            }
+            else
+            {
+                // Рисуем только иконку, когда мышь далеко
+                TextRenderer.DrawText( g, icons[ i ], iconFont, btnRect, Color.White,
+                    TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter );
+            }
+
+            // 3. Разделитель
+            if ( i < 2 )
+            {
+                using var linePen = new Pen( Color.FromArgb( 40, 255, 255, 255 ) );
+                g.DrawLine( linePen, btnRect.Right - 1, btnRect.Y + 5, btnRect.Right - 1, btnRect.Bottom - 5 );
+            }
+        }
     }
 
     protected override void OnParentChanged( EventArgs e )
