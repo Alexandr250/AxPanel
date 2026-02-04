@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AxPanelWinFormsTest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+115b97b21da1b4cfdf4dddf0488e216ac7416bc4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6eae28350632d47ad0cbbd647ce9abd5b155253d")]
 [assembly: System.Reflection.AssemblyProductAttribute("AxPanelWinFormsTest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AxPanelWinFormsTest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

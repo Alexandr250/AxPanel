@@ -18,7 +18,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     private MouseState _mouseState = new();
 
-    public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine(); // new ListLayoutEngine();
+    public ILayoutEngine LayoutEngine { get; set; } = new ListLayoutEngine(); // new GridLayoutEngine(); // new ListLayoutEngine();
     public IReadOnlyList<LaunchButtonView> Buttons => _buttons;
     public string PanelName { get; set; }
     public int ScrollValue => _scrollValue;
@@ -93,7 +93,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         {
             if ( btn.BaseControlPath != null && stats.TryGetValue( btn.BaseControlPath, out var s ) )
             {
-                btn.UpdateState( s.IsRunning, s.CpuUsage, s.RamMb, s.StartTime );
+                btn.UpdateState( s.IsRunning, s.CpuUsage, s.RamMb, s.WindowCount, s.StartTime );
                 changed = true;
             }
         }

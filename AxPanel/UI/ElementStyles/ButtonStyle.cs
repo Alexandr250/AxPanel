@@ -8,7 +8,7 @@ namespace AxPanel.UI.ElementStyles;
 public class ButtonStyle : IDisposable
 {
     // Группировка констант
-    public int DefaultHeight { get; set; } = 60; // 42
+    public int DefaultHeight { get; set; } = 36; // 42
     public int DeleteButtonWidth { get; set; } = 50;
     public int SpaceHeight { get; set; } = 1;
 

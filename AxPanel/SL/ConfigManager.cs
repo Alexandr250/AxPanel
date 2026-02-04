@@ -26,13 +26,7 @@ public class ConfigManager
     {
         if ( !File.Exists( ConfigFile ) )
         {
-            var defaultConfig = new MainConfig
-            {
-                Width = 400,
-                Height = 600,
-                HeaderHeight = 30,
-                BorderWidth = 5
-            };
+            var defaultConfig = CreateDefaultConfig();
             SaveMainConfig( defaultConfig ); // Создаем файл сразу
             return defaultConfig;
         }
@@ -42,7 +36,19 @@ public class ConfigManager
             string json = File.ReadAllText( ConfigFile );
             return JsonSerializer.Deserialize<MainConfig>( json );
         }
-        catch { return new MainConfig(); }
+        catch { return CreateDefaultConfig(); }
+    }
+
+    private static MainConfig CreateDefaultConfig()
+    {
+        var defaultConfig = new MainConfig
+        {
+            Width = 400,
+            Height = 600,
+            HeaderHeight = 30,
+            BorderWidth = 5
+        };
+        return defaultConfig;
     }
 
     public static void SaveItemsConfig( MainModel panelModel )

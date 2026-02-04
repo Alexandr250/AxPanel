@@ -177,12 +177,12 @@
     {
       "Items": [
         {
-          "Name": "Exchange",
-          "FilePath": "\\\\pi\\Exchange",
+          "Name": "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0432\u0441\u0435",
+          "FilePath": "",
           "ClicksCount": 0,
           "Id": 0,
           "Height": 0,
-          "IsSeparator": false
+          "IsSeparator": true
         },
         {
           "Name": "\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u044B",
@@ -207,9 +207,25 @@
           "Id": 3,
           "Height": 0,
           "IsSeparator": false
+        },
+        {
+          "Name": "projects",
+          "FilePath": "D:\\projects\\projects",
+          "ClicksCount": 0,
+          "Id": 4,
+          "Height": 0,
+          "IsSeparator": false
+        },
+        {
+          "Name": "git-source",
+          "FilePath": "D:\\projects\\git-source",
+          "ClicksCount": 0,
+          "Id": 5,
+          "Height": 0,
+          "IsSeparator": false
         }
       ],
-      "Name": "Common",
+      "Name": "Folders",
       "Type": 0
     },
     {

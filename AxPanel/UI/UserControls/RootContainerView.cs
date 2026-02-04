@@ -270,6 +270,23 @@ public class RootContainerView : Panel
         return new Rectangle( x, Height - _footerHeight, actualWidth, _footerHeight );
     }
 
+    //protected override void OnHandleCreated( EventArgs e )
+    //{
+    //    base.OnHandleCreated( e );
+
+    //    // 1. Включаем Темную тему для системных элементов окна (если нужно)
+    //    int darkMode = 1;
+    //    Win32Api.DwmSetWindowAttribute( this.Handle, Win32Api.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof( int ) );
+
+    //    // 2. Включаем эффект размытия (Acrylic)
+    //    int backdrop = ( int )Win32Api.BackdropType.Acrylic;
+    //    Win32Api.DwmSetWindowAttribute( this.Handle, Win32Api.DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof( int ) );
+
+    //    // 3. Устанавливаем полупрозрачный фон, чтобы размытие "просочилось" через контрол
+    //    // Если BackColor будет полностью непрозрачным, эффект не будет виден.
+    //    this.BackColor = Color.FromArgb( 30, 20, 20, 20 );
+    //}
+
     protected override void OnMouseClick( MouseEventArgs e )
     {
         base.OnMouseClick( e );

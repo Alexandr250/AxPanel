@@ -3,6 +3,8 @@ using System.Diagnostics;
 using AxPanel.Model;
 using AxPanel.SL;
 using AxPanel.UI.Themes;
+using static AxPanel.Win32Api;
+using System.Runtime.InteropServices;
 
 namespace AxPanel;
 
@@ -39,6 +41,9 @@ public partial class MainView : Form
 
         var theme = new DarkTheme();
         BackColor = theme.WindowStyle.BackColor;
+
+        //this.BackColor = Color.Black; // DWM использует черный как "ключ" для прозрачности Mica
+        //this.AllowTransparency = true; // Только для Form
 
         // Кэшируем настройки, чтобы не читать конфиг при каждом движении окна
         _config = ConfigManager.ReadMainConfig();
@@ -160,6 +165,9 @@ public partial class MainView : Form
         SuspendLayout(); // Приостанавливаем логику макета
         base.OnResize( e );
         ResumeLayout();
+
+        if( _config != null )
+            ConfigManager.SaveMainConfig( _config );
     }
 
     private void HandleExitClick()

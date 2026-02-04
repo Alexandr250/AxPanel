@@ -23,6 +23,7 @@ public class LaunchButtonView : BaseControl
     public DateTime? StartTime { get; set; }
     public bool IsDragging { get; set; } // Флаг для аниматора
     //public string Path { get; set; } // Ключ для мониторинга
+    public int WindowCount { get; set; }
 
     public bool IsSeparator => string.IsNullOrEmpty( BaseControlPath );
 
@@ -225,9 +226,11 @@ public class LaunchButtonView : BaseControl
         }
     }
 
-    public void UpdateState( bool isRunning, float cpuUsage, float ramMb, DateTime? startTime )
+    public void UpdateState( bool isRunning, float cpuUsage, float ramMb, int windowCount, DateTime? startTime )
     {
+        // Добавляем проверку WindowCount != windowCount в общий флаг изменений
         bool changed = IsRunning != isRunning ||
+                       WindowCount != windowCount ||
                        Math.Abs( CpuUsage - cpuUsage ) > 0.5f ||
                        Math.Abs( RamUsage - ramMb ) > 0.5f ||
                        StartTime != startTime;
@@ -237,10 +240,11 @@ public class LaunchButtonView : BaseControl
             IsRunning = isRunning;
             CpuUsage = isRunning ? cpuUsage : 0;
             RamUsage = isRunning ? ramMb : 0;
+            WindowCount = isRunning ? windowCount : 0; // Сбрасываем в 0, если не запущен
             StartTime = isRunning ? startTime : null;
 
             if ( InvokeRequired )
-                BeginInvoke( Invalidate );
+                BeginInvoke( ( Action )Invalidate );
             else
                 Invalidate();
         }

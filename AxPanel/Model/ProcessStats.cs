@@ -1,8 +1,10 @@
 ﻿namespace AxPanel.Model;
 
-public record ProcessStats(
-    bool IsRunning,
-    float CpuUsage,
-    float RamMb,
-    DateTime? StartTime
-);
+public struct ProcessStats
+{
+    public bool IsRunning;
+    public float CpuUsage;
+    public float RamMb;
+    public int WindowCount; // Новое поле для счетчика окон
+    public DateTime? StartTime;
+}

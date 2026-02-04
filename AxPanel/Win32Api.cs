@@ -143,5 +143,78 @@ namespace AxPanel
         /// <returns>True, если дескриптор успешно освобожден.</returns>
         [DllImport( "kernel32.dll", SetLastError = true )]
         public static extern bool CloseHandle( IntPtr hObject );
+
+        [DllImport( "dwmapi.dll" )]
+        public static extern int DwmSetWindowAttribute( IntPtr hwnd, int attr, ref int value, int attrLen );
+
+        // Константы для Windows 11 (Mica, Acrylic)
+        public const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+        public const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
+        public enum BackdropType
+        {
+            None = 1,
+            Mica = 2,
+            Acrylic = 3,
+            Tabbed = 4
+        }
+
+        [StructLayout( LayoutKind.Sequential )]
+        public struct WindowCompositionAttributeData
+        {
+            public WindowCompositionAttribute Attribute;
+            public IntPtr Data;
+            public int SizeOfData;
+        }
+
+        public enum WindowCompositionAttribute
+        {
+            WCA_ACCENT_POLICY = 19 // Этот атрибут отвечает за эффекты размытия
+        }
+
+        [StructLayout( LayoutKind.Sequential )]
+        public struct AccentPolicy
+        {
+            public AccentState AccentState;
+            public int AccentFlags;
+            public int GradientColor;
+            public int AnimationId;
+        }
+
+        public enum AccentState
+        {
+            ACCENT_DISABLED = 0,
+            ACCENT_ENABLE_BLURBEHIND = 3,      // Обычное размытие (Win10)
+            ACCENT_ENABLE_ACRYLICBLURBEHIND = 4 // Acrylic (Win10 1803+)
+        }
+
+        [DllImport( "user32.dll" )]
+        public static extern int SetWindowCompositionAttribute( IntPtr hwnd, ref WindowCompositionAttributeData data );
+
+        public delegate bool EnumWindowsProc( IntPtr hWnd, int lParam );
+
+        [DllImport( "user32.dll" )]
+        public static extern bool EnumWindows( EnumWindowsProc lpEnumFunc, int lParam );
+
+        [DllImport( "user32.dll" )]
+        public static extern uint GetWindowThreadProcessId( IntPtr hWnd, out uint lpdwProcessId );
+
+        [DllImport( "user32.dll" )]
+        public static extern bool IsWindowVisible( IntPtr hWnd );
+
+        public static int GetWindowCount( int processId )
+        {
+            int count = 0;
+            EnumWindows( ( hWnd, lParam ) =>
+            {
+                GetWindowThreadProcessId( hWnd, out uint windowPid );
+                if ( windowPid == processId && IsWindowVisible( hWnd ) )
+                {
+                    count++;
+                }
+                return true;
+            }, 0 );
+            return count;
+        }
     }
 }
