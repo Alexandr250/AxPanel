@@ -79,32 +79,7 @@ public class ButtonDrawer
         g.DrawLine( _theme.ButtonStyle.BorderLightPen, 0, 0, 0, rect.Bottom );
         g.DrawLine( _theme.ButtonStyle.BorderDarkPen, rect.Right, 0, rect.Right, rect.Bottom );
         g.DrawLine( _theme.ButtonStyle.BorderDarkPen, 0, rect.Bottom, rect.Right, rect.Bottom );
-
-        if ( control is LaunchButtonView lb2 && lb2.IsRunning && lb2.WindowCount > 1 )
-        {
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-            int badgeSize = 16;
-            int margin = 2;
-            // Позиционируем в правом верхнем углу
-            Rectangle badgeRect = new Rectangle( control.Width - badgeSize - margin, margin, badgeSize, badgeSize );
-
-            // Рисуем подложку бейджа (темный круг с полупрозрачностью)
-            using var badgeBrush = new SolidBrush( Color.FromArgb( 200, 20, 20, 20 ) );
-            using var borderPen = new Pen( Color.FromArgb( 150, Color.White ), 1f );
-
-            g.FillEllipse( badgeBrush, badgeRect );
-            g.DrawEllipse( borderPen, badgeRect );
-
-            // Рисуем цифру
-            using var font = new Font( "Segoe UI", 7f, FontStyle.Bold );
-            TextRenderer.DrawText( g, lb2.WindowCount.ToString(), font, badgeRect, Color.White,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding );
-
-            // Возвращаем режим без сглаживания для четких линий границ кнопок
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
-        }
-
+        
         // 6. Текст и иконка
         int iconAreaSize = _theme.ButtonStyle.DefaultHeight;
         int reservedRight = ( isCompact || !( control is LaunchButtonView lbtn && lbtn.IsRunning ) ) ? 0 : 100;
@@ -147,6 +122,39 @@ public class ButtonDrawer
             using var runningBrush = new SolidBrush( Color.FromArgb( 0, 120, 215 ) );
             g.FillRectangle( runningBrush, 0, 2, 3, control.Height - 4 );
         }
+
+        //бэдж
+        if ( control is LaunchButtonView { IsRunning: true, WindowCount: > 0 } lb2 )
+        {
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            int badgeSize = 16;
+            int margin = 2;
+            // Позиционируем в правом верхнем углу
+            Rectangle badgeRect = new( margin, margin, badgeSize, badgeSize );
+
+            //// Рисуем подложку бейджа (темный круг с полупрозрачностью)
+            //using var badgeBrush = new SolidBrush( Color.FromArgb( 160, 20, 20, 20 ) );
+            //using var borderPen = new Pen( Color.FromArgb( 150, Color.White ), 1f );
+
+            // Рисуем подложку бейджа (используем системный акцентный синий)
+            using var badgeBrush = new SolidBrush( Color.FromArgb( 200, 0, 120, 215 ) ); //using var badgeBrush = new SolidBrush( Color.FromArgb( 200, 0, 120, 215 ) ); // Синий Windows (System.Drawing.SystemColors.Highlight)
+                                                                                        
+            // Темная окантовка (почти черная, с небольшой прозрачностью)
+            using var borderPen = new Pen( Color.FromArgb( 180, 10, 10, 10 ), 1.5f );
+
+            g.FillEllipse( badgeBrush, badgeRect );
+            g.DrawEllipse( borderPen, badgeRect );
+
+            // Рисуем цифру
+            using var font = new Font( "Segoe UI", 7f, FontStyle.Bold );
+            TextRenderer.DrawText( g, lb2.WindowCount.ToString(), font, badgeRect, Color.White,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding );
+
+            // Возвращаем режим без сглаживания для четких линий границ кнопок
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+        }
+
     }
 
     private void DrawSmallMeter( Graphics g, Rectangle rect, float percent, string text, Color color )

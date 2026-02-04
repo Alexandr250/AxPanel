@@ -50,8 +50,7 @@ namespace AxPanel.SL
                     var fileName = Path.GetFileNameWithoutExtension( path );
 
                     // Ищем процесс по имени файла (как в твоем оригинальном коде)
-                    var process = allProcesses.FirstOrDefault( p =>
-                        p.ProcessName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) );
+                    var process = allProcesses.FirstOrDefault( p => p.ProcessName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) );
 
                     if ( process != null )
                     {
@@ -63,7 +62,9 @@ namespace AxPanel.SL
                                 CpuUsage = GetCpuUsage( path, process.ProcessName ),
                                 RamMb = process.WorkingSet64 / 1024 / 1024,
                                 // Используем новый метод из Win32Api
-                                WindowCount = Win32Api.GetWindowCount( process.Id ),
+                                WindowCount = allProcesses
+                                    .Where( p => p.ProcessName.Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
+                                    .Count( p => p.MainWindowHandle != IntPtr.Zero && Win32Api.IsWindowVisible( p.MainWindowHandle ) ), // Win32Api.GetWindowCount( process.Id ),
                                 StartTime = process.StartTime
                             };
                         }
