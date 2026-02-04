@@ -216,9 +216,9 @@ public partial class MainView : Form
         }
 
         // 3. Текст заголовка (Title)
-        TextRenderer.DrawText( g, "AX-PANEL v1.0", this.Font,
-            new Rectangle( 15, 0, 200, h ), Color.Gray,
-            TextFormatFlags.VerticalCenter | TextFormatFlags.Left );
+        //TextRenderer.DrawText( g, "AX-PANEL v1.0", this.Font,
+        //    new Rectangle( 15, 0, 200, h ), Color.Gray,
+        //    TextFormatFlags.VerticalCenter | TextFormatFlags.Left );
 
         _btnMinRect = new Rectangle( Width - BtnWidth * 2, 0, BtnWidth, h );
         _btnCloseRect = new Rectangle( Width - BtnWidth, 0, BtnWidth, h );

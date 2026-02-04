@@ -3,10 +3,42 @@
     {
       "Items": [
         {
+          "Name": "Work",
+          "FilePath": "",
+          "ClicksCount": 0,
+          "Id": 0,
+          "Height": 0,
+          "IsSeparator": true
+        },
+        {
+          "Name": "Visual Studio",
+          "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
+          "ClicksCount": 43,
+          "Id": 1,
+          "Height": 0,
+          "IsSeparator": false
+        },
+        {
+          "Name": "vivaldi.exe",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+          "ClicksCount": 0,
+          "Id": 2,
+          "Height": 0,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Other",
+          "FilePath": "",
+          "ClicksCount": 0,
+          "Id": 3,
+          "Height": 0,
+          "IsSeparator": true
+        },
+        {
           "Name": "Cube IDE",
           "FilePath": "C:\\ST\\STM32CubeIDE_1.13.1\\STM32CubeIDE\\stm32cubeide.exe",
           "ClicksCount": 0,
-          "Id": 0,
+          "Id": 4,
           "Height": 0,
           "IsSeparator": false
         },
@@ -14,15 +46,7 @@
           "Name": "Embarcadero IDE",
           "FilePath": "D:\\Program Files (x86)\\Embarcadero\\Studio\\23.0\\bin\\bds.exe",
           "ClicksCount": 0,
-          "Id": 1,
-          "Height": 0,
-          "IsSeparator": false
-        },
-        {
-          "Name": "Visual Studio",
-          "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
-          "ClicksCount": 43,
-          "Id": 2,
+          "Id": 5,
           "Height": 0,
           "IsSeparator": false
         },
@@ -30,7 +54,7 @@
           "Name": "Rider",
           "FilePath": "C:\\Program Files\\JetBrains\\JetBrains Rider 2025.1\\bin\\rider64.exe",
           "ClicksCount": 1,
-          "Id": 3,
+          "Id": 6,
           "Height": 0,
           "IsSeparator": false
         },
@@ -38,7 +62,7 @@
           "Name": "QtCreator",
           "FilePath": "C:\\Qt\\Qt5.12.12\\Tools\\QtCreator\\bin\\qtcreator.exe",
           "ClicksCount": 0,
-          "Id": 4,
+          "Id": 7,
           "Height": 0,
           "IsSeparator": false
         },
@@ -46,7 +70,7 @@
           "Name": "Delphi 7",
           "FilePath": "C:\\Program Files (x86)\\Borland\\Delphi7\\Bin\\delphi32.exe",
           "ClicksCount": 0,
-          "Id": 5,
+          "Id": 8,
           "Height": 0,
           "IsSeparator": false
         },
@@ -54,7 +78,7 @@
           "Name": "Lazarus",
           "FilePath": "C:\\lazarus\\lazarus.exe",
           "ClicksCount": 0,
-          "Id": 6,
+          "Id": 9,
           "Height": 0,
           "IsSeparator": false
         },
@@ -62,7 +86,7 @@
           "Name": "VS Code",
           "FilePath": "C:\\Users\\17264\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
           "ClicksCount": 1,
-          "Id": 7,
+          "Id": 10,
           "Height": 0,
           "IsSeparator": false
         },
@@ -70,7 +94,7 @@
           "Name": "WinMerge",
           "FilePath": "C:\\Program Files\\WinMerge\\WinMergeU.exe",
           "ClicksCount": 1,
-          "Id": 8,
+          "Id": 11,
           "Height": 0,
           "IsSeparator": false
         },
@@ -78,7 +102,7 @@
           "Name": "HEX Editor HxD",
           "FilePath": "C:\\Program Files\\HxD\\HxD.exe",
           "ClicksCount": 0,
-          "Id": 9,
+          "Id": 12,
           "Height": 0,
           "IsSeparator": false
         },
@@ -86,7 +110,7 @@
           "Name": "Notepad PP",
           "FilePath": "C:\\Program Files\\Notepad\u002B\u002B\\notepad\u002B\u002B.exe",
           "ClicksCount": 0,
-          "Id": 10,
+          "Id": 13,
           "Height": 0,
           "IsSeparator": false
         },
@@ -94,7 +118,7 @@
           "Name": "Total commander",
           "FilePath": "C:\\Program Files\\Total Commander 9.50\\TOTALCMD64.EXE",
           "ClicksCount": 0,
-          "Id": 11,
+          "Id": 14,
           "Height": 0,
           "IsSeparator": false
         },
@@ -102,7 +126,7 @@
           "Name": "SourceTree",
           "FilePath": "C:\\Users\\17264\\AppData\\Local\\SourceTree\\SourceTree.exe",
           "ClicksCount": 0,
-          "Id": 12,
+          "Id": 15,
           "Height": 0,
           "IsSeparator": false
         },
@@ -110,7 +134,7 @@
           "Name": "SDFViewer.exe",
           "FilePath": "C:\\Program Files (x86)\\Flyhoward\\SDF Viewer\\SDFViewer.exe",
           "ClicksCount": 0,
-          "Id": 13,
+          "Id": 16,
           "Height": 0,
           "IsSeparator": false
         },
@@ -118,7 +142,7 @@
           "Name": "dbeaver.exe",
           "FilePath": "C:\\Users\\17264\\AppData\\Local\\DBeaver\\dbeaver.exe",
           "ClicksCount": 1,
-          "Id": 14,
+          "Id": 17,
           "Height": 0,
           "IsSeparator": false
         },
@@ -126,7 +150,7 @@
           "Name": "Unity.exe",
           "FilePath": "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.46f1\\Editor\\Unity.exe",
           "ClicksCount": 0,
-          "Id": 15,
+          "Id": 18,
           "Height": 0,
           "IsSeparator": false
         },
@@ -134,7 +158,7 @@
           "Name": "EXCEL.EXE",
           "FilePath": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
           "ClicksCount": 0,
-          "Id": 16,
+          "Id": 19,
           "Height": 0,
           "IsSeparator": false
         },
@@ -142,7 +166,7 @@
           "Name": "SQL Server Management Studio 20",
           "FilePath": "C:\\Program Files (x86)\\Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe",
           "ClicksCount": 1,
-          "Id": 17,
+          "Id": 20,
           "Height": 0,
           "IsSeparator": false
         }

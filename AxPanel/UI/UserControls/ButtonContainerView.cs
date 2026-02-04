@@ -18,7 +18,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     private MouseState _mouseState = new();
 
-    public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine();
+    public ILayoutEngine LayoutEngine { get; set; } = new GridLayoutEngine(); // new ListLayoutEngine();
     public IReadOnlyList<LaunchButtonView> Buttons => _buttons;
     public string PanelName { get; set; }
     public int ScrollValue => _scrollValue;
@@ -54,7 +54,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         };
 
         this.DragDrop += ( s, e ) => {
-            var droppedBtn = ( LaunchButtonView )e.Data.GetData( typeof( LaunchButtonView ) );
+            var droppedBtn = ( LaunchButtonView )e.Data?.GetData( typeof( LaunchButtonView ) );
 
             // Если бросили в другой контейнер
             if ( droppedBtn.Parent != this )
@@ -146,7 +146,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     private void CreateButtonControls( List<LaunchItem> items )
     {
         // Сортируем входящие элементы по кликам и ID
-        var ordered = items.OrderByDescending( i => i.ClicksCount ).ThenBy( i => i.Id );
+        var ordered = SortByGroups( items ); // items.OrderByDescending( i => i.ClicksCount ).ThenBy( i => i.Id );
 
         foreach ( var item in ordered )
         {
@@ -194,6 +194,33 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         // После добавления всех кнопок один раз пересчитываем их логическое состояние
         ReorderButtons();
+    }
+
+    private List<LaunchItem> SortByGroups( List<LaunchItem> items )
+    {
+        var result = new List<LaunchItem>();
+        var currentGroup = new List<LaunchItem>();
+
+        foreach ( var item in items )
+        {
+            if ( item.IsSeparator )
+            {
+                if ( currentGroup.Count > 0 )
+                {
+                    result.AddRange( currentGroup.OrderByDescending( i => i.ClicksCount ) );
+                    currentGroup.Clear();
+                }
+                result.Add( item );
+            }
+            else
+            {
+                currentGroup.Add( item );
+            }
+        }
+
+        result.AddRange( currentGroup.OrderByDescending( i => i.ClicksCount ) );
+
+        return result;
     }
 
     #endregion

@@ -3,24 +3,28 @@
   "WorkspaceRootPath": "D:\\projects\\git-source\\AxPanel\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\sl\\processmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\sl\\processmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\mainview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\mainview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\ui\\usercontrols\\buttoncontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\usercontrols\\buttoncontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\gridlayoutengine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\gridlayoutengine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\ui\\usercontrols\\rootcontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\usercontrols\\rootcontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\sl\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\sl\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\sl\\processmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\sl\\processmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\ui\\usercontrols\\buttoncontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\usercontrols\\buttoncontainerview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\sl\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\sl\\configmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -39,10 +43,6 @@
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\drawers\\buttondrawer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\gridlayoutengine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\gridlayoutengine.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\globalanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\globalanimator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -55,7 +55,7 @@
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\usercontrols\\basecontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A7CCE32A-0C6A-4ED4-83C3-A0860AD38855}|AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj|d:\\projects\\git-source\\axpanel\\axpanelwinformstest\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{A7CCE32A-0C6A-4ED4-83C3-A0860AD38855}|AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj|D:\\projects\\git-source\\AxPanel\\axpanelwinformstest\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{A7CCE32A-0C6A-4ED4-83C3-A0860AD38855}|AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj|solutionrelative:axpanelwinformstest\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
@@ -75,10 +75,6 @@
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\sl\\processmonitor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\ui\\elementstyles\\containerstyle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\elementstyles\\containerstyle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|d:\\projects\\git-source\\axpanel\\axpanel\\ui\\mousestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{4CF47F5B-544F-4DD9-86B0-579A7A964625}|AxPanel\\AxPanel.csproj|solutionrelative:axpanel\\ui\\mousestate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -90,7 +86,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 15,
           "Children": [
             {
               "$type": "Bookmark",
@@ -122,8 +118,7 @@
               "RelativeToolTip": "AxPanel\\Contracts\\ILayoutEngine.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-03T09:36:29.314Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-03T09:36:29.314Z"
             },
             {
               "$type": "Document",
@@ -135,8 +130,7 @@
               "RelativeToolTip": "AxPanelWinFormsTest\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-03T09:04:43.376Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-03T09:04:43.376Z"
             },
             {
               "$type": "Document",
@@ -147,8 +141,7 @@
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435]",
               "RelativeToolTip": "AxPanelWinFormsTest\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-03T09:04:29.455Z",
-              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435]"
+              "WhenOpened": "2026-02-03T09:04:29.455Z"
             },
             {
               "$type": "Document",
@@ -160,8 +153,7 @@
               "RelativeToolTip": "AxPanel\\GlobalAnimator.cs",
               "ViewState": "AgIAABYAAAAAAAAAAAAEwCcAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T15:36:55.027Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T15:36:55.027Z"
             },
             {
               "$type": "Document",
@@ -173,18 +165,17 @@
               "RelativeToolTip": "AxPanel\\SL\\ContainerService.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAABYAAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T13:44:31.095Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T13:44:31.095Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "ProcessManager.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\SL\\ProcessManager.cs",
               "RelativeDocumentMoniker": "AxPanel\\SL\\ProcessManager.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\SL\\ProcessManager.cs",
               "RelativeToolTip": "AxPanel\\SL\\ProcessManager.cs",
-              "ViewState": "AgIAAFkAAAAAAAAAAAAEwGgAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAAGAAAABIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T12:53:41.004Z",
               "EditorCaption": ""
@@ -204,18 +195,6 @@
             {
               "$type": "Document",
               "DocumentIndex": 18,
-              "Title": "ContainerStyle.cs",
-              "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\ElementStyles\\ContainerStyle.cs",
-              "RelativeDocumentMoniker": "AxPanel\\UI\\ElementStyles\\ContainerStyle.cs",
-              "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\ElementStyles\\ContainerStyle.cs",
-              "RelativeToolTip": "AxPanel\\UI\\ElementStyles\\ContainerStyle.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T11:24:08.902Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
               "Title": "MouseState.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\MouseState.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\MouseState.cs",
@@ -235,51 +214,50 @@
               "RelativeToolTip": "AxPanel\\UI\\UserControls\\BasePanelControl.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:51:17.97Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:51:17.97Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 2,
               "Title": "GridLayoutEngine.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\GridLayoutEngine.cs",
               "RelativeDocumentMoniker": "AxPanel\\GridLayoutEngine.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\GridLayoutEngine.cs",
               "RelativeToolTip": "AxPanel\\GridLayoutEngine.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAG8AAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T08:18:39.539Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "MainView.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\MainView.cs",
               "RelativeDocumentMoniker": "AxPanel\\MainView.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\MainView.cs",
               "RelativeToolTip": "AxPanel\\MainView.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAADIAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAPMAAAAAAAAAAAAAAPYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T08:09:45.45Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "ButtonContainerView.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\UserControls\\ButtonContainerView.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\UserControls\\ButtonContainerView.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\UserControls\\ButtonContainerView.cs",
               "RelativeToolTip": "AxPanel\\UI\\UserControls\\ButtonContainerView.cs",
-              "ViewState": "AgIAAN8AAAAAAAAAAAAowPAAAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAFcAAAAAAAAAAAAEwGYAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T08:09:45.601Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "LaunchButtonView.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\UserControls\\LaunchButtonView.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\UserControls\\LaunchButtonView.cs",
@@ -287,12 +265,11 @@
               "RelativeToolTip": "AxPanel\\UI\\UserControls\\LaunchButtonView.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAAK4AAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:09:45.605Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:09:45.605Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "ButtonDrawer.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\Drawers\\ButtonDrawer.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\Drawers\\ButtonDrawer.cs",
@@ -300,12 +277,11 @@
               "RelativeToolTip": "AxPanel\\UI\\Drawers\\ButtonDrawer.cs",
               "ViewState": "AgIAAG0AAAAAAAAAAAAEwHQAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:09:45.608Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:09:45.608Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\Program.cs",
               "RelativeDocumentMoniker": "AxPanel\\Program.cs",
@@ -313,18 +289,17 @@
               "RelativeToolTip": "AxPanel\\Program.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAEwA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:09:45.611Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:09:45.611Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "RootContainerView.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\UserControls\\RootContainerView.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\UserControls\\RootContainerView.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\UserControls\\RootContainerView.cs",
               "RelativeToolTip": "AxPanel\\UI\\UserControls\\RootContainerView.cs",
-              "ViewState": "AgIAAHsBAAAAAAAAAAAAABcAAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAAFoAAAAAAAAAAAAEwGUAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T08:09:45.614Z",
               "EditorCaption": ""
@@ -339,12 +314,11 @@
               "RelativeToolTip": "AxPanel\\UI\\UserControls\\BaseControl.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:09:45.617Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:09:45.617Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ConfigManager.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\SL\\ConfigManager.cs",
               "RelativeDocumentMoniker": "AxPanel\\SL\\ConfigManager.cs",
@@ -352,12 +326,11 @@
               "RelativeToolTip": "AxPanel\\SL\\ConfigManager.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T08:09:45.623Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T08:09:45.623Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "ContainerDrawer.cs",
               "DocumentMoniker": "D:\\projects\\git-source\\AxPanel\\AxPanel\\UI\\Drawers\\ContainerDrawer.cs",
               "RelativeDocumentMoniker": "AxPanel\\UI\\Drawers\\ContainerDrawer.cs",
@@ -365,8 +338,7 @@
               "RelativeToolTip": "AxPanel\\UI\\Drawers\\ContainerDrawer.cs",
               "ViewState": "AgIAAEEAAAAAAAAAAAAUwFoAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T09:26:51.372Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-02T09:26:51.372Z"
             }
           ]
         }
