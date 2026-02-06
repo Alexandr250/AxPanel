@@ -17,4 +17,6 @@ public class MainConfig
     public int ContainerHeaderHeight { get; set; }
 
     public int BorderWidth { get; set; }
+
+    public string ThemeFileName { get; set; }
 }

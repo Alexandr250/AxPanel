@@ -1,5 +1,6 @@
 ﻿// ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
+using AxPanel.Model;
 using AxPanel.UI.Drawers;
 using AxPanel.UI.Themes;
 
@@ -16,14 +17,9 @@ public class LaunchButtonView : BaseControl
     private Point _dragStartMousePos; // Позиция мыши в момент нажатия (экранная)
     private Point _dragStartControlPos; // Позиция кнопки в момент нажатия (локальная)
 
-    // Свойства состояния процесса
-    public bool IsRunning { get; set; }
-    public float CpuUsage { get; set; }
-    public float RamUsage { get; set; }
-    public DateTime? StartTime { get; set; }
+    public ProcessStats Stats { get; set; }
+
     public bool IsDragging { get; set; } // Флаг для аниматора
-    //public string Path { get; set; } // Ключ для мониторинга
-    public int WindowCount { get; set; }
 
     public bool IsSeparator => string.IsNullOrEmpty( BaseControlPath );
 
@@ -37,7 +33,7 @@ public class LaunchButtonView : BaseControl
     // Устаревшее, теперь позицией управляет LayoutEngine через контейнер
     public Func<int> RequestPosition;
 
-    public LaunchButtonView() : this( new DarkTheme() ) {}
+    public LaunchButtonView() : this( /*new DarkTheme()*/ new OldTheme() ) {}
 
     public LaunchButtonView( ITheme theme )
     {
@@ -62,8 +58,7 @@ public class LaunchButtonView : BaseControl
 
     protected override void OnPaint( PaintEventArgs e )
     {
-        // Передаем текущий размер кнопки (Width/Height) в отрисовщик
-        _buttonDrawer.Draw( this, _mouseState, _keyboardState, e, IsRunning ? CpuUsage : 0 );
+        _buttonDrawer.Draw( this, _mouseState, _keyboardState, e, Stats.IsRunning ? Stats.CpuUsage : 0 );
     }
 
     protected override void OnMouseEnter( EventArgs e )
@@ -226,22 +221,25 @@ public class LaunchButtonView : BaseControl
         }
     }
 
-    public void UpdateState( bool isRunning, float cpuUsage, float ramMb, int windowCount, DateTime? startTime )
+    public void UpdateState( ProcessStats stats )
     {
         // Добавляем проверку WindowCount != windowCount в общий флаг изменений
-        bool changed = IsRunning != isRunning ||
-                       WindowCount != windowCount ||
-                       Math.Abs( CpuUsage - cpuUsage ) > 0.5f ||
-                       Math.Abs( RamUsage - ramMb ) > 0.5f ||
-                       StartTime != startTime;
+        bool changed = Stats.IsRunning != stats.IsRunning ||
+                       Stats.WindowCount != stats.WindowCount ||
+                       Math.Abs( Stats.CpuUsage - stats.CpuUsage ) > 0.5f ||
+                       Math.Abs( Stats.RamMb - stats.RamMb ) > 0.5f ||
+                       Stats.StartTime != stats.StartTime;
 
         if ( changed )
         {
-            IsRunning = isRunning;
-            CpuUsage = isRunning ? cpuUsage : 0;
-            RamUsage = isRunning ? ramMb : 0;
-            WindowCount = isRunning ? windowCount : 0; // Сбрасываем в 0, если не запущен
-            StartTime = isRunning ? startTime : null;
+            Stats = new ProcessStats()
+            {
+                IsRunning = stats.IsRunning,
+                CpuUsage = stats.IsRunning ? stats.CpuUsage : 0,
+                RamMb = stats.IsRunning ? stats.RamMb : 0,
+                WindowCount = stats.IsRunning ? stats.WindowCount : 0, // Сбрасываем в 0, если не запущен
+                StartTime = stats.IsRunning ? stats.StartTime : null
+            };
 
             if ( InvokeRequired )
                 BeginInvoke( ( Action )Invalidate );

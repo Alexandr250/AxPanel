@@ -1,0 +1,35 @@
+{
+  "WindowStyle": {
+    "BackColor": "#141414",
+    "HeaderColor": "#000069",
+    "HeaderHeight": 30
+  },
+  "ContainerStyle": {
+    "ScrollValueIncrement": 10,
+    "HeaderHeight": 26,
+    "ButtonSize": 16,
+    "ButtonMargin": 3,
+    "BackColor": "#3C3C3C",
+    "Font": "Microsoft Sans Serif, 8,25, Regular",
+    "BorderLightColor": "Black",
+    "BorderDarkColor": "Black",
+    "ButtonSelectedColor": "Crimson",
+    "HeaderColor": "#282828",
+    "ForeColor": "White"
+  },
+  "ButtonStyle": {
+    "DefaultHeight": 36,
+    "DeleteButtonWidth": 50,
+    "SpaceHeight": 1,
+    "MinFont": "Times New Roman, 6, Regular",
+    "BorderLightColor": "#1E1E1E",
+    "BorderDarkColor": "#1E1E1E",
+    "SelectedColor": "#505050",
+    "SelectedAltColor": "#BE5050",
+    "UnselectedColor": "#3C3C3C",
+    "MainFontColor": "White",
+    "AdditionalFontColor": "#969696",
+    "DeleteButtonColor": "#8C8C8C",
+    "DeleteButtonBorderColor": "#505050"
+  }
+}

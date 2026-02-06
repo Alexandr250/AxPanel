@@ -69,30 +69,20 @@ public class ContainerDrawer
     private void DrawPhantom( Graphics g, Rectangle rect, LaunchButtonView btn )
     {
         g.SmoothingMode = SmoothingMode.AntiAlias;
-        int radius = 6; // Радиус скругления
+        int radius = _theme.ContainerStyle.PhantomRadius; // Радиус скругления
 
-        using ( GraphicsPath path = GetRoundedRect( rect, radius ) )
+        using( GraphicsPath path = GetRoundedRect( rect, radius ) )
         {
             // 1. Глубокий фон "ямы"
-            using var bgBrush = new SolidBrush( Color.FromArgb( 50, 0, 0, 0 ) );
-            g.FillPath( bgBrush, path );
+            g.FillPath( _theme.ContainerStyle.PhantomBgBrush, path );
 
-            // 2. Эффект вдавленности (внутренняя тень)
-            // Рисуем темную дугу сверху и слева
-            //using ( var darkPen = new Pen( Color.FromArgb( 120, 0, 0, 0 ), 1.5f ) )
-            //{
-            //    // Обрезаем область рисования только верхней левой частью для тени
-            //    g.SetClip( path );
-            //    g.DrawPath( darkPen, path );
-            //    g.ResetClip();
-            //}
+            //2.Эффект вдавленности( внутренняя тень )
+            g.SetClip( path );
+            g.DrawPath( _theme.ContainerStyle.PhantomShadowPen, path );
+            g.ResetClip();
 
             // 3. Тонкий пунктирный контур
-            using ( var dashPen = new Pen( Color.FromArgb( 90, Color.Black ), 1 ) )
-            {
-                //dashPen.DashStyle = DashStyle.Dash;
-                g.DrawPath( dashPen, path );
-            }
+            g.DrawPath( _theme.ContainerStyle.PhantomDashPen, path );
         }
 
         // 4. Отрисовка контента (иконка и текст)
@@ -113,23 +103,28 @@ public class ContainerDrawer
         // Текст
         if ( !string.IsNullOrEmpty( btn.Text ) )
         {
-            using var font = new Font( "Segoe UI", 7.5f );
-            using var textBrush = new SolidBrush( Color.FromArgb( 110, Color.Gray ) );
-            using var format = new StringFormat
+            using StringFormat format = new()
             {
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Far,
                 Trimming = StringTrimming.EllipsisCharacter
             };
-            Rectangle textRect = new Rectangle( rect.X + 4, rect.Y, rect.Width - 8, rect.Height - 4 );
-            g.DrawString( btn.Text, font, textBrush, textRect, format );
+            Rectangle textRect = new( rect.X + 4, rect.Y, rect.Width - 8, rect.Height - 4 );
+            g.DrawString( btn.Text, _theme.ContainerStyle.PhantomFont, _theme.ContainerStyle.PhantomTextBrush, textRect, format );
         }
     }
 
     // Хелпер для создания скругленного прямоугольника
     private GraphicsPath GetRoundedRect( Rectangle bounds, int radius )
     {
-        GraphicsPath path = new GraphicsPath();
+        GraphicsPath path = new();
+
+        if ( radius <= 0 )
+        {
+            path.AddRectangle( bounds );
+            return path;
+        }
+
         int d = radius * 2;
         path.AddArc( bounds.X, bounds.Y, d, d, 180, 90 );
         path.AddArc( bounds.Right - d, bounds.Y, d, d, 270, 90 );
@@ -152,9 +147,8 @@ public class ContainerDrawer
         g.FillRectangle( _theme.ContainerStyle.ButtonSelectedBrush, deleteRect );
 
         // Крестик
-        using var crossPen = new Pen( Color.White, 1.5f );
         int pad = 5;
-        g.DrawLine( crossPen, x + pad, y + pad, x + buttonSize - pad, y + buttonSize - pad );
-        g.DrawLine( crossPen, x + buttonSize - pad, y + pad, x + pad, y + buttonSize - pad );
+        g.DrawLine( _theme.ContainerStyle.DeleteBtnCrossPen, x + pad, y + pad, x + buttonSize - pad, y + buttonSize - pad );
+        g.DrawLine( _theme.ContainerStyle.DeleteBtnCrossPen, x + buttonSize - pad, y + pad, x + pad, y + buttonSize - pad );
     }
 }

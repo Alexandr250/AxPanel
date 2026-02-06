@@ -38,14 +38,14 @@ partial class Form1
         // 
         launchButton1.Anchor = AnchorStyles.None;
         launchButton1.BaseControlPath = null;
-        launchButton1.CpuUsage = 0F;
+        
         launchButton1.IsDragging = false;
-        launchButton1.IsRunning = false;
+        
         launchButton1.Location = new Point( 12, 12 );
         launchButton1.Name = "launchButton1";
-        launchButton1.RamUsage = 0F;
+        
         launchButton1.Size = new Size( 58, 53 );
-        launchButton1.StartTime = null;
+        
         launchButton1.TabIndex = 0;
         launchButton1.Text = "launchButton1";
         // 

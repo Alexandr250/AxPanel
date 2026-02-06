@@ -22,8 +22,9 @@ public class ContainerService
 
         if ( ProcessManager.Start( btn.BaseControlPath, rusAsAdmin ) )
         {
-            // Мгновенная визуальная отдача
-            btn.IsRunning = true;
+            var currentStats = btn.Stats;
+            currentStats.IsRunning = true;
+            btn.Stats = currentStats;
             btn.Invalidate();
         }
     }

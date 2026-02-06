@@ -93,7 +93,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         {
             if ( btn.BaseControlPath != null && stats.TryGetValue( btn.BaseControlPath, out var s ) )
             {
-                btn.UpdateState( s.IsRunning, s.CpuUsage, s.RamMb, s.WindowCount, s.StartTime );
+                btn.UpdateState( s );
                 changed = true;
             }
         }

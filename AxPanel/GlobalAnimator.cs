@@ -5,6 +5,11 @@ namespace AxPanel;
 
 public class GlobalAnimator : IDisposable
 {
+    // Поля для хранения скорости изменения (velocity)
+    private static float _velocity = 0f;
+    public static float SpringStiffness = 0.15f; // Жесткость
+    public static float SpringDamping = 0.5f;    // Затухание (0.8 - вязко, 0.3 - прыгуче)
+
     private readonly List<IAnimatable> _targets = new();
     private readonly Timer _timer;
     private const float LerpSpeed = 0.25f;
@@ -68,5 +73,17 @@ public class GlobalAnimator : IDisposable
         _timer.Stop();
         _timer.Dispose();
         _targets.Clear();
+    }
+
+    public static float CalculateSpring( float current, float target )
+    {
+        // Рассчитываем силу притяжения к цели
+        float force = ( target - current ) * SpringStiffness;
+
+        // Применяем силу к скорости и добавляем затухание
+        _velocity = ( _velocity + force ) * SpringDamping;
+
+        // Возвращаем новое значение
+        return current + _velocity;
     }
 }

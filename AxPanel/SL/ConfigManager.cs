@@ -1,4 +1,5 @@
 using AxPanel.Model;
+using AxPanel.UI.Themes;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -194,5 +195,15 @@ public class ConfigManager
             container.Items[ i ].Id = i;
 
         return container;
+    }
+
+    public static ITheme? LoadTheme( string fileName )
+    {
+        string path = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
+        if ( !File.Exists( path ) ) 
+            return null;
+
+        string json = File.ReadAllText( path );
+        return JsonSerializer.Deserialize<Theme>( json );
     }
 }

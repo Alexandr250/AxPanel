@@ -38,7 +38,6 @@ partial class Form2
         // 
         axPanelButton1.Location = new Point( 12, 12 );
         axPanelButton1.Name = "axPanelButton1";
-        axPanelButton1.Path = null;
         axPanelButton1.Size = new Size( 147, 38 );
         axPanelButton1.TabIndex = 0;
         axPanelButton1.Text = "axPanelButton1";

@@ -10,6 +10,7 @@ namespace AxPanel;
 
 public partial class MainView : Form
 {
+    private ITheme _theme;
     private Rectangle _btnMinRect;
     private Rectangle _btnCloseRect;
     private int _hoverBtn = 0; // 0 - нет, 1 - сворачивание, 2 - закрытие
@@ -39,8 +40,7 @@ public partial class MainView : Form
         InitializeComponent();
         DoubleBuffered = true; // Убирает мерцание
 
-        var theme = new DarkTheme();
-        BackColor = theme.WindowStyle.BackColor;
+        
 
         //this.BackColor = Color.Black; // DWM использует черный как "ключ" для прозрачности Mica
         //this.AllowTransparency = true; // Только для Form
@@ -50,7 +50,10 @@ public partial class MainView : Form
         _headerHeight = _config?.HeaderHeight ?? 30;
         _borderWidth = _config?.BorderWidth ?? 5;
 
-        MainContainer = new RootContainerView( theme );
+        _theme = ConfigManager.LoadTheme( _config.ThemeFileName ); //new OldTheme(); // new DarkTheme();
+        BackColor = _theme.WindowStyle.BackColor;
+
+        MainContainer = new RootContainerView( _theme );
         MainContainer.OnSaveConfigRequered += () =>
         {
             ConfigManager.SaveMainConfig( _config );
@@ -212,13 +215,13 @@ public partial class MainView : Form
         int h = _headerHeight;
 
         // 1. Рисуем фон заголовка (чуть светлее основного фона для объема)
-        using ( var headerBrush = new SolidBrush( Color.FromArgb( 45, 45, 48 ) ) )
+        using ( var headerBrush = new SolidBrush( _theme.WindowStyle.HeaderColor /*Color.FromArgb( 45, 45, 48 ) )*/ ) )
         {
             g.FillRectangle( headerBrush, 0, 0, this.Width, h );
         }
 
         // 2. Нижняя граница-разделитель
-        using ( var pen = new Pen( Color.FromArgb( 60, 60, 60 ) ) )
+        using ( var pen = new Pen( /* Color.FromArgb( 60, 60, 60 ) */ _theme.WindowStyle.SeparatorColor ) )
         {
             g.DrawLine( pen, 0, h - 1, this.Width, h - 1 );
         }
@@ -232,16 +235,23 @@ public partial class MainView : Form
         _btnCloseRect = new Rectangle( Width - BtnWidth, 0, BtnWidth, h );
 
         // Кнопка Свернуть
-        if ( _hoverBtn == 1 ) 
-            e.Graphics.FillRectangle( new SolidBrush( Color.FromArgb( 40, Color.White ) ), _btnMinRect );
+        if ( _hoverBtn == 1 )
+        {
+            g.FillRectangle( _theme.WindowStyle.MinBtnHoverBrush, _btnMinRect );
+            DrawPressedBorder( g, _btnMinRect, _theme ); // Метод для отрисовки впадины
+        }
 
-        using ( var p = new Pen( Color.White, 1 ) )
+        using ( var p = new Pen( _theme.WindowStyle.ControlIconColor, 1 ) )
             e.Graphics.DrawLine( p, _btnMinRect.X + 17, h / 2, _btnMinRect.X + 28, h / 2 );
 
         // Кнопка Закрыть
-        if ( _hoverBtn == 2 ) e.Graphics.FillRectangle( Brushes.Crimson, _btnCloseRect );
-        
-        using ( var p = new Pen( Color.White, 1 ) )
+        if ( _hoverBtn == 2 )
+        {
+            g.FillRectangle( _theme.WindowStyle.CloseBtnHoverBrush, _btnCloseRect );
+            DrawPressedBorder( g, _btnCloseRect, _theme );
+        }
+
+        using ( var p = new Pen( _theme.WindowStyle.ControlIconColor, 1 ) )
         {
             int cx = _btnCloseRect.X + BtnWidth / 2;
             int cy = h / 2;
@@ -252,7 +262,6 @@ public partial class MainView : Form
         // Если визуальный альфа-канал близок к нулю, ничего не рисуем (экономия ресурсов)
         if ( _leftClicksCount <= 0 || _visualAlpha < 0.05f ) 
             return;
-
         
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
@@ -267,13 +276,36 @@ public partial class MainView : Form
             bool isActive = i < _leftClicksCount;
             int alpha = ( int )( ( isActive ? 255 : 60 ) * _visualAlpha );
 
-            using var tempBrush = new SolidBrush( Color.FromArgb( alpha, Color.OrangeRed ) );
+            using var tempBrush = new SolidBrush( Color.FromArgb( alpha, _theme.WindowStyle.ExitIndicatorColor ) );
             g.FillEllipse( tempBrush, x + ( i * ( dotSize + gap ) ), y, dotSize, dotSize );
         }
 
         // Отрисовка текста
-        using var tempTextBrush = new SolidBrush( Color.FromArgb( ( int )( 150 * _visualAlpha ), Color.White ) );
+        using var tempTextBrush = new SolidBrush( Color.FromArgb( ( int )( 150 * _visualAlpha ), _theme.WindowStyle.TitleColor ) );
         g.DrawString( $"ВЫХОД: {_leftClicksCount}/{LeftClicksToExit}", Font, tempTextBrush, x + 45, y - 4 );
+        
+        if ( _theme.WindowStyle.BorderWidth > 0 )
+        {
+            // 1. Внешний светлый контур (Блик)
+            // Рисуем сверху и слева
+            e.Graphics.DrawLine( _theme.WindowStyle.WindowBorderLightPen, 0, 0, Width, 0 );
+            e.Graphics.DrawLine( _theme.WindowStyle.WindowBorderLightPen, 0, 0, 0, Height );
+
+            // 2. Внешний темный контур (Тень)
+            // Рисуем снизу и справа
+            e.Graphics.DrawLine( _theme.WindowStyle.WindowBorderDarkPen, 0, Height - 1, Width, Height - 1 );
+            e.Graphics.DrawLine( _theme.WindowStyle.WindowBorderDarkPen, Width - 1, 0, Width - 1, Height );
+        }
+    }
+
+    private void DrawPressedBorder( Graphics g, Rectangle rect, ITheme theme )
+    {
+        // Тень сверху-слева (вдавленность)
+        g.DrawLine( theme.WindowStyle.ControlBtnBorderDarkPen, rect.X, rect.Y, rect.Right - 1, rect.Y );
+        g.DrawLine( theme.WindowStyle.ControlBtnBorderDarkPen, rect.X, rect.Y, rect.X, rect.Bottom - 1 );
+        // Свет снизу-справа
+        g.DrawLine( theme.WindowStyle.ControlBtnBorderLightPen, rect.X, rect.Bottom - 1, rect.Right - 1, rect.Bottom - 1 );
+        g.DrawLine( theme.WindowStyle.ControlBtnBorderLightPen, rect.Right - 1, rect.Y, rect.Right - 1, rect.Bottom - 1 );
     }
 
     protected override void WndProc( ref Message m )

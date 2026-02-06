@@ -12,28 +12,28 @@ public partial class Form1 : Form
     {
         InitializeComponent();
 
-        MainModel panelModel = ConfigManager.ReadModel();
+        //MainModel panelModel = ConfigManager.ReadModel();
 
-        foreach ( ContainerItem container in panelModel.Containers )
-        {
-            ButtonContainerView uiContainer = axPanelMainContainer1.AddContainer( container.Name, container.Items );
-            uiContainer.ItemCollectionChanged += list =>
-            {
-                if( list is { Count: > 0 } )
-                    container.Items.AddRange( list );
+        //foreach ( ContainerItem container in panelModel.Containers )
+        //{
+        //    ButtonContainerView uiContainer = axPanelMainContainer1.AddContainer( container.Name, container.Items );
+        //    uiContainer.ItemCollectionChanged += list =>
+        //    {
+        //        if( list is { Count: > 0 } )
+        //            container.Items.AddRange( list );
 
-                ConfigManager.SaveItemsConfig( panelModel );
-            };
-        }
+        //        ConfigManager.SaveItemsConfig( panelModel );
+        //    };
+        //}
     }
 
     private void Form1_KeyDown( object sender, KeyEventArgs e )
     {
-        axPanelMainContainer1.RaiseKeyDown( e );
+       // axPanelMainContainer1.RaiseKeyDown( e );
     }
 
     private void Form1_KeyUp( object sender, KeyEventArgs e )
     {
-        axPanelMainContainer1.RaiseKeyUp( e );
+        //axPanelMainContainer1.RaiseKeyUp( e );
     }
 }

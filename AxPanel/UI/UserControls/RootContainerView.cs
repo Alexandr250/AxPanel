@@ -1,7 +1,6 @@
 ﻿using AxPanel.Model;
 using AxPanel.SL;
 using AxPanel.UI.Themes;
-using System.Diagnostics;
 
 namespace AxPanel.UI.UserControls;
 
@@ -45,7 +44,7 @@ public class RootContainerView : Panel
     {
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _backBrush = new SolidBrush( _theme.WindowStyle.BackColor );
-        _footerBrush = new SolidBrush( Color.FromArgb( 45, 45, 48 ) );
+        _footerBrush = new SolidBrush( _theme.WindowStyle.FooterColor );
 
         InitFooterButtons();
 
@@ -69,18 +68,15 @@ public class RootContainerView : Panel
 
         // Кнопка Выключения
         x -= btnWidth;
-        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
-            ProcessManager.Shutdown, "Выключение") );
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ), ProcessManager.Shutdown, "Выключение") );
 
         // Кнопка Перезагрузки
         x -= btnWidth;
-        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
-            ProcessManager.Restart, "Перезагрузка") );
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ), ProcessManager.Restart, "Перезагрузка") );
 
         // Кнопка Спящего режима
         x -= btnWidth;
-        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ),
-            ProcessManager.Sleep, "Спящий режим") );
+        _footerButtons.Add( (new Rectangle( x, Height - _footerHeight, btnWidth, _footerHeight ), ProcessManager.Sleep, "Спящий режим") );
     }
 
 
@@ -270,23 +266,6 @@ public class RootContainerView : Panel
         return new Rectangle( x, Height - _footerHeight, actualWidth, _footerHeight );
     }
 
-    //protected override void OnHandleCreated( EventArgs e )
-    //{
-    //    base.OnHandleCreated( e );
-
-    //    // 1. Включаем Темную тему для системных элементов окна (если нужно)
-    //    int darkMode = 1;
-    //    Win32Api.DwmSetWindowAttribute( this.Handle, Win32Api.DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkMode, sizeof( int ) );
-
-    //    // 2. Включаем эффект размытия (Acrylic)
-    //    int backdrop = ( int )Win32Api.BackdropType.Acrylic;
-    //    Win32Api.DwmSetWindowAttribute( this.Handle, Win32Api.DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof( int ) );
-
-    //    // 3. Устанавливаем полупрозрачный фон, чтобы размытие "просочилось" через контрол
-    //    // Если BackColor будет полностью непрозрачным, эффект не будет виден.
-    //    this.BackColor = Color.FromArgb( 30, 20, 20, 20 );
-    //}
-
     protected override void OnMouseClick( MouseEventArgs e )
     {
         base.OnMouseClick( e );
@@ -389,9 +368,6 @@ public class RootContainerView : Panel
         string[] icons = { "\uE7E8", "\uE777", "\uE708" };
         string[] texts = { "Завершение работы", "Перезагрузка", "Спящий режим" };
 
-        using var iconFont = new Font( "Segoe MDL2 Assets", 10 );
-        using var textFont = new Font( "Segoe UI", 9f );
-
         for ( int i = 0; i < 3; i++ )
         {
             Rectangle btnRect = GetFooterBtnRect( i );
@@ -400,29 +376,35 @@ public class RootContainerView : Panel
             // 1. Подсветка фона
             if ( isHovered )
             {
-                Color hoverColor = ( i == 0 ) ? Color.FromArgb( 100, 232, 17, 35 ) : Color.FromArgb( 50, 255, 255, 255 );
+                Color hoverColor = ( i == 0 ) ? _theme.WindowStyle.FooterCloseBtnHoverColor : _theme.WindowStyle.FooterBtnHoverColor;
                 using var brush = new SolidBrush( hoverColor );
                 g.FillRectangle( brush, btnRect );
+
+                g.DrawLine( _theme.WindowStyle.FooterBtnBorderDarkPen, btnRect.X, btnRect.Y, btnRect.Right - 1, btnRect.Y );
+                g.DrawLine( _theme.WindowStyle.FooterBtnBorderDarkPen, btnRect.X, btnRect.Y, btnRect.X, btnRect.Bottom - 1 );
+                // Свет снизу-справа
+                g.DrawLine( _theme.WindowStyle.FooterBtnBorderLightPen, btnRect.X, btnRect.Bottom - 1, btnRect.Right - 1, btnRect.Bottom - 1 );
+                g.DrawLine( _theme.WindowStyle.FooterBtnBorderLightPen, btnRect.Right - 1, btnRect.Y, btnRect.Right - 1, btnRect.Bottom - 1 );
             }
 
             // 2. Отрисовка контента
             if ( isHovered )
             {
                 // Рисуем текст по центру (иконку можно скрыть или сдвинуть влево)
-                TextRenderer.DrawText( g, texts[ i ], textFont, btnRect, Color.White,
+                TextRenderer.DrawText( g, texts[ i ], _theme.WindowStyle.FooterTextFont, btnRect, _theme.WindowStyle.FooterTextColor,
                     TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter | TextFormatFlags.EndEllipsis );
             }
             else
             {
                 // Рисуем только иконку, когда мышь далеко
-                TextRenderer.DrawText( g, icons[ i ], iconFont, btnRect, Color.White,
+                TextRenderer.DrawText( g, icons[ i ], _theme.WindowStyle.FooterIconFont, btnRect, _theme.WindowStyle.FooterTextColor,
                     TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter );
             }
 
             // 3. Разделитель
             if ( i < 2 )
             {
-                using var linePen = new Pen( Color.FromArgb( 40, 255, 255, 255 ) );
+                using var linePen = new Pen( _theme.WindowStyle.FooterSeparatorColor );
                 g.DrawLine( linePen, btnRect.Right - 1, btnRect.Y + 5, btnRect.Right - 1, btnRect.Bottom - 5 );
             }
         }

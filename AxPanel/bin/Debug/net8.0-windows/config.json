@@ -1,10 +1,11 @@
 {
-  "Top": 15,
-  "Left": 1584,
-  "Width": 320,
-  "Height": 1022,
+  "Top": 8,
+  "Left": 1653,
+  "Width": 256,
+  "Height": 1031,
   "ScroolValueIncrement": 0,
   "HeaderHeight": 30,
   "ContainerHeaderHeight": 0,
-  "BorderWidth": 5
+  "BorderWidth": 5,
+  "ThemeFileName": "bio-hazard.json"
 }

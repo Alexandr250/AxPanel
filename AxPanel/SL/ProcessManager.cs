@@ -58,33 +58,28 @@ public static class ProcessManager
 
     public static void Shutdown()
     {
-        //Process.Start( "shutdown", "/s /t 0" );
+        int timeToShutdown = 30;
 
         Thread.Sleep( 200 );
-        if( MessageBox.Show( "Выключить копьютер? Будет дано 60 секунд на сохранение файлов.", "Выключение компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+        if( MessageBox.Show( $"Выключить копьютер? Будет дано {timeToShutdown} секунд на сохранение файлов.", "Выключение компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
         {
-            // MessageBox.Show( "Shutdown" );
-            // Process.Start( "shutdown", "/s /t 60" );
-
-            Process.Start( new ProcessStartInfo( "shutdown", "/s /t 60 /c \"Сохраните работу! Автоматическое выключение через 60 секунд.\"" )
+            Process.Start( new ProcessStartInfo( "shutdown", $"/s /t {timeToShutdown} /c \"Сохраните работу! Автоматическое выключение через {timeToShutdown} секунд.\"" )
             {
                 CreateNoWindow = true,
                 UseShellExecute = false
             } );
         }
     }
-    //public static void Restart() => Process.Start( "shutdown", "/r /t 30" );
+
     public static void Restart()
     {
-        //Process.Start( "shutdown", "/r /t 0" );
+        int timeToShutdown = 30;
+
         Thread.Sleep( 200 );
 
         if ( MessageBox.Show( "Перезагрузить компьютер копьютер?", "Перезагрузка компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
         {
-            //MessageBox.Show( "Restart" );
-            // Process.Start( "shutdown", "/r /t 60 /c \"Сохраните работу! Автоматическое выключение через 60 секунд.\"" );
-
-            Process.Start( new ProcessStartInfo( "shutdown", "/r /t 60 /c \"Перезагрузка через 60 секунд. Сохраните важные документы!\"" )
+            Process.Start( new ProcessStartInfo( "shutdown", $"/r /t {timeToShutdown} /c \"Перезагрузка через {timeToShutdown} секунд. Сохраните важные документы!\"" )
             {
                 CreateNoWindow = true,
                 UseShellExecute = false
