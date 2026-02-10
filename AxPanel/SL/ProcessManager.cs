@@ -61,7 +61,7 @@ public static class ProcessManager
         int timeToShutdown = 30;
 
         Thread.Sleep( 200 );
-        if( MessageBox.Show( $"Выключить копьютер? Будет дано {timeToShutdown} секунд на сохранение файлов.", "Выключение компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+        if( MessageBox.Show( $"Выключить компьютер? Будет дано {timeToShutdown} секунд на сохранение файлов.", "Выключение компьютера", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
         {
             Process.Start( new ProcessStartInfo( "shutdown", $"/s /t {timeToShutdown} /c \"Сохраните работу! Автоматическое выключение через {timeToShutdown} секунд.\"" )
             {
@@ -100,7 +100,7 @@ public static class ProcessManager
         }
         else
         {
-            if( MessageBox.Show( "Перевести копьютер в спящий режим? \r\n Любое приложение может прервать процесс (например, если открыт несохраненный документ).", "Спящий режим", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
+            if( MessageBox.Show( "Перевести компьютер в спящий режим? \r\n Любое приложение может прервать процесс (например, если открыт несохраненный документ).", "Спящий режим", MessageBoxButtons.YesNo, MessageBoxIcon.Question ) == DialogResult.Yes )
             {
                 Application.SetSuspendState( PowerState.Suspend, false, false );
             }

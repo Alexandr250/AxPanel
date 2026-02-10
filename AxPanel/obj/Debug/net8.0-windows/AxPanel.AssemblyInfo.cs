@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AxPanel")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f60c6182ee022434bfb0ac69bd78d42e0ecdddba")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+89a61dfca7f79de7269a3548df2d1140c2a0ddc6")]
 [assembly: System.Reflection.AssemblyProductAttribute("AxPanel")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AxPanel")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

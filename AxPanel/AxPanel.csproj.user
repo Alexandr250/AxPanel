@@ -7,6 +7,9 @@
     <Compile Update="UI\UserControls\ButtonContainerView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="UI\UserControls\DragIconOverlay.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="UI\UserControls\RootContainerView.cs">
       <SubType>Component</SubType>
     </Compile>

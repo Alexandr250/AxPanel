@@ -216,5 +216,30 @@ namespace AxPanel
             }, 0 );
             return count;
         }
+
+        [DllImport( "user32.dll" )]
+        public static extern bool ChangeWindowMessageFilterEx( IntPtr hWnd, uint msg, uint action, ref CHANGEFILTERSTRUCT pChangeFilterStruct );
+
+        public struct CHANGEFILTERSTRUCT
+        {
+            public uint cbSize;
+            public uint ExtStatus;
+        }
+
+        public const uint WM_DROPFILES = 0x0233;
+        public const uint WM_COPYDATA = 0x004A;
+        public const uint MSGFLT_ALLOW = 1;
+
+        [DllImport( "shell32.dll" )]
+        public static extern void DragAcceptFiles( IntPtr hWnd, bool fAccept );
+
+        [DllImport( "shell32.dll" )]
+        public static extern uint DragQueryFile( IntPtr hDrop, uint iFile, [Out] StringBuilder lpszFile, uint cch );
+
+        [DllImport( "ole32.dll" )]
+        public static extern int RevokeDragDrop( IntPtr hwnd );
+
+        [DllImport( "ole32.dll" )]
+        public static extern int RegisterDragDrop( IntPtr hwnd, IDropTarget pDropTarget );
     }
 }

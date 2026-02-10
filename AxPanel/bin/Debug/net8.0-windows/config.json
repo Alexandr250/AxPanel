@@ -1,11 +1,13 @@
 {
-  "Top": 8,
-  "Left": 1653,
+  "Top": 1,
+  "Left": 1644,
   "Width": 256,
   "Height": 1031,
   "ScroolValueIncrement": 0,
   "HeaderHeight": 30,
   "ContainerHeaderHeight": 0,
   "BorderWidth": 5,
-  "ThemeFileName": "bio-hazard.json"
+  "ThemeFileName": "win95.json",
+  "ItemsConfig": "test-items-config.json",
+  "LayoutMode": "Grid"
 }

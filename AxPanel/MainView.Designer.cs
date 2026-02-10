@@ -42,14 +42,13 @@ partial class MainView
         // 
         // MainView
         // 
-        AutoScaleDimensions = new SizeF( 10F, 25F );
+        AutoScaleDimensions = new SizeF( 7F, 15F );
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(     64,     64,     64 );
-        ClientSize = new Size( 353, 578 );
+        ClientSize = new Size( 247, 347 );
         FormBorderStyle = FormBorderStyle.None;
-        Margin = new Padding( 4, 5, 4, 5 );
         Name = "MainView";
-        Padding = new Padding( 0, 50, 0, 0 );
+        Padding = new Padding( 0, 30, 0, 0 );
         StartPosition = FormStartPosition.Manual;
         Text = "MainPanel";
         ResumeLayout( false );

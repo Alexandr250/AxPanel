@@ -1,0 +1,200 @@
+{
+  "Containers": [
+    {
+      "Items": [
+        {
+          "Name": "Visual Studio",
+          "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
+          "ClicksCount": 4,
+          "Id": 0,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Unity.exe",
+          "FilePath": "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.46f1\\Editor\\Unity.exe",
+          "ClicksCount": 3,
+          "Id": 1,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "EXCEL.EXE",
+          "FilePath": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
+          "ClicksCount": 2,
+          "Id": 2,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "bio-hazard.json",
+          "FilePath": "D:\\projects\\git-source\\AxPanel\\AxPanel\\bin\\Debug\\net8.0-windows\\bio-hazard.json",
+          "ClicksCount": 1,
+          "Id": 3,
+          "Height": 52,
+          "IsSeparator": false
+        }
+      ],
+      "Name": "\u041F\u0440\u043E\u0433\u0440\u0430\u043C\u043C\u044B",
+      "Type": 0
+    },
+    {
+      "Items": [
+        {
+          "Name": "stepper.exe",
+          "FilePath": "D:\\CersysAnalytic\\Cersys.Stepper\\stepper.exe",
+          "ClicksCount": 19,
+          "Id": 0,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Acrobat.exe",
+          "FilePath": "C:\\Program Files (x86)\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe",
+          "ClicksCount": 18,
+          "Id": 1,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "vivaldi.exe",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+          "ClicksCount": 17,
+          "Id": 2,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "PDFXCview.exe",
+          "FilePath": "C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXCview.exe",
+          "ClicksCount": 16,
+          "Id": 3,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "SolarLS.Lab.exe",
+          "FilePath": "D:\\Solar LS\\SolarLS.Lab\\SolarLS.Lab.exe",
+          "ClicksCount": 15,
+          "Id": 4,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSCapture.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Capture\\FSCapture.exe",
+          "ClicksCount": 14,
+          "Id": 5,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSViewer.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Image Viewer\\FSViewer.exe",
+          "ClicksCount": 13,
+          "Id": 6,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Thorlabs Optical Power Monitor.exe",
+          "FilePath": "D:\\trol\\OPM\\Thorlabs Optical Power Monitor.exe",
+          "ClicksCount": 12,
+          "Id": 7,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "qbittorrent.exe",
+          "FilePath": "C:\\Program Files\\qBittorrent\\qbittorrent.exe",
+          "ClicksCount": 11,
+          "Id": 8,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "PlanetVPN.exe",
+          "FilePath": "C:\\Program Files (x86)\\PlanetVPN\\PlanetVPN.exe",
+          "ClicksCount": 10,
+          "Id": 9,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Bitrix24.exe",
+          "FilePath": "C:\\Program Files (x86)\\Bitrix24\\Bitrix24.exe",
+          "ClicksCount": 9,
+          "Id": 10,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "OpenVPNConnect.exe",
+          "FilePath": "C:\\Program Files\\OpenVPN Connect\\OpenVPNConnect.exe",
+          "ClicksCount": 8,
+          "Id": 11,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "LINQPad8.exe",
+          "FilePath": "C:\\Program Files\\LINQPad8\\LINQPad8.exe",
+          "ClicksCount": 7,
+          "Id": 12,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Tor",
+          "FilePath": "D:\\Tor Browser\\Browser\\firefox.exe",
+          "ClicksCount": 6,
+          "Id": 13,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "MaxView.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone MaxView\\MaxView.exe",
+          "ClicksCount": 5,
+          "Id": 14,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSResizer.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Photo Resizer\\FSResizer.exe",
+          "ClicksCount": 4,
+          "Id": 15,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "palemoon.exe",
+          "FilePath": "C:\\Program Files\\Pale Moon\\palemoon.exe",
+          "ClicksCount": 3,
+          "Id": 16,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "x32dbg.exe",
+          "FilePath": "D:\\Downloads\\x64dbg\\release\\x32\\x32dbg.exe",
+          "ClicksCount": 2,
+          "Id": 17,
+          "Height": 52,
+          "IsSeparator": false
+        },
+        {
+          "Name": "x64dbg.exe",
+          "FilePath": "D:\\Downloads\\x64dbg\\release\\x64\\x64dbg.exe",
+          "ClicksCount": 1,
+          "Id": 18,
+          "Height": 52,
+          "IsSeparator": false
+        }
+      ],
+      "Name": "Desktop",
+      "Type": 0
+    }
+  ]
+}

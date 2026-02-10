@@ -11,8 +11,8 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
-        MainConfig? config = ConfigManager.ReadMainConfig();
-        MainModel panelModel = ConfigManager.ReadModel();
+        MainConfig? config = ConfigManager.GetMainConfig();
+        MainModel panelModel = ConfigManager.GetModel();
 
         MainView view = new();
         view.MainModel = panelModel;
@@ -48,10 +48,24 @@ internal static class Program
             foreach ( ContainerItem containerItem in panelModel.Containers )
             {
                 ButtonContainerView uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
+                //uiContainer.ItemCollectionChanged += list =>
+                //{
+                //    if( list != null )
+                //        containerItem.Items.AddRange( list );
+                //    ConfigManager.SaveItemsConfig( panelModel );
+                //};
                 uiContainer.ItemCollectionChanged += list =>
                 {
-                    if( list != null )
-                        containerItem.Items.AddRange( list );
+                    // 1. Если list == null, значит это промежуточное перемещение 
+                    // (например, кнопка просто пролетает над другой). Ничего не сохраняем.
+                    if ( list == null ) 
+                        return;
+
+                    // 2. Если пришел заполненный список — это ФИНАЛЬНЫЙ порядок (после MouseUp или DragDrop)
+                    // Просто заменяем старый список в модели на новый
+                    containerItem.Items = list;
+
+                    // 3. Теперь сохраняем актуальную модель
                     ConfigManager.SaveItemsConfig( panelModel );
                 };
             }

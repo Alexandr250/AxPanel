@@ -40,20 +40,18 @@ public partial class MainView : Form
         InitializeComponent();
         DoubleBuffered = true; // Убирает мерцание
 
-        
-
         //this.BackColor = Color.Black; // DWM использует черный как "ключ" для прозрачности Mica
         //this.AllowTransparency = true; // Только для Form
 
         // Кэшируем настройки, чтобы не читать конфиг при каждом движении окна
-        _config = ConfigManager.ReadMainConfig();
+        _config = ConfigManager.GetMainConfig();
         _headerHeight = _config?.HeaderHeight ?? 30;
         _borderWidth = _config?.BorderWidth ?? 5;
 
-        _theme = ConfigManager.LoadTheme( _config.ThemeFileName ); //new OldTheme(); // new DarkTheme();
+        _theme = ConfigManager.LoadTheme( _config.ThemeFileName );
         BackColor = _theme.WindowStyle.BackColor;
 
-        MainContainer = new RootContainerView( _theme );
+        MainContainer = new RootContainerView( _theme, _config );
         MainContainer.OnSaveConfigRequered += () =>
         {
             ConfigManager.SaveMainConfig( _config );
@@ -78,26 +76,23 @@ public partial class MainView : Form
 
     private void UpdateContainerBounds()
     {
-        if ( MainContainer == null ) return;
+        if ( MainContainer == null ) 
+            return;
 
-        // Читаем конфиг( предположим, он доступен через ConfigManager или поле )
-
-        var config = ConfigManager.ReadMainConfig();
+        var config = ConfigManager.GetMainConfig();
 
         int headerHeight = config?.HeaderHeight ?? 30;
         int borderWidth = config?.BorderWidth ?? 5;
 
         _btnMinRect = new Rectangle( ClientSize.Width - BtnWidth * 2, 0, BtnWidth, headerHeight );
         _btnCloseRect = new Rectangle( ClientSize.Width - BtnWidth, 0, BtnWidth, headerHeight );
-
-
+        
         MainContainer.Top = headerHeight;
         MainContainer.Left = borderWidth;
-        MainContainer.Width = ClientSize.Width - ( borderWidth * 2 ); 
+        MainContainer.Width = ClientSize.Width - borderWidth * 2; 
         MainContainer.Height = ClientSize.Height - headerHeight - borderWidth;
     }
 
-    // Нативное перемещение (заменяет ваш MouseMove)
     protected override void OnMouseDown( MouseEventArgs e )
     {
         base.OnMouseDown( e );

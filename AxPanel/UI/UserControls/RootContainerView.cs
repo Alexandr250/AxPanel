@@ -12,6 +12,7 @@ public class RootContainerView : Panel
 
     private readonly System.Windows.Forms.Timer _animationTimer;
     private readonly ITheme _theme;
+    private readonly MainConfig _mainConfig;
     private readonly Brush _backBrush;
 
     private ButtonContainerView _selected;
@@ -40,9 +41,10 @@ public class RootContainerView : Panel
         }
     }
 
-    public RootContainerView( ITheme theme )
+    public RootContainerView( ITheme theme, MainConfig mainConfig )
     {
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
+        _mainConfig = mainConfig;
         _backBrush = new SolidBrush( _theme.WindowStyle.BackColor );
         _footerBrush = new SolidBrush( _theme.WindowStyle.FooterColor );
 
@@ -82,7 +84,7 @@ public class RootContainerView : Panel
 
     public ButtonContainerView AddContainer( string name, List<LaunchItem>? items )
     {
-        var container = new ButtonContainerView( _theme )
+        var container = new ButtonContainerView( _theme, _mainConfig )
         {
             PanelName = name,
             BaseControlPath = name,
@@ -101,7 +103,8 @@ public class RootContainerView : Panel
 
         if ( Selected == null ) 
             Selected = container;
-        else ArrangeContainers(); // Мгновенная расстановка при добавлении
+        else
+            ArrangeContainers();
 
         // Привязываем запуск одиночного процесса
         container.ProcessStartRequested += btn =>
@@ -132,7 +135,25 @@ public class RootContainerView : Panel
             }
         };
 
-        container.ItemCollectionChanged += _ => UpdateGlobalMonitorPaths();
+        container.ItemCollectionChanged += ( items ) =>
+        {
+            if ( items != null )
+            {
+                // 1. Получаем живую ссылку на модель из кэша (тот самый static _cachedModel)
+                var model = ConfigManager.GetModel();
+
+                // 2. Находим нужный контейнер по имени
+                var target = model.Containers.FirstOrDefault( c => c.Name == container.PanelName );
+                if ( target != null )
+                {
+                    target.Items = items; // Заменяем старые данные новыми
+
+                    // 3. Вызываем сохранение
+                    OnSaveConfigRequered?.Invoke();
+                }
+            }
+            UpdateGlobalMonitorPaths();
+        };
 
         // Регистрируем контейнер в аниматоре прямо здесь
         _animator.Register( container );
@@ -421,7 +442,7 @@ public class RootContainerView : Panel
 
             try
             {
-                var config = ConfigManager.ReadMainConfig();
+                var config = ConfigManager.GetMainConfig();
                 if ( config != null )
                 {
                     headerHeight = config.HeaderHeight;

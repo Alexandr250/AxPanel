@@ -1,45 +1,70 @@
 using AxPanel.Model;
 using AxPanel.UI.Themes;
+using Microsoft.VisualBasic.Devices;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 
 namespace AxPanel.SL;
 
 public class ConfigManager
 {
-    private const string ItemsConfigFile = "items-config.json";
-    private const string ConfigFile = "config.json";
+    private static readonly object _lock = new();
 
-    // Опции для красивого JSON
+    private static string ItemsConfigFile = "items-config.json";
+    private const string MainConfigFile = "config.json";
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+
+    private static MainConfig? _cachedMainConfig;
+    private static MainModel? _cachedModel;
+
+    private static string GetFullPath( string fileName ) =>
+        Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
+
+    public static MainConfig GetMainConfig()
+    {
+        if ( _cachedMainConfig == null )
+        {
+            lock ( _lock )
+            {
+                _cachedMainConfig ??= ReadMainConfigFromDisk();
+            }
+        }
+        return _cachedMainConfig;
+    }
+
+    private static MainConfig ReadMainConfigFromDisk()
+    {
+        string path = GetFullPath( MainConfigFile );
+        if ( File.Exists( path ) )
+        {
+            try
+            {
+                string json = File.ReadAllText( path );
+                return JsonSerializer.Deserialize<MainConfig>( json ) ?? CreateDefaultConfig();
+            }
+            catch { return CreateDefaultConfig(); }
+        }
+
+        var defaultConfig = CreateDefaultConfig();
+        SaveMainConfig( defaultConfig );
+        return defaultConfig;
+    }
 
     public static void SaveMainConfig( MainConfig mainConfig )
     {
-        try
+        lock ( _lock )
         {
-            string jsonString = JsonSerializer.Serialize( mainConfig, JsonOptions );
-            File.WriteAllText( ConfigFile, jsonString );
+            _cachedMainConfig = mainConfig;
+            try
+            {
+                string json = JsonSerializer.Serialize( mainConfig, JsonOptions );
+                File.WriteAllText( GetFullPath( MainConfigFile ), json );
+            }
+            catch ( Exception ex ) { Debug.WriteLine( ex.Message ); }
         }
-        catch ( Exception ex ) { Debug.WriteLine( ex.Message ); }
     }
-
-    public static MainConfig? ReadMainConfig()
-    {
-        if ( !File.Exists( ConfigFile ) )
-        {
-            var defaultConfig = CreateDefaultConfig();
-            SaveMainConfig( defaultConfig ); // Создаем файл сразу
-            return defaultConfig;
-        }
-
-        try
-        {
-            string json = File.ReadAllText( ConfigFile );
-            return JsonSerializer.Deserialize<MainConfig>( json );
-        }
-        catch { return CreateDefaultConfig(); }
-    }
-
+    
     private static MainConfig CreateDefaultConfig()
     {
         var defaultConfig = new MainConfig
@@ -47,81 +72,93 @@ public class ConfigManager
             Width = 400,
             Height = 600,
             HeaderHeight = 30,
-            BorderWidth = 5
+            BorderWidth = 5,
+            ItemsConfig = "items-config.json",
+            ThemeFileName = "default-theme.json"
         };
         return defaultConfig;
     }
 
-    public static void SaveItemsConfig( MainModel panelModel )
-    {
-        // Оставляем логику клонирования без системных контейнеров
-        MainModel panelModelClone = new()
-        {
-            Containers = panelModel.Containers.Where( c => c.Type != ContainerType.System ).ToList()
-        };
-
-        try
-        {
-            string jsonString = JsonSerializer.Serialize( panelModelClone, JsonOptions );
-            File.WriteAllText( ItemsConfigFile, jsonString );
-        }
-        catch ( Exception ex ) { Debug.WriteLine( ex.Message ); }
-    }
+    
 
     [Obsolete]
     public static MainModel ReadItemsConfig()
     {
-        return ReadModel(); // Перенаправляем на актуальный метод для чистоты
+        return GetModel(); // Перенаправляем на актуальный метод для чистоты
     }
 
-    public static MainModel ReadModel()
+    /// <summary>
+    /// Потокобезопасное получение модели. 
+    /// Читает с диска только при первом вызове или после сброса кэша.
+    /// </summary>
+    public static MainModel GetModel()
+    {
+        // Первая проверка без блокировки для производительности
+        if ( _cachedModel == null )
+        {
+            lock ( _lock )
+            {
+                if ( _cachedModel == null )
+                {
+                    _cachedModel = ReadModelFromDisk();
+                }
+            }
+        }
+        return _cachedModel;
+    }
+
+    private static MainModel ReadModelFromDisk()
     {
         MainModel? panelModel = null;
+        string fileName = GetMainConfig().ItemsConfig ?? "items-config.json";
+        string path = GetFullPath( fileName );
 
         // 1. Попытка чтения из файла
-        if ( File.Exists( ItemsConfigFile ) )
+        if ( File.Exists( path ) )
         {
             try
             {
-                string json = File.ReadAllText( ItemsConfigFile );
+                string json = File.ReadAllText( path );
                 panelModel = JsonSerializer.Deserialize<MainModel>( json );
             }
             catch ( Exception ex )
             {
-                Debug.WriteLine( $"Ошибка загрузки: {ex.Message}" );
+                Debug.WriteLine( $"[ConfigManager] Ошибка загрузки: {ex.Message}" );
             }
         }
 
-        // 2. Если файла нет, он пуст или в нем нет контейнеров — создаем один пустой
+        // 2. Если файла нет или он пустой — создаем структуру с нуля
         if ( panelModel == null || panelModel.Containers == null || panelModel.Containers.Count == 0 )
         {
             panelModel = new MainModel { Containers = new List<ContainerItem>() };
 
-            // Создаем абсолютно пустой контейнер (без кнопок)
             var emptyContainer = new ContainerItem
             {
                 Name = "Новая панель",
-                Items = [],
-                Type = ContainerType.Normal // Предполагаем, что это обычный тип
+                Items = new List<LaunchItem>(),
+                Type = ContainerType.Normal
             };
 
             panelModel.Containers.Add( emptyContainer );
 
-            // Сохраняем, чтобы файл физически появился на диске
+            // Сразу сохраняем на диск (метод SaveItemsConfig тоже должен использовать lock)
             SaveItemsConfig( panelModel );
         }
 
-        // 3. Индексация существующих элементов (если они есть)
+        // 3. Индексация существующих элементов (ID для UI)
         foreach ( var container in panelModel.Containers )
         {
             if ( container.Items == null ) continue;
             for ( int i = 0; i < container.Items.Count; i++ )
             {
-                if ( container.Items[ i ] != null ) container.Items[ i ].Id = i;
+                if ( container.Items[ i ] != null )
+                    container.Items[ i ].Id = i;
             }
         }
 
-        // Принудительное добавление системного контейнера (если ваша логика это требует)
+        // 4. Принудительное добавление системного контейнера
+        // Мы не сохраняем его в JSON (согласно логике SaveItemsConfig), 
+        // поэтому добавляем его каждый раз при чтении в память.
         if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) )
         {
             panelModel.Containers.Add( BuildStandatrContainer() );
@@ -129,6 +166,70 @@ public class ConfigManager
 
         return panelModel;
     }
+
+    //public static MainModel GetModel()
+    //{
+    //    MainModel? panelModel = null;
+
+    //    // 1. Попытка чтения из файла
+    //    if ( File.Exists( ItemsConfigFile ) )
+    //    {
+    //        try
+    //        {
+    //            string json = File.ReadAllText( ItemsConfigFile );
+    //            panelModel = JsonSerializer.Deserialize<MainModel>( json );
+    //        }
+    //        catch ( Exception ex )
+    //        {
+    //            Debug.WriteLine( $"Ошибка загрузки: {ex.Message}" );
+    //        }
+    //    }
+
+    //    // 2. Если файла нет, он пуст или в нем нет контейнеров — создаем один пустой
+    //    if ( panelModel == null || panelModel.Containers == null || panelModel.Containers.Count == 0 )
+    //    {
+    //        panelModel = new MainModel { Containers = new List<ContainerItem>() };
+
+    //        // Создаем абсолютно пустой контейнер (без кнопок)
+    //        var emptyContainer = new ContainerItem
+    //        {
+    //            Name = "Новая панель",
+    //            Items = [],
+    //            Type = ContainerType.Normal // Предполагаем, что это обычный тип
+    //        };
+
+    //        panelModel.Containers.Add( emptyContainer );
+
+    //        // Сохраняем, чтобы файл физически появился на диске
+    //        SaveItemsConfig( panelModel );
+    //    }
+
+    //    // 3. Индексация существующих элементов (если они есть)
+    //    foreach ( var container in panelModel.Containers )
+    //    {
+    //        if ( container.Items == null ) continue;
+    //        for ( int i = 0; i < container.Items.Count; i++ )
+    //        {
+    //            if ( container.Items[ i ] != null ) container.Items[ i ].Id = i;
+    //        }
+    //    }
+
+    //    // Принудительное добавление системного контейнера (если ваша логика это требует)
+    //    if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) )
+    //    {
+    //        panelModel.Containers.Add( BuildStandatrContainer() );
+    //    }
+
+    //    return panelModel;
+    //}
+
+    //private static FileInfo GetItemsConfigFileInfo()
+    //{
+    //    if( string.IsNullOrEmpty( ItemsConfigFile ) )
+    //    {
+    //        if( MainModel)
+    //    }
+    //}
 
     private static ContainerItem BuildStandatrContainer()
     {
@@ -195,6 +296,30 @@ public class ConfigManager
             container.Items[ i ].Id = i;
 
         return container;
+    }
+
+    public static void SaveItemsConfig( MainModel panelModel )
+    {
+        lock ( _lock )
+        {
+            _cachedModel = panelModel;
+
+            MainModel clone = new MainModel
+            {
+                Containers = panelModel.Containers.Where( c => c.Type != ContainerType.System ).ToList()
+            };
+
+            try
+            {
+                string fileName = GetMainConfig().ItemsConfig ?? "items-config.json";
+                string json = JsonSerializer.Serialize( clone, JsonOptions );
+                File.WriteAllText( GetFullPath( fileName ), json );
+            }
+            catch( Exception ex )
+            {
+                Debug.WriteLine( ex.Message );
+            }
+        }
     }
 
     public static ITheme? LoadTheme( string fileName )

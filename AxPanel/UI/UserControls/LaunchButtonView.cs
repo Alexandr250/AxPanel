@@ -29,6 +29,7 @@ public class LaunchButtonView : BaseControl
     public event Action<LaunchButtonView> ButtonRightClick;
     public event Action<LaunchButtonView> DeleteButtonClick;
     public event Action<Rectangle?> MovingChanged;
+    public event Action<LaunchButtonView> Dragging;
 
     // Устаревшее, теперь позицией управляет LayoutEngine через контейнер
     public Func<int> RequestPosition;
@@ -135,6 +136,8 @@ public class LaunchButtonView : BaseControl
                 // Это исключает "накопление ошибки" при быстрых рывках
                 this.Left = _dragStartControlPos.X + deltaX;
                 this.Top = _dragStartControlPos.Y + deltaY;
+
+                Dragging?.Invoke( this );
             }
         }
 

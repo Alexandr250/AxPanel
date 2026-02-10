@@ -11,8 +11,11 @@ public class ButtonStyle : IDisposable
 {
     // Группировка констант
     public int DefaultHeight { get; set; } = 36; // 42
+    public int DefaultWidth { get; set; } = 60;
+
     public int DeleteButtonWidth { get; set; } = 50;
     public int SpaceHeight { get; set; } = 1;
+    public int SpaceWidth { get; set; } = 3;
 
     // Ресурсы для объемной обводки бейджа
     [JsonIgnore] public Pen BadgeBorderLightPen { get; set; } = new Pen( Color.FromArgb( 200, Color.White ), 1.5f );
