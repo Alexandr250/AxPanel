@@ -97,51 +97,19 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     {
         base.OnHandleCreated( e );
 
-        // 2. ВКЛЮЧАЕМ стандартный механизм WinForms
-        // НЕ вызывай RevokeDragDrop, он ломает всё!
-        this.AllowDrop = false;
+        AllowDrop = false;
 
-        // 1. РАЗРЕШАЕМ сообщения через фильтр UAC (это самое важное)
-        CHANGEFILTERSTRUCT cfs = new CHANGEFILTERSTRUCT { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
-
-        // WM_DROPFILES (0x233)
-        ChangeWindowMessageFilterEx( this.Handle, 0x0233, 1, ref cfs );
-        // WM_COPYGLOBALDATA (0x0049) - нужен для передачи данных между процессами
-        ChangeWindowMessageFilterEx( this.Handle, 0x0049, 1, ref cfs );
-        // WM_COPYDATA (0x004A)
-        ChangeWindowMessageFilterEx( this.Handle, 0x004A, 1, ref cfs );
-
+        CHANGEFILTERSTRUCT cfs = new() { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
         
+        ChangeWindowMessageFilterEx( Handle, WM_DROPFILES, 1, ref cfs );
+        ChangeWindowMessageFilterEx( Handle, WM_COPYGLOBALDATA, 1, ref cfs );
+        ChangeWindowMessageFilterEx( Handle, WM_COPYDATA, 1, ref cfs );
 
-        DragAcceptFiles( this.Handle, true );
+        DragAcceptFiles( Handle, true );
     }
-
-    //protected override void OnHandleCreated( EventArgs e )
-    //{
-    //    base.OnHandleCreated( e );
-    //    this.AllowDrop = true; // Принудительно включаем здесь
-
-    //    //CHANGEFILTERSTRUCT cfs = new CHANGEFILTERSTRUCT { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
-    //    //ChangeWindowMessageFilterEx( this.Handle, WM_DROPFILES, MSGFLT_ALLOW, ref cfs );
-    //    //ChangeWindowMessageFilterEx( this.Handle, WM_COPYDATA, MSGFLT_ALLOW, ref cfs );
-    //    //ChangeWindowMessageFilterEx( this.Handle, 0x0049, MSGFLT_ALLOW, ref cfs ); // WM_COPYGLOBALDATA
-
-    //    //RevokeDragDrop( this.Handle );
-
-    //    // 2. Принудительно разрешаем фильтр (на всякий случай оставляем)
-    //    CHANGEFILTERSTRUCT cfs = new CHANGEFILTERSTRUCT { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
-    //    ChangeWindowMessageFilterEx( this.Handle, 0x0233, 1, ref cfs ); // WM_DROPFILES
-    //    ChangeWindowMessageFilterEx( this.Handle, 0x0049, 1, ref cfs ); // WM_COPYGLOBALDATA
-
-    //    // 3. Включаем AllowDrop ЗАНОВО после манипуляций
-    //    this.AllowDrop = true;
-
-    //    //DragAcceptFiles( this.Handle, true );
-    //}
 
     protected override void WndProc( ref Message m )
     {
-        const int WM_DROPFILES = 0x0233;
         if ( m.Msg == WM_DROPFILES )
         {
             HandleNativeDrop( m.WParam );

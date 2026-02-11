@@ -228,6 +228,7 @@ namespace AxPanel
 
         public const uint WM_DROPFILES = 0x0233;
         public const uint WM_COPYDATA = 0x004A;
+        public const uint WM_COPYGLOBALDATA = 0x0049;
         public const uint MSGFLT_ALLOW = 1;
 
         [DllImport( "shell32.dll" )]

@@ -230,7 +230,7 @@ public class RootContainerView : Panel
         foreach ( var container in Containers )
         {
             container.Top = currentTop;
-            //container.Width = this.Width;
+            container.Width = this.Width;
 
             int targetH = ( container == Selected ) ? _targetSelectedHeight : _theme.ContainerStyle.HeaderHeight;
 
@@ -268,6 +268,7 @@ public class RootContainerView : Panel
 
         foreach ( var container in Containers )
         {
+            container.Width = this.Width;
             container.Top = currentTop;
             container.Height = ( container == Selected ) ? selHeight : _theme.ContainerStyle.HeaderHeight;
             currentTop += container.Height;
@@ -434,42 +435,57 @@ public class RootContainerView : Panel
     protected override void OnParentChanged( EventArgs e )
     {
         base.OnParentChanged( e );
-
         if ( Parent != null )
         {
-            int headerHeight = 30;
-            int borderWidth = 5;
-
-            try
-            {
-                var config = ConfigManager.GetMainConfig();
-                if ( config != null )
-                {
-                    headerHeight = config.HeaderHeight;
-                    borderWidth = config.BorderWidth;
-                }
-            }
-            catch { /* дефолтные значения при ошибке */ }
-
-            // Отключаем Dock, чтобы ручные координаты работали
             this.Dock = DockStyle.None;
-
-            // Установка координат с учетом всех отступов
-            this.Left = borderWidth;
-            this.Top = headerHeight;
-
-            // Ширина: ширина родителя минус левый и правый отступы
-            this.Width = Parent.Width - ( borderWidth * 2 );
-
-            // Высота: высота родителя минус верхний (Header) и нижний (Border) отступы
-            this.Height = Parent.Height - headerHeight - borderWidth;
-
-            // Привязки для автоматического ресайза при растягивании окна
+            // Задаем начальные координаты
+            this.Location = new Point( _mainConfig.BorderWidth, _mainConfig.HeaderHeight );
+            // Включаем авто-растяжение
             this.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             ArrangeContainers();
         }
     }
+
+    //protected override void OnParentChanged( EventArgs e )
+    //{
+    //    base.OnParentChanged( e );
+
+    //    if ( Parent != null )
+    //    {
+    //        int headerHeight = 30;
+    //        int borderWidth = 5;
+
+    //        try
+    //        {
+    //            var config = ConfigManager.GetMainConfig();
+    //            if ( config != null )
+    //            {
+    //                headerHeight = config.HeaderHeight;
+    //                borderWidth = config.BorderWidth;
+    //            }
+    //        }
+    //        catch { /* дефолтные значения при ошибке */ }
+
+    //        // Отключаем Dock, чтобы ручные координаты работали
+    //        this.Dock = DockStyle.None;
+
+    //        // Установка координат с учетом всех отступов
+    //        this.Left = borderWidth;
+    //        this.Top = headerHeight;
+
+    //        // Ширина: ширина родителя минус левый и правый отступы
+    //        this.Width = Parent.Width - ( borderWidth * 2 );
+
+    //        // Высота: высота родителя минус верхний (Header) и нижний (Border) отступы
+    //        this.Height = Parent.Height - headerHeight - borderWidth;
+
+    //        // Привязки для автоматического ресайза при растягивании окна
+    //        this.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+    //        ArrangeContainers();
+    //    }
+    //}
 
     protected override void Dispose( bool disposing )
     {

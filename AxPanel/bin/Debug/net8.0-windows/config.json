@@ -1,13 +1,13 @@
 {
-  "Top": 1,
-  "Left": 1644,
-  "Width": 256,
-  "Height": 1031,
+  "Top": 40,
+  "Left": 1550,
+  "Width": 303,
+  "Height": 822,
   "ScroolValueIncrement": 0,
   "HeaderHeight": 30,
   "ContainerHeaderHeight": 0,
   "BorderWidth": 5,
-  "ThemeFileName": "win95.json",
-  "ItemsConfig": "test-items-config.json",
+  "ThemeFileName": "luna.json",
+  "ItemsConfig": "work-items-config.json",
   "LayoutMode": "Grid"
 }

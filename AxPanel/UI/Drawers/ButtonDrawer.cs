@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices.JavaScript;
 using AxPanel.UI.Themes;
 using AxPanel.UI.UserControls;
@@ -33,6 +34,7 @@ public class ButtonDrawer
         {
             LineAlignment = StringAlignment.Center,
             Alignment = isCompact ? StringAlignment.Center : StringAlignment.Near,
+            //Trimming = StringTrimming.Word
             FormatFlags = StringFormatFlags.NoWrap
         };
 
@@ -89,33 +91,10 @@ public class ButtonDrawer
         
         // 6. Текст и иконка
         int iconAreaSize = _theme.ButtonStyle.DefaultHeight;
-        int reservedRight = ( isCompact || !( control is LaunchButtonView lbtn && lbtn.Stats.IsRunning ) ) ? 0 : 100;
+        int reservedRight = isCompact || control is not LaunchButtonView { Stats.IsRunning: true } ? 0 : 100;
 
-        if ( isCompact )
-        {
-            // Режим сетки: Иконка сверху, текст снизу
-            if ( control.Icon != null )
-            {
-                var iconRect = new Rectangle( ( control.Width - 32 ) / 2, ( control.Height - 45 ) / 2, 32, 32 );
-                g.DrawIconUnstretched( control.Icon, iconRect );
-            }
-            var textRect = new Rectangle( 5, control.Height - 22, control.Width - 10, 18 );
-            g.DrawString( control.Text, control.Font, _theme.ButtonStyle.MainFontBrush, textRect, format );
-        }
-        else
-        {
-            // Режим списка: Иконка слева, текст в две строки
-            if ( control.Icon != null )
-            {
-                int center = iconAreaSize / 2;
-                g.DrawIconUnstretched( control.Icon, new Rectangle( center - 16, center - 16, 32, 32 ) );
-            }
-            var textRectTop = new Rectangle( iconAreaSize, 0, control.Width - iconAreaSize - reservedRight, control.Height / 2 );
-            var textRectBottom = new Rectangle( iconAreaSize, control.Height / 2, control.Width - iconAreaSize - reservedRight, control.Height / 2 );
-
-            g.DrawString( control.Text, control.Font, _theme.ButtonStyle.MainFontBrush, textRectTop, format );
-            g.DrawString( control.BaseControlPath, control.Font, _theme.ButtonStyle.AdditionalFontBrush, textRectBottom, format );
-        }
+        
+        DrawIconAndText( control, mouseState, isCompact, g, iconAreaSize, reservedRight, format );
 
         // 7. Кнопка удаления (только при наведении)
         if ( mouseState.MouseInDeleteButton )
@@ -124,7 +103,7 @@ public class ButtonDrawer
         }
 
         // 8. Маркер активности (синяя полоса слева)
-        if ( control is LaunchButtonView runBtn && runBtn.Stats.IsRunning )
+        if ( control is LaunchButtonView { Stats.IsRunning: true } )
         {
             using var runningBrush = new SolidBrush( _theme.ButtonStyle.RunningColor );
             g.FillRectangle( runningBrush, 0, 2, _theme.ButtonStyle.ActivityMarkerWidth, control.Height - 4 );
@@ -163,6 +142,95 @@ public class ButtonDrawer
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
         }
 
+    }
+
+    private void DrawIconAndText( BaseControl control, MouseState mouseState, bool isCompact, Graphics g, int iconAreaSize, int reservedRight, StringFormat format )
+    {
+        if ( isCompact )
+        {
+            // Режим сетки: Иконка сверху, текст снизу
+            int innerSpace = 5;
+            int iconLength = 32;
+
+            Rectangle textRect = new( innerSpace, 
+                innerSpace + iconLength + innerSpace, 
+                control.Width - innerSpace * 2, 
+                control.Height - ( iconLength + innerSpace * 2 ) - innerSpace );
+            
+            TextFormatFlags flags = TextFormatFlags.WordBreak |
+                                    TextFormatFlags.HorizontalCenter |
+                                    TextFormatFlags.Top |
+                                    TextFormatFlags.EndEllipsis |
+                                    TextFormatFlags.NoPadding |
+                                    TextFormatFlags.TextBoxControl;
+
+            Size proposedSize = new Size( textRect.Width, int.MaxValue );
+            Size textSize = TextRenderer.MeasureText( g, control.Text, control.Font, proposedSize, flags );
+
+            bool isTextTrimmed = textSize.Height > textRect.Height;
+
+            Color textColor = Color.Black; // Цвет по умолчанию
+            if ( _theme.ButtonStyle.MainFontBrush is SolidBrush sb )
+            {
+                textColor = sb.Color;
+            }
+
+            if ( control.Icon != null )
+            {
+                Rectangle iconRect;
+                float opacity = 1.0f;
+
+                if ( mouseState.MouseInControl && isTextTrimmed )
+                {
+                    // Центрируем иконку по всему контролу и делаем прозрачной
+                    iconRect = new Rectangle( ( control.Width - iconLength ) / 2, ( control.Height - iconLength ) / 2, iconLength, iconLength );
+                    opacity = 0.5f;
+
+                    Size fullTextSize = TextRenderer.MeasureText( g, control.Text, control.Font, new Size( control.Width - innerSpace * 2, int.MaxValue ), flags );
+
+                    int centerY = Math.Max( innerSpace, ( control.Height - fullTextSize.Height ) / 2 );
+
+                    textRect = new Rectangle( innerSpace, centerY, control.Width - innerSpace * 2, control.Height - centerY );
+
+                    flags |= TextFormatFlags.Top;
+                    flags &= ~TextFormatFlags.VerticalCenter;
+                }
+                else
+                {
+                    iconRect = new Rectangle( ( control.Width - iconLength ) / 2, innerSpace, iconLength, iconLength );
+                }
+
+                // Рисуем иконку с учетом прозрачности
+                if ( opacity < 1.0f )
+                {
+                    using Bitmap bmp = control.Icon.ToBitmap();
+                    using ImageAttributes ia = new();
+                    ColorMatrix cm = new() { Matrix33 = opacity };
+                    ia.SetColorMatrix( cm );
+                    g.DrawImage( bmp, iconRect, 0, 0, bmp.Width, bmp.Height, GraphicsUnit.Pixel, ia );
+                }
+                else
+                {
+                    g.DrawIconUnstretched( control.Icon, iconRect );
+                }
+            }
+
+            TextRenderer.DrawText( g, control.Text, control.Font, textRect, textColor, flags );
+        }
+        else
+        {
+            // Режим списка: Иконка слева, текст в две строки
+            if ( control.Icon != null )
+            {
+                int center = iconAreaSize / 2;
+                g.DrawIconUnstretched( control.Icon, new Rectangle( center - 16, center - 16, 32, 32 ) );
+            }
+            var textRectTop = new Rectangle( iconAreaSize, 0, control.Width - iconAreaSize - reservedRight, control.Height / 2 );
+            var textRectBottom = new Rectangle( iconAreaSize, control.Height / 2, control.Width - iconAreaSize - reservedRight, control.Height / 2 );
+
+            g.DrawString( control.Text, control.Font, _theme.ButtonStyle.MainFontBrush, textRectTop, format );
+            g.DrawString( control.BaseControlPath, control.Font, _theme.ButtonStyle.AdditionalFontBrush, textRectBottom, format );
+        }
     }
 
     private void DrawSmallMeter( Graphics g, Rectangle rect, float percent, string text, Color color )

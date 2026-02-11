@@ -13,6 +13,8 @@ public partial class MainView : Form
     private ITheme _theme;
     private Rectangle _btnMinRect;
     private Rectangle _btnCloseRect;
+    private Rectangle _btnTopMostRect;
+    private bool _isTopMost = false;
     private int _hoverBtn = 0; // 0 - нет, 1 - сворачивание, 2 - закрытие
     private const int BtnWidth = 45;
 
@@ -65,7 +67,7 @@ public partial class MainView : Form
         MainContainer.Visible = true;
         Controls.Add( MainContainer );
 
-        Resize += ( s, e ) => UpdateContainerBounds();
+        // Resize += ( s, e ) => UpdateContainerBounds();
 
         FormClosed += ( s, e ) =>
         {
@@ -84,6 +86,7 @@ public partial class MainView : Form
         int headerHeight = config?.HeaderHeight ?? 30;
         int borderWidth = config?.BorderWidth ?? 5;
 
+        _btnTopMostRect = new Rectangle( Width - BtnWidth * 3, 0, BtnWidth, headerHeight );
         _btnMinRect = new Rectangle( ClientSize.Width - BtnWidth * 2, 0, BtnWidth, headerHeight );
         _btnCloseRect = new Rectangle( ClientSize.Width - BtnWidth, 0, BtnWidth, headerHeight );
         
@@ -101,6 +104,13 @@ public partial class MainView : Form
         {
             if ( _hoverBtn == 1 ) { this.WindowState = FormWindowState.Minimized; return; }
             if ( _hoverBtn == 2 ) { Application.Exit(); return; }
+            if ( _hoverBtn == 3 )
+            {
+                _isTopMost = !_isTopMost;
+                TopMost = _isTopMost;
+                Invalidate( new Rectangle( Width - BtnWidth * 3, 0, BtnWidth * 3, _headerHeight ) );
+                return;
+            }
 
             HandleExitClick(); // Тройной клик
 
@@ -133,17 +143,18 @@ public partial class MainView : Form
         int oldHover = _hoverBtn;
         if ( _btnMinRect.Contains( e.Location ) ) _hoverBtn = 1;
         else if ( _btnCloseRect.Contains( e.Location ) ) _hoverBtn = 2;
+        else if ( _btnTopMostRect.Contains( e.Location ) ) _hoverBtn = 3;
         else _hoverBtn = 0;
 
         if ( oldHover != _hoverBtn ) 
-            Invalidate( new Rectangle( Width - BtnWidth * 2, 0, BtnWidth * 2, _headerHeight ) );
+            Invalidate( new Rectangle( Width - BtnWidth * 3, 0, BtnWidth * 3, _headerHeight ) );
     }
 
     protected override void OnMouseLeave( EventArgs e )
     {
         base.OnMouseLeave( e );
         _hoverBtn = 0;
-        Invalidate( new Rectangle( Width - BtnWidth * 2, 0, BtnWidth * 2, _headerHeight ) );
+        Invalidate( new Rectangle( Width - BtnWidth * 3, 0, BtnWidth * 3, _headerHeight ) );
     }
 
     protected override void OnKeyDown( KeyEventArgs e )
@@ -158,13 +169,47 @@ public partial class MainView : Form
         //MainContainer?.RaiseKeyUp( e );
     }
 
+    //protected override void OnResize( EventArgs e )
+    //{
+    //    SuspendLayout(); // Приостанавливаем логику макета
+    //    base.OnResize( e );
+    //    ResumeLayout();
+
+    //    if( _config != null )
+    //        ConfigManager.SaveMainConfig( _config );
+    //}
+
     protected override void OnResize( EventArgs e )
     {
-        SuspendLayout(); // Приостанавливаем логику макета
+        // 1. Сначала даем базовому классу обработать изменение размера
         base.OnResize( e );
-        ResumeLayout();
 
-        if( _config != null )
+        // 2. Выполняем пересчет размеров контейнера и кнопок
+        if ( MainContainer != null && _config != null )
+        {
+            // Используем значения строго из конфига, как вы и просили
+            int h = _config.HeaderHeight;
+            int bw = _config.BorderWidth;
+
+            // Обновляем прямоугольники кнопок (для отрисовки и кликов)
+            _btnTopMostRect = new Rectangle( ClientSize.Width - BtnWidth * 3, 0, BtnWidth, h );
+            _btnMinRect = new Rectangle( ClientSize.Width - BtnWidth * 2, 0, BtnWidth, h );
+            _btnCloseRect = new Rectangle( ClientSize.Width - BtnWidth, 0, BtnWidth, h );
+
+            // Устанавливаем положение и размер контейнера за один проход
+            // Это предотвращает двойную перерисовку дочерних элементов
+            MainContainer.Bounds = new Rectangle(
+                bw,
+                h,
+                Math.Max( 0, ClientSize.Width - bw * 2 ),
+                Math.Max( 0, ClientSize.Height - h - bw )
+            );
+
+            Invalidate( new Rectangle( 0, 0, Width, _headerHeight ) );
+        }
+
+        // 3. Сохраняем конфиг (если в этом есть логика сохранения размеров самого окна)
+        if ( _config != null )
             ConfigManager.SaveMainConfig( _config );
     }
 
@@ -226,8 +271,47 @@ public partial class MainView : Form
         //    new Rectangle( 15, 0, 200, h ), Color.Gray,
         //    TextFormatFlags.VerticalCenter | TextFormatFlags.Left );
 
-        _btnMinRect = new Rectangle( Width - BtnWidth * 2, 0, BtnWidth, h );
-        _btnCloseRect = new Rectangle( Width - BtnWidth, 0, BtnWidth, h );
+        _btnCloseRect = new Rectangle( Width - BtnWidth, 
+            0, BtnWidth, h );
+        _btnMinRect = new Rectangle( Width - BtnWidth * 2, 
+            0, BtnWidth, h );
+        _btnTopMostRect = new Rectangle( Width - BtnWidth * 3, 
+            0, BtnWidth, h ); // Новая кнопка
+
+        // --- ОТРИСОВКА КНОПКИ TOPMOST ---
+        if ( _hoverBtn == 3 /*|| _isTopMost */ )
+        {
+            g.FillRectangle( _theme.WindowStyle.MinBtnHoverBrush, _btnTopMostRect );
+            DrawPressedBorder( g, _btnTopMostRect, _theme ); // Метод для отрисовки впадины
+        }
+
+        using ( Pen p = new( _theme.WindowStyle.ControlIconColor, 1 ) )
+        {
+            int cx = _btnTopMostRect.X + BtnWidth / 2;
+            int cy = h / 2;
+
+            if ( _isTopMost )
+            {
+                g.DrawLine( p, cx, cy - 2, cx, cy + 8 );
+                g.DrawRectangle( p, cx - 4, cy - 5, 8, 3 );
+                g.DrawLine( p, cx - 6, cy - 6, cx + 6, cy - 6 );
+            }
+            else
+            {
+                g.DrawLine( p, cx - 1.4f, cy - 1.4f, cx + 5.6f, cy + 5.6f );
+
+                PointF[] headPoints =
+                [
+                    new( cx - 6.3f, cy - 0.7f ),
+                    new( cx - 0.7f, cy - 6.3f ),
+                    new( cx + 1.4f, cy - 4.2f ),
+                    new( cx - 4.2f, cy + 1.4f )
+                ];
+                g.DrawPolygon( p, headPoints );
+
+                g.DrawLine( p, cx - 8.48f, cy, cx, cy - 8.48f );
+            }
+        }
 
         // Кнопка Свернуть
         if ( _hoverBtn == 1 )
@@ -313,7 +397,7 @@ public partial class MainView : Form
             Point pos = PointToClient( new Point( x, y ) );
 
             // Приоритет 1: Если мышь над кнопками управления — отдаем управление кнопкам
-            if ( _btnMinRect.Contains( pos ) || _btnCloseRect.Contains( pos ) )
+            if ( _btnMinRect.Contains( pos ) || _btnCloseRect.Contains( pos ) || _btnTopMostRect.Contains( pos ) )
             {
                 m.Result = ( IntPtr )Win32Api.HTCLIENT;
                 return;

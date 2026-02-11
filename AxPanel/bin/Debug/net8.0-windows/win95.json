@@ -47,7 +47,7 @@
     "DeleteBtnCrossWidth": 1.5
   },
   "ButtonStyle": {
-    "DefaultHeight": 52,
+    "DefaultHeight": 66,
     "DeleteButtonWidth": 45,
     "SpaceHeight": 1,
     "MinFont": "Small Fonts, 6, Regular",
