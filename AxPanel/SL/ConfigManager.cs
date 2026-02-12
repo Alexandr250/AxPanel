@@ -1,8 +1,6 @@
 using AxPanel.Model;
 using AxPanel.UI.Themes;
-using Microsoft.VisualBasic.Devices;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.Json;
 
 namespace AxPanel.SL;
@@ -46,7 +44,7 @@ public class ConfigManager
             catch { return CreateDefaultConfig(); }
         }
 
-        var defaultConfig = CreateDefaultConfig();
+        MainConfig defaultConfig = CreateDefaultConfig();
         SaveMainConfig( defaultConfig );
         return defaultConfig;
     }
@@ -61,13 +59,16 @@ public class ConfigManager
                 string json = JsonSerializer.Serialize( mainConfig, JsonOptions );
                 File.WriteAllText( GetFullPath( MainConfigFile ), json );
             }
-            catch ( Exception ex ) { Debug.WriteLine( ex.Message ); }
+            catch( Exception ex )
+            {
+                Debug.WriteLine( ex.Message );
+            }
         }
     }
     
     private static MainConfig CreateDefaultConfig()
     {
-        var defaultConfig = new MainConfig
+        MainConfig defaultConfig = new()
         {
             Width = 400,
             Height = 600,
@@ -77,14 +78,6 @@ public class ConfigManager
             ThemeFileName = "default-theme.json"
         };
         return defaultConfig;
-    }
-
-    
-
-    [Obsolete]
-    public static MainModel ReadItemsConfig()
-    {
-        return GetModel(); // Перенаправляем на актуальный метод для чистоты
     }
 
     /// <summary>
@@ -98,10 +91,7 @@ public class ConfigManager
         {
             lock ( _lock )
             {
-                if ( _cachedModel == null )
-                {
-                    _cachedModel = ReadModelFromDisk();
-                }
+                _cachedModel ??= ReadModelFromDisk();
             }
         }
         return _cachedModel;
@@ -128,14 +118,14 @@ public class ConfigManager
         }
 
         // 2. Если файла нет или он пустой — создаем структуру с нуля
-        if ( panelModel == null || panelModel.Containers == null || panelModel.Containers.Count == 0 )
+        if ( panelModel?.Containers == null || panelModel.Containers.Count == 0 )
         {
-            panelModel = new MainModel { Containers = new List<ContainerItem>() };
+            panelModel = new MainModel { Containers = [] };
 
-            var emptyContainer = new ContainerItem
+            ContainerItem emptyContainer = new()
             {
                 Name = "Новая панель",
-                Items = new List<LaunchItem>(),
+                Items = [],
                 Type = ContainerType.Normal
             };
 
@@ -146,9 +136,11 @@ public class ConfigManager
         }
 
         // 3. Индексация существующих элементов (ID для UI)
-        foreach ( var container in panelModel.Containers )
+        foreach ( ContainerItem container in panelModel.Containers )
         {
-            if ( container.Items == null ) continue;
+            if ( container.Items == null ) 
+                continue;
+
             for ( int i = 0; i < container.Items.Count; i++ )
             {
                 if ( container.Items[ i ] != null )
@@ -157,145 +149,124 @@ public class ConfigManager
         }
 
         // 4. Принудительное добавление системного контейнера
-        // Мы не сохраняем его в JSON (согласно логике SaveItemsConfig), 
-        // поэтому добавляем его каждый раз при чтении в память.
-        if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) )
-        {
-            panelModel.Containers.Add( BuildStandatrContainer() );
-        }
+        if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) ) 
+            panelModel.Containers.Add( BuildStandartContainer() );
+
+        panelModel.Containers.Add( BuildPortableContainer() );
 
         return panelModel;
     }
 
-    //public static MainModel GetModel()
-    //{
-    //    MainModel? panelModel = null;
-
-    //    // 1. Попытка чтения из файла
-    //    if ( File.Exists( ItemsConfigFile ) )
-    //    {
-    //        try
-    //        {
-    //            string json = File.ReadAllText( ItemsConfigFile );
-    //            panelModel = JsonSerializer.Deserialize<MainModel>( json );
-    //        }
-    //        catch ( Exception ex )
-    //        {
-    //            Debug.WriteLine( $"Ошибка загрузки: {ex.Message}" );
-    //        }
-    //    }
-
-    //    // 2. Если файла нет, он пуст или в нем нет контейнеров — создаем один пустой
-    //    if ( panelModel == null || panelModel.Containers == null || panelModel.Containers.Count == 0 )
-    //    {
-    //        panelModel = new MainModel { Containers = new List<ContainerItem>() };
-
-    //        // Создаем абсолютно пустой контейнер (без кнопок)
-    //        var emptyContainer = new ContainerItem
-    //        {
-    //            Name = "Новая панель",
-    //            Items = [],
-    //            Type = ContainerType.Normal // Предполагаем, что это обычный тип
-    //        };
-
-    //        panelModel.Containers.Add( emptyContainer );
-
-    //        // Сохраняем, чтобы файл физически появился на диске
-    //        SaveItemsConfig( panelModel );
-    //    }
-
-    //    // 3. Индексация существующих элементов (если они есть)
-    //    foreach ( var container in panelModel.Containers )
-    //    {
-    //        if ( container.Items == null ) continue;
-    //        for ( int i = 0; i < container.Items.Count; i++ )
-    //        {
-    //            if ( container.Items[ i ] != null ) container.Items[ i ].Id = i;
-    //        }
-    //    }
-
-    //    // Принудительное добавление системного контейнера (если ваша логика это требует)
-    //    if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) )
-    //    {
-    //        panelModel.Containers.Add( BuildStandatrContainer() );
-    //    }
-
-    //    return panelModel;
-    //}
-
-    //private static FileInfo GetItemsConfigFileInfo()
-    //{
-    //    if( string.IsNullOrEmpty( ItemsConfigFile ) )
-    //    {
-    //        if( MainModel)
-    //    }
-    //}
-
-    private static ContainerItem BuildStandatrContainer()
+    private static ContainerItem BuildStandartContainer()
     {
+        // Регистрируем переменную для корректного ExpandEnvironmentVariables
+        Environment.SetEnvironmentVariable( "SystemDirectory", Environment.SystemDirectory );
+
+        try
+        {
+            string jsonPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "system-apps.json" );
+            if ( !File.Exists( jsonPath ) ) return null;
+
+            string jsonContent = File.ReadAllText( jsonPath );
+
+            var container = JsonSerializer.Deserialize<ContainerItem>( jsonContent );
+
+            if ( container == null ) return null;
+
+            // Фильтруем элементы: раскрываем пути и проверяем наличие файлов
+            container.Items = container.Items
+                .Where( item =>
+                {
+                    if ( item.IsSeparator ) 
+                        return true; // Разделители оставляем
+
+                    // Раскрываем %windir%, %SystemDirectory% и т.д.
+                    string expandedPath = Environment.ExpandEnvironmentVariables( item.FilePath );
+
+                    if ( File.Exists( expandedPath ) )
+                    {
+                        item.FilePath = expandedPath;
+                        return true;
+                    }
+                    return false;
+                } )
+                .ToList();
+
+            // Пересчитываем ID, чтобы после фильтрации (например, без gpedit) они шли по порядку
+            for ( int i = 0; i < container.Items.Count; i++ )
+                container.Items[ i ].Id = i;
+
+            return container;
+        }
+        catch ( Exception ex )
+        {
+            Debug.WriteLine( $"Ошибка загрузки SystemApps: {ex.Message}" );
+            return null;
+        }
+    }
+
+    private static ContainerItem BuildPortableContainer( string fileName = "portable-apps.json" )
+    {
+        // 1. Загружаем список портативок через ваш метод
+        List<PortableItem> portableItems = LoadPortableItems( fileName );
+
+        // 2. Создаем новый контейнер
         ContainerItem container = new()
         {
-            Name = "Системные инструменты",
-            Type = ContainerType.System,
+            Name = "Портативный софт",
+            Type = ContainerType.System, // Или добавьте свой тип в enum, если нужно
             Items = []
         };
 
-        var groups = new Dictionary<string, List<(string Name, string Path)>>
-    {
-        { "Основные", [
-                ( "Проводник", Environment.GetEnvironmentVariable( "windir" ) + "\\explorer.exe" ),
-                ( "Блокнот", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\notepad.exe" ),
-                ( "Калькулятор", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\calc.exe" ),
-                ( "Диспетчер задач", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\taskmgr.exe" )
-            ]
-        },
-        { "Администрирование", [
-                ( "Командная строка", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\cmd.exe" ),
-                ( "PowerShell", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\WindowsPowerShell\\v1.0\\powershell.exe" ),
-                ( "Редактор реестра", Environment.GetEnvironmentVariable( "windir" ) + "\\regedit.exe" ),
-                ( "Службы", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\services.msc" ),
-                ( "Управление компьютером", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\compmgmt.msc" )
-            ]
-        },
-        { "Сеть и Настройка", [
-                ( "Сетевые подключения", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\ncpa.cpl" ),
-                ( "Панель управления", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\control.exe" ),
-                ( "Удаление программ", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\appwiz.cpl" ),
-                ( "Параметры звука", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\mmsys.cpl" )
-            ]
-        },
-        { "Диагностика", [
-                ( "Монитор ресурсов", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\resmon.exe" ),
-                ( "Управление дисками", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\diskmgmt.msc" ),
-                ( "Просмотр событий", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\eventvwr.msc" ),
-                ( "Очистка диска", Environment.GetFolderPath( Environment.SpecialFolder.System ) + "\\cleanmgr.exe" )
-            ]
-        }
-    };
+        if ( portableItems == null || portableItems.Count == 0 )
+            return container;
 
-        foreach ( var group in groups )
+        foreach ( var item in portableItems )
         {
-            // Разделитель группы (FilePath пустой — отрисуется как разделитель)
-            container.Items.Add( new LaunchItem
-            {
-                Name = $"--- {group.Key} ---",
-                FilePath = string.Empty
-            } );
+            // Проверяем, существует ли файл. 
+            // Если файла нет, можно либо пропустить, либо оставить для логики загрузки
+            //bool exists = File.Exists( item.FilePath );
 
-            foreach ( var item in group.Value )
-            {
-                container.Items.Add( new LaunchItem
-                {
-                    Name = item.Name,
-                    FilePath = item.Path // Теперь здесь ПОЛНЫЙ ПУТЬ
-                } );
-            }
+            // Добавляем в контейнер
+            container.Items.Add( item );
         }
-
-        for ( int i = 0; i < container.Items.Count; i++ ) 
-            container.Items[ i ].Id = i;
 
         return container;
+    }
+
+    public static List<PortableItem> LoadPortableItems( string fileName )
+    {
+        try
+        {
+            string path = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
+            if ( !File.Exists( path ) ) return new List<PortableItem>();
+
+            string json = File.ReadAllText( path );
+
+            // Прямая десериализация в список портативок
+            var items = JsonSerializer.Deserialize<List<PortableItem>>( json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            } );
+
+            if ( items != null )
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                foreach ( var item in items )
+                {
+                    // Приводим относительный путь Apps\... к абсолютному
+                    if ( !string.IsNullOrEmpty( item.FilePath ) )
+                        item.FilePath = Path.GetFullPath( Path.Combine( baseDir, item.FilePath ) );
+                }
+            }
+
+            return items ?? new List<PortableItem>();
+        }
+        catch ( Exception ex )
+        {
+            Debug.WriteLine( $"Ошибка загрузки PortableItems: {ex.Message}" );
+            return new List<PortableItem>();
+        }
     }
 
     public static void SaveItemsConfig( MainModel panelModel )
@@ -304,7 +275,7 @@ public class ConfigManager
         {
             _cachedModel = panelModel;
 
-            MainModel clone = new MainModel
+            MainModel clone = new()
             {
                 Containers = panelModel.Containers.Where( c => c.Type != ContainerType.System ).ToList()
             };

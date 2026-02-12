@@ -21,6 +21,8 @@ namespace AxPanel
         /// </summary>
         public const uint SHGFI_LARGEICON = 0x0;
 
+        public const uint SHGFI_USEFILEATTRIBUTES = 0x10;
+
         /// <summary>
         /// WM_NCHITTEST (0x84) — "Запрос на проверку области". Windows отправляет его при каждом движении мыши,
         /// чтобы понять: курсор над фоном (HTCLIENT), над заголовком (HTCAPTION) или над рамкой ресайза.
@@ -85,6 +87,12 @@ namespace AxPanel
         /// <returns>Значение, зависящее от флагов <paramref name="uFlags"/>. Если извлекается иконка, возвращает ненулевое значение при успехе.</returns>
         [DllImport( "shell32.dll", CharSet = CharSet.Auto )]
         public static extern IntPtr SHGetFileInfo( string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags );
+
+        [DllImport( "shell32.dll", CharSet = CharSet.Auto )]
+        public static extern uint ExtractIconEx( string szFileName, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, uint nIcons );
+
+        [DllImport( "user32.dll", SetLastError = true )]
+        public static extern IntPtr CopyIcon( IntPtr hIcon );
 
         /// <summary>
         /// Уничтожает дескриптор иконки и освобождает память, которую она занимала.

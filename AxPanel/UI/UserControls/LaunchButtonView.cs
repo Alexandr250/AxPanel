@@ -3,6 +3,7 @@
 using AxPanel.Model;
 using AxPanel.UI.Drawers;
 using AxPanel.UI.Themes;
+using System.Diagnostics;
 
 namespace AxPanel.UI.UserControls;
 
@@ -24,7 +25,7 @@ public class LaunchButtonView : BaseControl
     public bool IsSeparator => string.IsNullOrEmpty( BaseControlPath );
 
     // События
-    public event Action<LaunchButtonView> ButtonLeftClick;
+    public event Action<LaunchButtonView, object?> ButtonLeftClick;
     public event Action<LaunchButtonView> ButtonMiddleClick;
     public event Action<LaunchButtonView> ButtonRightClick;
     public event Action<LaunchButtonView> DeleteButtonClick;
@@ -41,9 +42,59 @@ public class LaunchButtonView : BaseControl
         _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
         _buttonDrawer = new ButtonDrawer( _theme );
 
-        Dock = DockStyle.None;      // Категорически отключаем Dock
-        Anchor = AnchorStyles.None;  // Отключаем Anchor, чтобы Left/Top работали свободно
+        Dock = DockStyle.None; 
+        Anchor = AnchorStyles.None; 
         AutoSize = false;
+
+        AllowDrop = true;
+    }
+
+    protected override void OnDragEnter( DragEventArgs dragEventArgs )
+    {
+        base.OnDragEnter( dragEventArgs );
+
+        if ( dragEventArgs.Data.GetDataPresent( DataFormats.FileDrop ) && !IsSeparator )
+        {
+            dragEventArgs.Effect = DragDropEffects.Link; // Иконка связи
+            _mouseState.IsDragOver = true; // Установим флаг для отрисовки
+            Invalidate();
+        }
+        else
+        {
+            dragEventArgs.Effect = DragDropEffects.None;
+        }
+    }
+
+    protected override void OnDragLeave( EventArgs e )
+    {
+        base.OnDragLeave( e );
+        _mouseState.IsDragOver = false;
+        Invalidate();
+    }
+
+    protected override void OnDragDrop( DragEventArgs dragEventArgs )
+    {
+        _mouseState.IsDragOver = false;
+        Invalidate();
+
+        base.OnDragDrop( dragEventArgs );
+
+        // Получаем массив путей (даже если бросили один файл)
+        string[] files = ( string[] )dragEventArgs.Data.GetData( DataFormats.FileDrop );
+
+        if ( files is { Length: > 0 } && !IsSeparator )
+        {
+            string arguments = string.Join( " ", files.Select( f => $"\"{f}\"" ) );
+
+            try
+            {
+                ButtonLeftClick?.Invoke( this, arguments );
+            }
+            catch ( Exception ex )
+            {
+                MessageBox.Show( $"Ошибка запуска: {ex.Message}" );
+            }
+        }
     }
 
     protected override void OnParentChanged( EventArgs e )
@@ -159,7 +210,7 @@ public class LaunchButtonView : BaseControl
                     DeleteButtonClick?.Invoke( this );
                 }
                 else
-                    ButtonLeftClick?.Invoke( this );
+                    ButtonLeftClick?.Invoke( this, null );
             }
         }
         else if ( e.Button == MouseButtons.Right )

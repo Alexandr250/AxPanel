@@ -32,7 +32,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public event Action<ButtonContainerView> ContainerSelected;
     public event Action<List<LaunchItem>> ItemCollectionChanged;
     public event Action<ButtonContainerView> ContainerDeleteRequested;
-    public event Action<LaunchButtonView> ProcessStartRequested;
+    public event Action<LaunchButtonView, object?> ProcessStartRequested;
     public event Action<LaunchButtonView> ProcessStartAsAdminRequested;
     public event Action<LaunchButtonView> GroupStartRequested;
     public event Action<string> ExplorerOpenRequested;
@@ -298,7 +298,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             };
 
             // Остальные подписки
-            btn.ButtonLeftClick += ( button ) => ProcessStartRequested?.Invoke( button );
+            btn.ButtonLeftClick += ( button, args ) => ProcessStartRequested?.Invoke( button, args );
             btn.ButtonRightClick += b => ExplorerOpenRequested?.Invoke( b.BaseControlPath );
             btn.ButtonMiddleClick += ( button ) => ProcessStartAsAdminRequested?.Invoke( button );
 

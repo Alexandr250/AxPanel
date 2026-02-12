@@ -9,4 +9,5 @@ public struct MouseState
     public bool ButtonMoved { get; set; } = false;
 
     public bool MouseInGroupPlay { get; set; } = false;
+    public bool IsDragOver { get; set; }
 }

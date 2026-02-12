@@ -57,6 +57,7 @@
     "DeleteButtonColor": "#E97B33",
     "DeleteButtonBorderColor": "#B35213",
     "RunningColor": "#21A121",
+    "DropTargetColor": "#0058EE",
     "PulseSpeed": 0.004,
     "PulseLineWidth": 2.0,
     "ActivityMarkerWidth": 4,

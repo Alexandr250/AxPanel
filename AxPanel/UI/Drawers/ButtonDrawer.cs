@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices.JavaScript;
+using System.Windows.Forms;
 using AxPanel.UI.Themes;
 using AxPanel.UI.UserControls;
 
@@ -63,7 +64,7 @@ public class ButtonDrawer
         }
 
         // 4. Индикаторы CPU/RAM (только в режиме списка)
-        if ( !isCompact && control is LaunchButtonView lb && lb.Stats.IsRunning )
+        if ( !isCompact && control is LaunchButtonView { Stats.IsRunning: true } lb )
         {
             int margin = _theme.ButtonStyle.MeterMargin;
             int indicatorWidth = _theme.ButtonStyle.MeterWidth;
@@ -81,6 +82,13 @@ public class ButtonDrawer
             string ramText = lb.Stats.RamMb >= 1024 ? $"{( lb.Stats.RamMb / 1024f ):N1}G" : $"{lb.Stats.RamMb:0}M";
             float ramPercent = ( lb.Stats.RamMb / 1024f ) * 100f;
             DrawSmallMeter( g, ramRect, ramPercent, ramText, _theme.ButtonStyle.RamIndicatorColor );
+        }
+
+        // 4.1 DND-рамка
+        if ( mouseState.IsDragOver )
+        {
+            using var p = new Pen( _theme.ButtonStyle.DropTargetColor, 6 );
+            g.DrawRectangle( p, 1, 1, control.Width - 2, control.Height - 2 );
         }
 
         // 5. Границы
@@ -109,7 +117,11 @@ public class ButtonDrawer
             g.FillRectangle( runningBrush, 0, 2, _theme.ButtonStyle.ActivityMarkerWidth, control.Height - 4 );
         }
 
-        //бэдж
+        DrawBadge( control, g );
+    }
+
+    private void DrawBadge( BaseControl control, Graphics g )
+    {
         if ( control is LaunchButtonView { Stats.IsRunning: true, Stats.WindowCount: > 0 } lb2 )
         {
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -141,7 +153,6 @@ public class ButtonDrawer
             // Возвращаем режим без сглаживания для четких линий границ кнопок
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
         }
-
     }
 
     private void DrawIconAndText( BaseControl control, MouseState mouseState, bool isCompact, Graphics g, int iconAreaSize, int reservedRight, StringFormat format )

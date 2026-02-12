@@ -124,8 +124,9 @@ public class ProcessMonitor : IDisposable
                                 StartTime = process.StartTime
                             };
                         }
-                        catch
+                        catch( Exception ex )
                         {
+                            Debug.WriteLine( ex );
                             stats[ path ] = new ProcessStats { IsRunning = true, CpuUsage = 0 };
                         }
                     }

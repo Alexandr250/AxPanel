@@ -107,8 +107,8 @@ public class RootContainerView : Panel
             ArrangeContainers();
 
         // Привязываем запуск одиночного процесса
-        container.ProcessStartRequested += btn =>
-            _containerService.RunProcess( btn );
+        container.ProcessStartRequested += ( btn, args ) =>
+            _containerService.RunProcess( btn, false, args );
 
         // Привязываем запуск одиночного процесса от имени администратора
         container.ProcessStartAsAdminRequested += btn =>
@@ -294,21 +294,6 @@ public class RootContainerView : Panel
         Invalidate(); // Обновить визуальное состояние
     }
 
-    protected override void OnDoubleClick( EventArgs e )
-    {
-        base.OnDoubleClick( e );
-
-        // Проверяем каждую кнопку футера
-        //for ( int i = 0; i < 3; i++ )
-        //{
-        //    if ( GetFooterBtnRect( i ).Contains( e.Location ) )
-        //    {
-        //        ExecuteCommand( i );
-        //        break;
-        //    }
-        //}
-    }
-
     protected override void OnMouseDown( MouseEventArgs e )
     {
         base.OnMouseDown( e );
@@ -446,47 +431,7 @@ public class RootContainerView : Panel
             ArrangeContainers();
         }
     }
-
-    //protected override void OnParentChanged( EventArgs e )
-    //{
-    //    base.OnParentChanged( e );
-
-    //    if ( Parent != null )
-    //    {
-    //        int headerHeight = 30;
-    //        int borderWidth = 5;
-
-    //        try
-    //        {
-    //            var config = ConfigManager.GetMainConfig();
-    //            if ( config != null )
-    //            {
-    //                headerHeight = config.HeaderHeight;
-    //                borderWidth = config.BorderWidth;
-    //            }
-    //        }
-    //        catch { /* дефолтные значения при ошибке */ }
-
-    //        // Отключаем Dock, чтобы ручные координаты работали
-    //        this.Dock = DockStyle.None;
-
-    //        // Установка координат с учетом всех отступов
-    //        this.Left = borderWidth;
-    //        this.Top = headerHeight;
-
-    //        // Ширина: ширина родителя минус левый и правый отступы
-    //        this.Width = Parent.Width - ( borderWidth * 2 );
-
-    //        // Высота: высота родителя минус верхний (Header) и нижний (Border) отступы
-    //        this.Height = Parent.Height - headerHeight - borderWidth;
-
-    //        // Привязки для автоматического ресайза при растягивании окна
-    //        this.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-
-    //        ArrangeContainers();
-    //    }
-    //}
-
+    
     protected override void Dispose( bool disposing )
     {
         if ( disposing )

@@ -1,0 +1,62 @@
+[
+    {
+        "Name": "Notepad++",
+        "FilePath": "Apps\\Notepad++\\notepad++.exe",
+        "DownloadUrl": "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.7.1/npp.8.7.1.portable.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 0,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "7-Zip",
+        "FilePath": "Apps\\7zip\\x64\\7zFM.exe",
+        "DownloadUrl": "https://www.7-zip.org/a/7z2409-x64.exe",
+        "IsArchive": false,
+        "ClicksCount": 0,
+        "Id": 1,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "Autoruns",
+        "FilePath": "Apps\\Autoruns\\autoruns64.exe",
+        "DownloadUrl": "https://download.sysinternals.com/files/Autoruns.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 2,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "Process Explorer",
+        "FilePath": "Apps\\ProcessExplorer\\procexp64.exe",
+        "DownloadUrl": "https://download.sysinternals.com/files/ProcessExplorer.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 3,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "TCPView",
+        "FilePath": "Apps\\TCPView\\Tcpview64.exe",
+        "DownloadUrl": "https://download.sysinternals.com/files/TCPView.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 4,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "VLC Player",
+        "FilePath": "Apps\\VLC\\vlc.exe",
+        "DownloadUrl": "https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 5,
+        "Height": 0,
+        "IsSeparator": false
+    }
+]

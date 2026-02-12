@@ -374,6 +374,17 @@ public class ButtonStyle : IDisposable
         set { MeterBorderDarkPen?.Dispose(); MeterBorderDarkPen = new Pen( ColorTranslator.FromHtml( value ), 1f ); }
     }
 
+    // Цвет подсветки при наведении перетаскиваемого файла (Drag-and-Drop)
+    [JsonIgnore]
+    public Color DropTargetColor { get; set; } = Color.FromArgb( 255, 255, 165, 0 ); // По умолчанию Orange
+
+    [JsonPropertyName( "DropTargetColor" )]
+    public string DropTargetColorHex
+    {
+        get => ColorTranslator.ToHtml( DropTargetColor );
+        set => DropTargetColor = ColorTranslator.FromHtml( value );
+    }
+
     // Очистка ресурсов
     public void Dispose()
     {

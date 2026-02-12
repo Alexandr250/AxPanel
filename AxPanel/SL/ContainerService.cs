@@ -1,47 +1,85 @@
-﻿using AxPanel.UI.UserControls;
+﻿using AxPanel.Model;
+using AxPanel.UI.UserControls;
 
 namespace AxPanel.SL;
 
 public class ContainerService
 {
     /// <summary>
-    /// Запуск одиночного процесса с обновлением состояния кнопки
+    /// Основной метод запуска. Поддерживает асинхронную загрузку портативок.
     /// </summary>
-    public void RunProcess( LaunchButtonView btn )
-    {
-        RunProcess( btn, false );
-    }
-
-    /// <summary>
-    /// Запуск одиночного процесса с обновлением состояния кнопки
-    /// </summary>
-    public void RunProcess( LaunchButtonView btn, bool rusAsAdmin )
+    public async void RunProcess( LaunchButtonView btn, bool runAsAdmin, object? args = null )
     {
         if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
             return;
 
-        if ( ProcessManager.Start( btn.BaseControlPath, rusAsAdmin ) )
+        // 1. Проверяем: если файла нет, но это PortableItem (лежит в Tag) — качаем
+        if ( !File.Exists( btn.BaseControlPath ) && btn.Tag is PortableItem portable )
         {
-            var currentStats = btn.Stats;
-            currentStats.IsRunning = true;
-            btn.Stats = currentStats;
-            btn.Invalidate();
+            // Визуальный фидбек: можно временно изменить текст или включить флаг загрузки
+            string originalText = btn.Text;
+
+            bool success = await DownloadManager.DownloadAndPrepare( portable, status =>
+            {
+                // Обновляем статус прямо на кнопке через Invoke (т.к. асинхронно)
+                btn.BeginInvoke( new Action( () => {
+                    btn.Text = status;
+                    btn.Invalidate();
+                } ) );
+            } );
+
+            if ( !success )
+            {
+                MessageBox.Show( $"Ошибка при подготовке {portable.Name}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error );
+                btn.Text = originalText;
+                return;
+            }
+
+            btn.Text = originalText; // Возвращаем название после загрузки
+        }
+
+        // 2. Если файл теперь существует (или был сразу) — запускаем
+        if ( File.Exists( btn.BaseControlPath ) )
+        {
+            if ( ProcessManager.Start( btn.BaseControlPath, runAsAdmin, args ) )
+            {
+                // Обновляем статистику "запущенности" (монитор подхватит остальное)
+                var currentStats = btn.Stats;
+                currentStats.IsRunning = true;
+                btn.Stats = currentStats;
+                btn.Invalidate();
+            }
+        }
+        else
+        {
+            MessageBox.Show( $"Файл не найден: {btn.BaseControlPath}", "Ошибка запуска", MessageBoxButtons.OK, MessageBoxIcon.Warning );
         }
     }
 
     /// <summary>
-    /// Запускает переданный список кнопок
+    /// Групповой запуск (например, всех утилит под разделителем)
     /// </summary>
     public void RunProcessGroup( IEnumerable<LaunchButtonView> groupButtons )
     {
-        foreach ( var btn in groupButtons )
+        // Групповой запуск делаем через Task.Run, чтобы не фризить UI, если файлов много
+        Task.Run( () =>
         {
-            RunProcess( btn );
-        }
+            foreach ( var btn in groupButtons )
+            {
+                // Вызываем обычный запуск для каждой кнопки
+                // (BeginInvoke внутри RunProcess позаботится о потокобезопасности UI)
+                RunProcess( btn, false );
+            }
+        } );
     }
 
     /// <summary>
-    /// Открытие расположения файла
+    /// Простая обертка для запуска без параметров
+    /// </summary>
+    public void RunProcess( LaunchButtonView btn ) => RunProcess( btn, false, null );
+
+    /// <summary>
+    /// Открытие расположения файла в проводнике
     /// </summary>
     public void OpenLocation( string path )
     {

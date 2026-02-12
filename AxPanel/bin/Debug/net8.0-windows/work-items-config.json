@@ -131,40 +131,40 @@
           "IsSeparator": false
         },
         {
-          "Name": "Total commander",
-          "FilePath": "C:\\Program Files\\Total Commander 9.50\\TOTALCMD64.EXE",
+          "Name": "SourceTree",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\SourceTree\\SourceTree.exe",
           "ClicksCount": 5,
           "Id": 16,
           "Height": 62,
           "IsSeparator": false
         },
         {
-          "Name": "SourceTree",
-          "FilePath": "C:\\Users\\17264\\AppData\\Local\\SourceTree\\SourceTree.exe",
+          "Name": "Unity.exe",
+          "FilePath": "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.46f1\\Editor\\Unity.exe",
           "ClicksCount": 4,
           "Id": 17,
           "Height": 62,
           "IsSeparator": false
         },
         {
-          "Name": "SDFViewer.exe",
-          "FilePath": "C:\\Program Files (x86)\\Flyhoward\\SDF Viewer\\SDFViewer.exe",
+          "Name": "EXCEL.EXE",
+          "FilePath": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
           "ClicksCount": 3,
           "Id": 18,
           "Height": 62,
           "IsSeparator": false
         },
         {
-          "Name": "Unity.exe",
-          "FilePath": "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.46f1\\Editor\\Unity.exe",
+          "Name": "SDFViewer.exe",
+          "FilePath": "C:\\Program Files (x86)\\Flyhoward\\SDF Viewer\\SDFViewer.exe",
           "ClicksCount": 2,
           "Id": 19,
           "Height": 62,
           "IsSeparator": false
         },
         {
-          "Name": "EXCEL.EXE",
-          "FilePath": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
+          "Name": "Total commander",
+          "FilePath": "C:\\Program Files\\Total Commander 9.50\\TOTALCMD64.EXE",
           "ClicksCount": 1,
           "Id": 20,
           "Height": 62,
