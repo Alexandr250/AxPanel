@@ -24,8 +24,8 @@
   "ContainerStyle": {
     "ScrollValueIncrement": 10,
     "HeaderHeight": 28,
-    "ButtonSize": 18,
-    "ButtonMargin": 8,
+    "ButtonSize": 28,
+    "ButtonMargin": 2,
     "BackColor": "#D1D9E6",
     "Font": "Segoe UI Semibold, 10, Regular",
     "BorderLightColor": "#FFFFFF",
@@ -43,8 +43,8 @@
     "DeleteBtnCrossWidth": 1.5
   },
   "ButtonStyle": {
-    "DefaultHeight": 62,
-    "DeleteButtonWidth": 58,
+    "DefaultHeight": 92,
+    "DeleteButtonWidth": 92,
     "SpaceHeight": 2,
     "MinFont": "Segoe UI, 7, Bold",
     "BorderLightColor": "#FFFFFF",

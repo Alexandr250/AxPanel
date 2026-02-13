@@ -11,7 +11,7 @@ public class ButtonStyle : IDisposable
 {
     // Группировка констант
     public int DefaultHeight { get; set; } = 36; // 42
-    public int DefaultWidth { get; set; } = 60;
+    public int DefaultWidth { get; set; } = 100;
 
     public int DeleteButtonWidth { get; set; } = 50;
     public int SpaceHeight { get; set; } = 1;

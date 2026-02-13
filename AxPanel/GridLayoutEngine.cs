@@ -7,7 +7,7 @@ namespace AxPanel
 {
     public class GridLayoutEngine : ILayoutEngine
     {
-        private int _defaultButtonWidth = 60;
+        private int _defaultButtonWidth = 80;
         public int Gap { get; set; } = 3;
 
         public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )

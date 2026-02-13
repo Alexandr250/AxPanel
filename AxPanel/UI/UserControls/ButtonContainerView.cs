@@ -353,7 +353,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                 Dock = DockStyle.None, // Прямой запрет на стыковку
                 Anchor = AnchorStyles.Top | AnchorStyles.Left, // Фиксируем только левый верхний угол
                 Width = this.Width,
-                Height = item.Height > 0 ? item.Height : _theme.ButtonStyle.DefaultHeight,
+                Height = /*item.Height > 0 ? item.Height : */_theme.ButtonStyle.DefaultHeight,
                 Text = item.Name,
                 BaseControlPath = item.FilePath,
                 Arguments = item.Arguments

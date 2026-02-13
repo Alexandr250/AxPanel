@@ -1,13 +1,13 @@
 {
-  "Top": 8,
-  "Left": 1659,
-  "Width": 243,
-  "Height": 1004,
+  "Top": 6,
+  "Left": 1497,
+  "Width": 371,
+  "Height": 977,
   "ScroolValueIncrement": 0,
   "HeaderHeight": 30,
   "ContainerHeaderHeight": 0,
   "BorderWidth": 5,
-  "ThemeFileName": "neumorphism.json",
+  "ThemeFileName": "luna.json",
   "ItemsConfig": "work-items-config.json",
   "LayoutMode": "Grid"
 }
