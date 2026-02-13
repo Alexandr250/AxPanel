@@ -30,23 +30,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\17264\\.nuget\\packages\\": {},
+    "C:\\Users\\av.bushkevich\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
+      "projectUniqueName": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
       "projectName": "AxPanelWinFormsTest",
-      "projectPath": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
-      "packagesPath": "C:\\Users\\17264\\.nuget\\packages\\",
-      "outputPath": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\obj\\",
+      "projectPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
+      "packagesPath": "C:\\Users\\av.bushkevich\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\17264\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\av.bushkevich\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -62,8 +62,8 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "projectReferences": {
-            "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanel.csproj": {
-              "projectPath": "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanel.csproj"
+            "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\AxPanel.csproj": {
+              "projectPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\AxPanel.csproj"
             }
           }
         }
@@ -72,11 +72,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -101,7 +96,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

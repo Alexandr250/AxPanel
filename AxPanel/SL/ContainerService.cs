@@ -14,10 +14,12 @@ public class ContainerService
             return;
 
         // 1. Проверяем: если файла нет, но это PortableItem (лежит в Tag) — качаем
-        if ( !File.Exists( btn.BaseControlPath ) && btn.Tag is PortableItem portable )
+        if ( !File.Exists( btn.BaseControlPath ) && !string.IsNullOrEmpty( btn.DownloadUrl ) )
         {
             // Визуальный фидбек: можно временно изменить текст или включить флаг загрузки
             string originalText = btn.Text;
+
+            var portable = new PortableItem() { DownloadUrl = btn.DownloadUrl, FilePath = btn.BaseControlPath, Name = btn.Text, IsArchive = btn.IsArchive };
 
             bool success = await DownloadManager.DownloadAndPrepare( portable, status =>
             {

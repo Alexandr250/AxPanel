@@ -11,9 +11,9 @@
     },
     {
         "Name": "7-Zip",
-        "FilePath": "Apps\\7zip\\x64\\7zFM.exe",
-        "DownloadUrl": "https://www.7-zip.org/a/7z2409-x64.exe",
-        "IsArchive": false,
+        "FilePath": "Apps\\7-zip\\7-ZipPortable\\7-ZipPortable.exe",
+        "DownloadUrl": "https://7zip-soft.com/go/?https://dl.7zip-soft.com/files/7-ZipPortable.zip",
+        "IsArchive": true,
         "ClicksCount": 0,
         "Id": 1,
         "Height": 0,
