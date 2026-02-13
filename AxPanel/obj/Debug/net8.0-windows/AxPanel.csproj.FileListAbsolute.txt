@@ -4,7 +4,6 @@ C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\bin\Debug\net8.0-windows\AxP
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\bin\Debug\net8.0-windows\AxPanel.dll
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\bin\Debug\net8.0-windows\AxPanel.pdb
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.MainView.resources
-C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.UI.UserControls.AxPanelMainContainer.resources
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.csproj.GenerateResource.cache
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.AssemblyInfoInputs.cache
@@ -35,3 +34,5 @@ D:\projects\git-source\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.genrunti
 D:\projects\git-source\AxPanel\AxPanel\obj\Debug\net8.0-windows\ref\AxPanel.dll
 D:\projects\git-source\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.UI.UserControls.RootContainerView.resources
 D:\projects\git-source\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.UI.UserControls.ButtonContainerView.resources
+C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.UI.UserControls.ButtonContainerView.resources
+C:\Users\av.bushkevich\source\repos\AxPanel\AxPanel\obj\Debug\net8.0-windows\AxPanel.UI.UserControls.RootContainerView.resources

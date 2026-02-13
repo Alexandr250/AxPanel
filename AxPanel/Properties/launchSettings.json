@@ -2,7 +2,7 @@
   "profiles": {
     "Debug": {
       "commandName": "Executable",
-      "executablePath": "D:\\projects\\git-source\\AxPanel\\AxPanel\\bin\\Debug\\net8.0-windows\\AxPanel.exe"
+      "executablePath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\bin\\Debug\\net8.0-windows\\AxPanel.exe"
     }
   }
 }

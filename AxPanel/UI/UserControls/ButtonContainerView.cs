@@ -297,6 +297,12 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                 BaseControlPath = item.FilePath,
             };
 
+            if( item is PortableItem portable )
+            {
+                btn.DownloadUrl = portable.DownloadUrl;
+                btn.IsArchive = portable.IsArchive;
+            }
+
             // Остальные подписки
             btn.ButtonLeftClick += ( button, args ) => ProcessStartRequested?.Invoke( button, args );
             btn.ButtonRightClick += b => ExplorerOpenRequested?.Invoke( b.BaseControlPath );
