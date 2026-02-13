@@ -161,6 +161,14 @@ public class RootContainerView : Panel
         // Не забываем отписать при удалении
         container.ContainerDeleteRequested += c => _animator.Unregister( c );
 
+        container.DragHoverActivated += ( panel ) =>
+        {
+            if ( Selected != panel )
+            {
+                Selected = panel; // Это автоматически запустит StartAnimateArrange()
+            }
+        };
+
         return container;
     }
 

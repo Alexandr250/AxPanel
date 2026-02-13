@@ -58,5 +58,55 @@
         "Id": 5,
         "Height": 0,
         "IsSeparator": false
+    },
+    {
+        "Name": "WinMerge",
+        "FilePath": "Apps\\WinMerge\\WinMergeU.exe",
+        "DownloadUrl": "https://github.com/WinMerge/winmerge/releases/download/v2.16.54/winmerge-2.16.54-exe.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 6,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "SpaceSniffer",
+        "FilePath": "Apps\\SpaceSniffer\\SpaceSniffer.exe",
+        "DownloadUrl": "https://www.uderzo.it/main_products/space_sniffer/files/spacesniffer_2_1_0_21_x64.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 7,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "FastStone Image Viewer",
+        "FilePath": "Apps\\FSViewer83\\FSViewer.exe",
+        "DownloadUrl": "https://www.faststonesoft.net/DN/FSViewer83.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 8,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "DnSpy32",
+        "FilePath": "Apps\\dnspy32\\dnSpy.exe",
+        "DownloadUrl": "https://github.com/dnSpy/dnSpy/releases/download/v6.1.8/dnSpy-net-win32.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 9,
+        "Height": 0,
+        "IsSeparator": false
+    },
+    {
+        "Name": "DnSpy64",
+        "FilePath": "Apps\\dnspy64\\dnSpy.exe",
+        "DownloadUrl": "https://github.com/dnSpy/dnSpy/releases/download/v6.1.8/dnSpy-net-win64.zip",
+        "IsArchive": true,
+        "ClicksCount": 0,
+        "Id": 10,
+        "Height": 0,
+        "IsSeparator": false
     }
 ]

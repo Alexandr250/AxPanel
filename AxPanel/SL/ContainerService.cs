@@ -13,21 +13,20 @@ public class ContainerService
         if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
             return;
 
-        // 1. Проверяем: если файла нет, но это PortableItem (лежит в Tag) — качаем
         if ( !File.Exists( btn.BaseControlPath ) && !string.IsNullOrEmpty( btn.DownloadUrl ) )
         {
             // Визуальный фидбек: можно временно изменить текст или включить флаг загрузки
             string originalText = btn.Text;
 
-            var portable = new PortableItem() { DownloadUrl = btn.DownloadUrl, FilePath = btn.BaseControlPath, Name = btn.Text, IsArchive = btn.IsArchive };
+            PortableItem portable = new() { DownloadUrl = btn.DownloadUrl, FilePath = btn.BaseControlPath, Name = btn.Text, IsArchive = btn.IsArchive };
 
             bool success = await DownloadManager.DownloadAndPrepare( portable, status =>
             {
                 // Обновляем статус прямо на кнопке через Invoke (т.к. асинхронно)
-                btn.BeginInvoke( new Action( () => {
+                btn.BeginInvoke( () => {
                     btn.Text = status;
                     btn.Invalidate();
-                } ) );
+                } );
             } );
 
             if ( !success )
@@ -46,7 +45,7 @@ public class ContainerService
             if ( ProcessManager.Start( btn.BaseControlPath, runAsAdmin, args ) )
             {
                 // Обновляем статистику "запущенности" (монитор подхватит остальное)
-                var currentStats = btn.Stats;
+                ProcessStats currentStats = btn.Stats;
                 currentStats.IsRunning = true;
                 btn.Stats = currentStats;
                 btn.Invalidate();
@@ -66,7 +65,7 @@ public class ContainerService
         // Групповой запуск делаем через Task.Run, чтобы не фризить UI, если файлов много
         Task.Run( () =>
         {
-            foreach ( var btn in groupButtons )
+            foreach ( LaunchButtonView btn in groupButtons )
             {
                 // Вызываем обычный запуск для каждой кнопки
                 // (BeginInvoke внутри RunProcess позаботится о потокобезопасности UI)
@@ -78,7 +77,8 @@ public class ContainerService
     /// <summary>
     /// Простая обертка для запуска без параметров
     /// </summary>
-    public void RunProcess( LaunchButtonView btn ) => RunProcess( btn, false, null );
+    public void RunProcess( LaunchButtonView btn ) => 
+        RunProcess( btn, false, null );
 
     /// <summary>
     /// Открытие расположения файла в проводнике

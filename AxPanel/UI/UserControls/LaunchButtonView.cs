@@ -47,6 +47,27 @@ public class LaunchButtonView : BaseControl
         AutoSize = false;
 
         AllowDrop = true;
+
+        this.GiveFeedback += OnGiveFeedback;
+    }
+
+    private void OnGiveFeedback( object sender, GiveFeedbackEventArgs e )
+    {
+        // Система просит обратную связь - мы используем этот момент, чтобы подвинуть кнопку
+        e.UseDefaultCursors = true;
+
+        if ( IsDragging && Parent != null )
+        {
+            // Получаем текущую позицию мыши (экранную) и переводим в координаты родителя
+            Point clientPos = Parent.PointToClient( Cursor.Position );
+
+            // Смещаем кнопку так, чтобы курсор был там же, где в начале захвата
+            this.Left = clientPos.X - _lastLocation.X;
+            this.Top = clientPos.Y - _lastLocation.Y;
+
+            // Оповещаем контейнер, чтобы он раздвигал другие кнопки
+            Dragging?.Invoke( this );
+        }
     }
 
     protected override void OnDragEnter( DragEventArgs dragEventArgs )
@@ -175,20 +196,44 @@ public class LaunchButtonView : BaseControl
             // Если сдвинули хоть немного — двигаем физически
             if ( Math.Abs( deltaX ) > 2 || Math.Abs( deltaY ) > 2 )
             {
-                if( !_mouseState.ButtonMoved )
-                    MovingChanged?.Invoke( new Rectangle( Left, Top, Width, Height ) );
+                //if( !_mouseState.ButtonMoved )
+                //    MovingChanged?.Invoke( new Rectangle( Left, Top, Width, Height ) );
+
+                //_mouseState.ButtonMoved = true;
+
+                //if ( !IsDragging )
+                //{
+                //    IsDragging = true;
+                //}
+
+                //// Устанавливаем позицию напрямую от стартовой точки
+                //// Это исключает "накопление ошибки" при быстрых рывках
+                //this.Left = _dragStartControlPos.X + deltaX;
+                //this.Top = _dragStartControlPos.Y + deltaY;
+
+                //Dragging?.Invoke( this );
+
+                //this.Capture = false;
+
+                //// 3. Запускаем системный DragDrop. 
+                //// ВНИМАНИЕ: код ПАУЗИТСЯ здесь до момента отпускания мыши (Drop)
+                //var effect = this.DoDragDrop( this, DragDropEffects.Move );
+
+                //// 4. После того как Drop произошел, сбрасываем флаг
+                //IsDragging = false;
+                //Invalidate();
 
                 _mouseState.ButtonMoved = true;
-                
-
                 IsDragging = true;
+                this.Capture = false;
 
-                // Устанавливаем позицию напрямую от стартовой точки
-                // Это исключает "накопление ошибки" при быстрых рывках
-                this.Left = _dragStartControlPos.X + deltaX;
-                this.Top = _dragStartControlPos.Y + deltaY;
+                // Запускаем - поток замрет здесь, но OnGiveFeedback будет "простреливать" изнутри
+                this.DoDragDrop( this, DragDropEffects.Move );
 
-                Dragging?.Invoke( this );
+                // Сюда попадем только когда отпустим мышь
+                IsDragging = false;
+                _mouseState.ButtonMoved = false;
+                Invalidate();
             }
         }
 
@@ -210,7 +255,10 @@ public class LaunchButtonView : BaseControl
                     DeleteButtonClick?.Invoke( this );
                 }
                 else
-                    ButtonLeftClick?.Invoke( this, null );
+                {
+                    string? args = string.IsNullOrEmpty( Arguments ) ? null : Arguments;
+                    ButtonLeftClick?.Invoke( this, args );
+                }
             }
         }
         else if ( e.Button == MouseButtons.Right )

@@ -180,4 +180,13 @@ public class WindowStyle
 
     // Толщину границы тоже выносим, чтобы в Win95 она была жирной, а в Pastel - 1px
     public int BorderWidth { get; set; } = 5;
+
+    [JsonIgnore] public Color AccentColor { get; set; } = Color.FromArgb( 0, 120, 215 );
+
+    [JsonPropertyName( "AccentColor" )]
+    public string AccentHex
+    {
+        get => ColorTranslator.ToHtml( AccentColor );
+        set => AccentColor = ColorTranslator.FromHtml( value );
+    }
 }

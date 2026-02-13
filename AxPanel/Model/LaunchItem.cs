@@ -6,6 +6,8 @@ public class LaunchItem
 
     public string FilePath { get; set; }
 
+    public string Arguments { get; set; }
+
     public int ClicksCount { get; set; }
 
     public int Id { get; set; }

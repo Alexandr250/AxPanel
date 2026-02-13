@@ -9,6 +9,15 @@ namespace AxPanel
     /// </summary>
     public static class Win32Api
     {
+        [ComImport, Guid( "00000122-0000-0000-C000-000000000046" ), InterfaceType( ComInterfaceType.InterfaceIsIUnknown )]
+        public interface IDropTarget
+        {
+            void DragEnter( [In, MarshalAs( UnmanagedType.Interface )] object pDataObj, [In] int grfKeyState, [In] Point pt, [In, Out] ref int pdwEffect );
+            void DragOver( [In] int grfKeyState, [In] Point pt, [In, Out] ref int pdwEffect );
+            void DragLeave();
+            void Drop( [In, MarshalAs( UnmanagedType.Interface )] object pDataObj, [In] int grfKeyState, [In] Point pt, [In, Out] ref int pdwEffect );
+        }
+
         /// <summary>
         /// Флаг указывает функции SHGetFileInfo, что необходимо извлечь дескриптор иконки (hIcon).
         /// Если этот флаг установлен, вы обязаны вызвать DestroyIcon для освобождения ресурсов.

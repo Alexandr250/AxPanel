@@ -11,6 +11,8 @@ namespace AxPanel.UI.UserControls;
 
 public partial class ButtonContainerView : BasePanelControl, IAnimatable
 {
+    private readonly System.Windows.Forms.Timer _dragHoverTimer = new() { Interval = 400 }; // 400мс — оптимально
+
     // Сервисы и отрисовка
     private readonly ContainerDrawer _containerDrawer;
     private readonly ITheme _theme;
@@ -25,6 +27,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public ILayoutEngine LayoutEngine { get; set; }
     public IReadOnlyList<LaunchButtonView> Buttons => _buttons;
     public string PanelName { get; set; }
+    public bool IsWaitingForExpand { get; set; }
     public int ScrollValue => _scrollValue;
     ITheme IAnimatable.Theme => _theme;
 
@@ -36,6 +39,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public event Action<LaunchButtonView> ProcessStartAsAdminRequested;
     public event Action<LaunchButtonView> GroupStartRequested;
     public event Action<string> ExplorerOpenRequested;
+    public event Action<ButtonContainerView> DragHoverActivated;
 
     public ButtonContainerView( ITheme theme, MainConfig mainConfig )
     {
@@ -88,9 +92,14 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             }
         };
 
+        _dragHoverTimer.Tick += ( s, e ) =>
+        {
+            _dragHoverTimer.Stop();
+            DragHoverActivated?.Invoke( this ); // Раскрываем панель
+        };
+
         //ElevatedDragDropManager.Instance.EnableDragDrop( Handle );
         //ElevatedDragDropManager.Instance.ElevatedDragDrop += OnElevatedDragDrop;
-
     }
 
     protected override void OnHandleCreated( EventArgs e )
@@ -98,6 +107,8 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         base.OnHandleCreated( e );
 
         AllowDrop = false;
+
+        RegisterDragDrop( this.Handle, new OleDropTarget( this ) );
 
         CHANGEFILTERSTRUCT cfs = new() { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
         
@@ -115,7 +126,21 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             HandleNativeDrop( m.WParam );
             return;
         }
+        if ( m.Msg == WM_COPYDATA )
+        {
+            if ( HandleNativeCopyData( m.LParam ) ) return;
+        }
+        if ( m.Msg == WM_COPYGLOBALDATA )
+        {
+            if ( HandleNativeCopyData( m.LParam ) ) return;
+        }
+
         base.WndProc( ref m );
+    }
+
+    private bool HandleNativeCopyData( IntPtr mLParam )
+    {
+        return true;
     }
 
     protected override void OnDragEnter( DragEventArgs drgevent )
@@ -129,6 +154,12 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         {
             drgevent.Effect = DragDropEffects.Move;
         }
+        else if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) ||
+                  drgevent.Data.GetDataPresent( DataFormats.Text ) ||
+                  drgevent.Data.GetDataPresent( DataFormats.UnicodeText ) )
+        {
+            drgevent.Effect = DragDropEffects.Link;
+        }
         else
         {
             drgevent.Effect = DragDropEffects.None;
@@ -138,6 +169,36 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     protected override void OnDragDrop( DragEventArgs drgevent )
     {
+        if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) || drgevent.Data.GetDataPresent( DataFormats.Text ) )
+        {
+            string url = string.Empty;
+
+            if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) )
+            {
+                var stream = drgevent.Data.GetData( "UniformResourceLocator" ) as Stream;
+                if ( stream != null )
+                {
+                    // Извлекаем URL (обычно в ASCII/UTF8 до нулевого байта)
+                    using var reader = new StreamReader( stream );
+                    url = reader.ReadToEnd().Split( '\0' ).FirstOrDefault() ?? "";
+                }
+            }
+
+            if ( string.IsNullOrEmpty( url ) && drgevent.Data.GetDataPresent( DataFormats.Text ) )
+                url = drgevent.Data.GetData( DataFormats.Text )?.ToString() ?? "";
+
+            if ( !string.IsNullOrEmpty( url ) && Uri.TryCreate( url, UriKind.Absolute, out var uri ) )
+            {
+                var newItem = new LaunchItem
+                {
+                    Name = uri.Host, // В качестве имени берем домен (напр. youtube.com)
+                    FilePath = url
+                };
+                AddButtons( new List<LaunchItem> { newItem } );
+                SyncModelOrder();
+                return;
+            }
+        }
         if ( drgevent.Data.GetDataPresent( DataFormats.FileDrop ) )
         {
             string[] files = ( string[] )drgevent.Data.GetData( DataFormats.FileDrop );
@@ -295,6 +356,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                 Height = item.Height > 0 ? item.Height : _theme.ButtonStyle.DefaultHeight,
                 Text = item.Name,
                 BaseControlPath = item.FilePath,
+                Arguments = item.Arguments
             };
 
             if( item is PortableItem portable )
@@ -615,6 +677,35 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public void StartProcessGroup( LaunchButtonView separator ) => 
         GroupStartRequested?.Invoke( separator );
 
+    public void NotifyDragHover() => DragHoverActivated?.Invoke( this );
+
+    public void StartDragHoverTimer()
+    {
+        _dragHoverTimer.Start();
+        IsWaitingForExpand = true; 
+        Invalidate();
+    }
+
+    public void StopDragHoverTimer()
+    {
+        _dragHoverTimer.Stop();
+        IsWaitingForExpand = false; 
+        Invalidate();
+    }
+
+    private string ResolveShortcut( string lnkPath )
+    {
+        try
+        {
+            // Используем динамику, чтобы не тащить тяжелые COM-библиотеки в зависимости
+            Type shellType = Type.GetTypeFromProgID( "WScript.Shell" );
+            dynamic shell = Activator.CreateInstance( shellType );
+            var shortcut = shell.CreateShortcut( lnkPath );
+            return shortcut.TargetPath;
+        }
+        catch { return lnkPath; }
+    }
+
     protected override void Dispose( bool disposing )
     {
         if ( disposing )
@@ -625,4 +716,98 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     }
 
     #endregion
+
+    private class OleDropTarget : Win32Api.IDropTarget
+    {
+        private readonly ButtonContainerView _parent;
+        public OleDropTarget( ButtonContainerView parent ) => _parent = parent;
+
+        public void DragEnter( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
+        {
+            var data = new DataObject( pDataObj );
+
+            if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
+                pdwEffect = 2; // Move (перетаскивание кнопки)
+            else if ( data.GetDataPresent( DataFormats.FileDrop ) )
+                pdwEffect = 1; // Copy (файлы/ярлыки)
+            else if ( data.GetDataPresent( "UniformResourceLocator" ) || data.GetDataPresent( DataFormats.Text ) )
+                pdwEffect = 4; // Link (ссылки)
+            else
+                pdwEffect = 0;
+
+            _parent.BeginInvoke( new Action( () => _parent.StartDragHoverTimer() ) );
+        }
+
+        public void DragOver( int grfKeyState, Point pt, ref int pdwEffect ) => pdwEffect = 4;
+
+        public void DragLeave()
+        {
+            _parent.BeginInvoke( new Action( () => _parent.StopDragHoverTimer() ) );
+        }
+
+        public void Drop( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
+        {
+            var data = new DataObject( pDataObj );
+
+            if ( data.GetDataPresent( DataFormats.FileDrop ) )
+            {
+                string[] files = ( string[] )data.GetData( DataFormats.FileDrop );
+                var items = new List<LaunchItem>();
+
+                foreach ( string file in files )
+                {
+                    string targetPath = file;
+                    string name = Path.GetFileNameWithoutExtension( file );
+
+                    // Если это ярлык — резолвим его цель
+                    if ( file.EndsWith( ".lnk", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        targetPath = _parent.ResolveShortcut( file );
+                    }
+
+                    items.Add( new LaunchItem { Name = name, FilePath = targetPath } );
+                }
+
+                _parent.BeginInvoke( new Action( () => {
+                    _parent.AddButtons( items );
+                    _parent.SyncModelOrder();
+                } ) );
+
+                pdwEffect = 1; // Copy
+                return;
+            }
+
+            if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
+            {
+                var droppedBtn = data.GetData( typeof( LaunchButtonView ) ) as LaunchButtonView;
+                if ( droppedBtn != null && droppedBtn.Parent != _parent )
+                {
+                    _parent.BeginInvoke( new Action( () => {
+                        _parent.MoveButtonToThisContainer( droppedBtn );
+                    } ) );
+                    pdwEffect = 2; // Move
+                    return;
+                }
+            }
+
+            string url = "";
+
+            if ( data.GetDataPresent( "UniformResourceLocator" ) )
+            {
+                using var ms = data.GetData( "UniformResourceLocator" ) as MemoryStream;
+                if ( ms != null ) url = Encoding.ASCII.GetString( ms.ToArray() ).Split( '\0' )[ 0 ];
+            }
+
+            if ( string.IsNullOrEmpty( url ) && data.GetDataPresent( DataFormats.Text ) )
+                url = data.GetData( DataFormats.Text )?.ToString();
+
+            if ( !string.IsNullOrEmpty( url ) && url.StartsWith( "http" ) )
+            {
+                _parent.BeginInvoke( new Action( () => {
+                    _parent.AddButtons( new List<LaunchItem> { new LaunchItem { Name = new Uri( url ).Host, FilePath = url } } );
+                    _parent.SyncModelOrder();
+                } ) );
+            }
+        }
+    }
 }

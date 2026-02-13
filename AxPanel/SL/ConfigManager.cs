@@ -9,9 +9,12 @@ public class ConfigManager
 {
     private static readonly object _lock = new();
 
-    private static string ItemsConfigFile = "items-config.json";
-    private const string MainConfigFile = "config.json";
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+    private static string _itemsConfigFile = "items-config.json";
+    private const string _mainConfigFile = "config.json";
+    private const string _portableAppsFile = "portable-apps.json";
+    private const string _systemAppsFile = "system-apps.json";
+
+    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
     private static MainConfig? _cachedMainConfig;
     private static MainModel? _cachedModel;
@@ -33,7 +36,7 @@ public class ConfigManager
 
     private static MainConfig ReadMainConfigFromDisk()
     {
-        string path = GetFullPath( MainConfigFile );
+        string path = GetFullPath( _mainConfigFile );
         if ( File.Exists( path ) )
         {
             try
@@ -56,8 +59,8 @@ public class ConfigManager
             _cachedMainConfig = mainConfig;
             try
             {
-                string json = JsonSerializer.Serialize( mainConfig, JsonOptions );
-                File.WriteAllText( GetFullPath( MainConfigFile ), json );
+                string json = JsonSerializer.Serialize( mainConfig, _jsonOptions );
+                File.WriteAllText( GetFullPath( _mainConfigFile ), json );
             }
             catch( Exception ex )
             {
@@ -157,21 +160,24 @@ public class ConfigManager
         return panelModel;
     }
 
-    private static ContainerItem BuildStandartContainer()
+    private static ContainerItem? BuildStandartContainer()
     {
         // Регистрируем переменную для корректного ExpandEnvironmentVariables
         Environment.SetEnvironmentVariable( "SystemDirectory", Environment.SystemDirectory );
 
         try
         {
-            string jsonPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "system-apps.json" );
-            if ( !File.Exists( jsonPath ) ) return null;
+            string jsonPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, _systemAppsFile );
+            
+            if ( !File.Exists( jsonPath ) ) 
+                return null;
 
             string jsonContent = File.ReadAllText( jsonPath );
 
-            var container = JsonSerializer.Deserialize<ContainerItem>( jsonContent );
+            ContainerItem? container = JsonSerializer.Deserialize<ContainerItem>( jsonContent );
 
-            if ( container == null ) return null;
+            if ( container == null ) 
+                return null;
 
             // Фильтруем элементы: раскрываем пути и проверяем наличие файлов
             container.Items = container.Items
@@ -205,31 +211,22 @@ public class ConfigManager
         }
     }
 
-    private static ContainerItem BuildPortableContainer( string fileName = "portable-apps.json" )
+    private static ContainerItem BuildPortableContainer()
     {
-        // 1. Загружаем список портативок через ваш метод
-        List<PortableItem> portableItems = LoadPortableItems( fileName );
+        List<PortableItem> portableItems = LoadPortableItems( _portableAppsFile );
 
-        // 2. Создаем новый контейнер
         ContainerItem container = new()
         {
             Name = "Портативный софт",
-            Type = ContainerType.System, // Или добавьте свой тип в enum, если нужно
+            Type = ContainerType.System,
             Items = []
         };
 
-        if ( portableItems == null || portableItems.Count == 0 )
+        if ( portableItems is not { Count: not 0 } )
             return container;
 
-        foreach ( var item in portableItems )
-        {
-            // Проверяем, существует ли файл. 
-            // Если файла нет, можно либо пропустить, либо оставить для логики загрузки
-            //bool exists = File.Exists( item.FilePath );
-
-            // Добавляем в контейнер
+        foreach ( PortableItem item in portableItems ) 
             container.Items.Add( item );
-        }
 
         return container;
     }
@@ -238,13 +235,15 @@ public class ConfigManager
     {
         try
         {
-            string path = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
-            if ( !File.Exists( path ) ) return new List<PortableItem>();
+            string path = GetFullPath( fileName );
+            
+            if ( !File.Exists( path ) ) 
+                return [];
 
             string json = File.ReadAllText( path );
 
             // Прямая десериализация в список портативок
-            var items = JsonSerializer.Deserialize<List<PortableItem>>( json, new JsonSerializerOptions
+            List<PortableItem>? items = JsonSerializer.Deserialize<List<PortableItem>>( json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             } );
@@ -252,7 +251,7 @@ public class ConfigManager
             if ( items != null )
             {
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                foreach ( var item in items )
+                foreach ( PortableItem item in items )
                 {
                     // Приводим относительный путь Apps\... к абсолютному
                     if ( !string.IsNullOrEmpty( item.FilePath ) )
@@ -260,12 +259,12 @@ public class ConfigManager
                 }
             }
 
-            return items ?? new List<PortableItem>();
+            return items ?? [];
         }
         catch ( Exception ex )
         {
             Debug.WriteLine( $"Ошибка загрузки PortableItems: {ex.Message}" );
-            return new List<PortableItem>();
+            return [];
         }
     }
 
@@ -283,7 +282,7 @@ public class ConfigManager
             try
             {
                 string fileName = GetMainConfig().ItemsConfig ?? "items-config.json";
-                string json = JsonSerializer.Serialize( clone, JsonOptions );
+                string json = JsonSerializer.Serialize( clone, _jsonOptions );
                 File.WriteAllText( GetFullPath( fileName ), json );
             }
             catch( Exception ex )
@@ -301,5 +300,49 @@ public class ConfigManager
 
         string json = File.ReadAllText( path );
         return JsonSerializer.Deserialize<Theme>( json );
+    }
+
+    public static void UpdatePortableJson( string itemName, string newPath )
+    {
+        lock( _lock )
+        {
+            try
+            {
+                string fullPath = GetFullPath( _portableAppsFile );
+
+                if( !File.Exists( fullPath ) )
+                    return;
+
+                string json = File.ReadAllText( fullPath );
+                List<PortableItem>? items = JsonSerializer.Deserialize<List<PortableItem>>( json );
+
+                PortableItem? target = items?.FirstOrDefault( i => i.Name == itemName );
+
+                if( target != null )
+                {
+                    if ( _cachedModel != null )
+                    {
+                        var itemInCache = _cachedModel.Containers
+                            .SelectMany( c => c.Items )
+                            .OfType<PortableItem>()
+                            .FirstOrDefault( i => i.Name.Equals( itemName, StringComparison.OrdinalIgnoreCase ) );
+
+                        if ( itemInCache != null )
+                            itemInCache.FilePath = newPath;
+                    }
+
+                    // Сохраняем путь в ОТНОСИТЕЛЬНОМ виде (как он был в JSON изначально)
+                    string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    target.FilePath = Path.GetRelativePath( baseDir, newPath );
+
+                    string updatedJson = JsonSerializer.Serialize( items, new JsonSerializerOptions { WriteIndented = true } );
+                    File.WriteAllText( fullPath, updatedJson );
+                }
+            }
+            catch( Exception ex )
+            {
+                Debug.WriteLine( $"Ошибка обновления JSON: {ex.Message}" );
+            }
+        }
     }
 }

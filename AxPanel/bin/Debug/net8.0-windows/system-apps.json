@@ -9,6 +9,7 @@
     { "Name": "Диспетчер задач", "FilePath": "%SystemDirectory%\\taskmgr.exe", "ClicksCount": 0, "Id": 4, "Height": 0, "IsSeparator": false },
     { "Name": "Paint", "FilePath": "%SystemDirectory%\\mspaint.exe", "ClicksCount": 0, "Id": 5, "Height": 0, "IsSeparator": false },
     { "Name": "Ножницы", "FilePath": "%SystemDirectory%\\SnippingTool.exe", "ClicksCount": 0, "Id": 6, "Height": 0, "IsSeparator": false },
+	{ "Name": "Очистить корзину", "FilePath": "%SystemDirectory%\\WindowsPowerShell\\v1.0\\powershell.exe", "Arguments": "-Command \"Clear-RecycleBin -Force\"", "ClicksCount": 0, "Id": 28, "Height": 0, "IsSeparator": false },
 
     { "Name": "Администрирование", "FilePath": "", "ClicksCount": 0, "Id": 7, "Height": 0, "IsSeparator": true },
     { "Name": "Командная строка", "FilePath": "%SystemDirectory%\\cmd.exe", "ClicksCount": 0, "Id": 8, "Height": 0, "IsSeparator": false },

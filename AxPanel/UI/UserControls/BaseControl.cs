@@ -31,6 +31,8 @@ public abstract class BaseControl : Control
 
     public bool IsArchive { get; set; }
 
+    public string? Arguments { get; set; }
+
     public string? BaseControlPath
     {
         get => _path;

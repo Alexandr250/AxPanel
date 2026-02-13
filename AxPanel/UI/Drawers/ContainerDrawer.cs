@@ -23,12 +23,29 @@ public class ContainerDrawer
         // 1. Расчет базового прямоугольника заголовка
         Rectangle headerRect = new( 0, 0, container.Width - 1, _theme.ContainerStyle.HeaderHeight - 1 );
 
+        if ( container.IsWaitingForExpand )
+        {
+            // Используем ExitIndicatorColor (оранжево-красный) для привлечения внимания
+            using var waitBrush = new SolidBrush( Color.FromArgb( 60, _theme.WindowStyle.ExitIndicatorColor ) );
+            g.FillRectangle( waitBrush, headerRect );
+        }
+        else
+        {
+            g.FillRectangle( _theme.ContainerStyle.HeaderBrush, headerRect );
+        }
+
         // 2. Отрисовка фона и границ заголовка
-        g.FillRectangle( _theme.ContainerStyle.HeaderBrush, headerRect );
+        // g.FillRectangle( _theme.ContainerStyle.HeaderBrush, headerRect );
         g.DrawLine( _theme.ContainerStyle.BorderLightPen, 0, 0, headerRect.Right, 0 );
         g.DrawLine( _theme.ContainerStyle.BorderLightPen, 0, 0, 0, headerRect.Bottom );
         g.DrawLine( _theme.ContainerStyle.BorderDarkPen, headerRect.Right, 0, headerRect.Right, headerRect.Bottom );
         g.DrawLine( _theme.ContainerStyle.BorderDarkPen, 0, headerRect.Bottom, headerRect.Right, headerRect.Bottom );
+
+        if ( container.IsWaitingForExpand )
+        {
+            using var linePen = new Pen( _theme.WindowStyle.ExitIndicatorColor, 2 );
+            g.DrawLine( linePen, 0, headerRect.Bottom, headerRect.Right, headerRect.Bottom );
+        }
 
         // 3. Отрисовка названия панели
         using StringFormat format = new()

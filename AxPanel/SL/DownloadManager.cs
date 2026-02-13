@@ -1,6 +1,7 @@
 ﻿using AxPanel.Model;
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Text.Json;
 
 namespace AxPanel.SL;
 
@@ -14,11 +15,6 @@ public static class DownloadManager
         {
             onStatusChanged?.Invoke( "Загрузка..." );
 
-            //// 1. Создаем дерево директорий (например, Apps\Notepad++)
-            //string? targetFile = item.FilePath;
-            //string? targetDir = Path.GetDirectoryName( targetFile );
-            //if ( !string.IsNullOrEmpty( targetDir ) ) Directory.CreateDirectory( targetDir );
-
             string? targetFile = item.FilePath;
 
             // 1. Определяем базовую директорию программы (Apps\ИмяПрограммы)
@@ -26,7 +22,7 @@ public static class DownloadManager
             string? targetDir = null;
 
             // Ищем, где в пути находится "Apps"
-            var parts = fullPath.Split( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
+            string[] parts = fullPath.Split( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
             int appsIndex = Array.FindIndex( parts, p => p.Equals( "Apps", StringComparison.OrdinalIgnoreCase ) );
 
             if ( appsIndex != -1 && appsIndex + 1 < parts.Length )
@@ -44,43 +40,97 @@ public static class DownloadManager
 
             // 2. Скачиваем во временный файл, чтобы не "мусорить" при обрыве связи
             string tempFile = Path.GetTempFileName();
-            using ( var response = await _httpClient.GetAsync( item.DownloadUrl, HttpCompletionOption.ResponseHeadersRead ) )
+            using ( HttpResponseMessage response = await _httpClient.GetAsync( item.DownloadUrl, HttpCompletionOption.ResponseHeadersRead ) )
             {
                 response.EnsureSuccessStatusCode();
-                using var fs = new FileStream( tempFile, FileMode.Create, FileAccess.Write, FileShare.None );
-                await response.Content.CopyToAsync( fs );
+                await using FileStream fileStream = new( tempFile, FileMode.Create, FileAccess.Write, FileShare.None );
+                await response.Content.CopyToAsync( fileStream );
             }
 
             // 3. Распаковка или перемещение
-            if ( item.IsArchive )
+            if( item.IsArchive )
             {
                 onStatusChanged?.Invoke( "Распаковка..." );
-                // Извлекаем ZIP прямо в папку назначения
+
                 ZipFile.ExtractToDirectory( tempFile, targetDir!, overwriteFiles: true );
 
-                // Поднимаем файлы, если всё упаковано в одну подпапку
-                NormalizeDirectoryStructure( targetDir! );
+                if( !File.Exists( item.FilePath ) )
+                    NormalizeDirectoryStructure( targetDir! );
+
+                if( !File.Exists( item.FilePath ) )
+                    CheckExeAndEditJsonPath( item, onStatusChanged, targetDir );
             }
             else
             {
-                // Если это одиночный EXE (как 7-zip в твоем списке)
-                if ( File.Exists( targetFile ) ) File.Delete( targetFile );
+                if ( File.Exists( targetFile ) ) 
+                    File.Delete( targetFile );
+
                 File.Move( tempFile, targetFile );
             }
 
             // Чистим временный файл, если он остался (после Move его не будет)
-            if ( File.Exists( tempFile ) ) File.Delete( tempFile );
+            if ( File.Exists( tempFile ) ) 
+                File.Delete( tempFile );
 
             onStatusChanged?.Invoke( item.Name ); // Возвращаем имя
             return true;
         }
         catch ( Exception ex )
         {
-            System.Diagnostics.Debug.WriteLine( $"[DownloadManager] Ошибка: {ex.Message}" );
+            Debug.WriteLine( $"[DownloadManager] Ошибка: {ex.Message}" );
             onStatusChanged?.Invoke( "Ошибка!" );
             return false;
         }
     }
+
+    private static void CheckExeAndEditJsonPath( PortableItem item, Action<string>? onStatusChanged, string? targetDir )
+    {
+        if ( !File.Exists( item.FilePath ) )
+        {
+            onStatusChanged?.Invoke( "Поиск файла..." );
+            string fileName = Path.GetFileName( item.FilePath );
+
+            // Ищем файл рекурсивно в папке приложения
+            string? foundFile = Directory.GetFiles( targetDir!, fileName, SearchOption.AllDirectories ).FirstOrDefault();
+
+            if ( foundFile != null )
+            {
+                item.FilePath = foundFile; // Обновляем путь в объекте
+                //TODO: -- ConfigManager.SaveItemsConfig( ConfigManager.GetModel() ); // Сохраняем новый путь в JSON
+                ConfigManager.UpdatePortableJson( item.Name, foundFile );
+            }
+        }
+    }
+
+    //private static void UpdatePortableJson( string fileName, string itemName, string newPath )
+    //{
+    //    try
+    //    {
+    //        string fullPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
+            
+    //        if( !File.Exists( fullPath ) ) 
+    //            return;
+
+    //        string json = File.ReadAllText( fullPath );
+    //        List<PortableItem>? items = JsonSerializer.Deserialize<List<PortableItem>>( json );
+
+    //        PortableItem? target = items?.FirstOrDefault( i => i.Name == itemName );
+
+    //        if( target != null )
+    //        {
+    //            // Сохраняем путь в ОТНОСИТЕЛЬНОМ виде (как он был в JSON изначально)
+    //            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+    //            target.FilePath = Path.GetRelativePath( baseDir, newPath );
+
+    //            string updatedJson = JsonSerializer.Serialize( items, new JsonSerializerOptions { WriteIndented = true } );
+    //            File.WriteAllText( fullPath, updatedJson );
+    //        }
+    //    }
+    //    catch( Exception ex )
+    //    {
+    //        Debug.WriteLine( $"Ошибка обновления JSON: {ex.Message}" );
+    //    }
+    //}
 
     private static void NormalizeDirectoryStructure( string targetDir )
     {
