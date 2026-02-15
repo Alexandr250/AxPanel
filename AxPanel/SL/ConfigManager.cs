@@ -1,7 +1,9 @@
 using AxPanel.Model;
 using AxPanel.UI.Themes;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 
 namespace AxPanel.SL;
 
@@ -14,7 +16,10 @@ public class ConfigManager
     private const string _portableAppsFile = "portable-apps.json";
     private const string _systemAppsFile = "system-apps.json";
 
-    private static readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions _jsonOptions = new() { 
+        WriteIndented = true, 
+        Encoder = JavaScriptEncoder.Create( UnicodeRanges.All ) 
+    };
 
     private static MainConfig? _cachedMainConfig;
     private static MainModel? _cachedModel;

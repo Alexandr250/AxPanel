@@ -23,7 +23,7 @@
   },
   "ContainerStyle": {
     "ScrollValueIncrement": 8,
-    "HeaderHeight": 25,
+    "HeaderHeight": 35,
     "ButtonSize": 14,
     "ButtonMargin": 2,
     "BackColor": "#FFFFFF",
