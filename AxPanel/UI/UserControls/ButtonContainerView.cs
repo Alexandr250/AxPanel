@@ -19,7 +19,6 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     // UI Состояние
     private readonly List<LaunchButtonView> _buttons = [];
     private int _scrollValue = 0;
-    private int _itemsCount = 0;
 
     private MouseState _mouseState = new();
 
@@ -241,7 +240,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         }
     }
 
-    private void MoveButtonToThisContainer( LaunchButtonView btn )
+    public void MoveButtonToThisContainer( LaunchButtonView btn )
     {
         ButtonContainerView? oldParent = btn.Parent as ButtonContainerView;
 
@@ -332,9 +331,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     public void AddButtons( List<LaunchItem> items )
     {
-        if ( items == null || items.Count == 0 ) return;
+        if ( items == null || items.Count == 0 ) 
+            return;
+
         CreateButtonControls( items );
-        _itemsCount += items.Count;
         SyncState();
     }
 
@@ -521,7 +521,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         return _buttons.Count - 1;
     }
 
-    private void SyncModelOrder()
+    public void SyncModelOrder()
     {
         // Извлекаем LaunchItem из каждой кнопки в их текущем порядке
         // (Убедись, что у тебя в LaunchButtonView есть ссылка на исходный LaunchItem или все его данные)
@@ -665,20 +665,9 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         Invalidate();
     }
 
-    private string ResolveShortcut( string lnkPath )
+    public string ResolveShortcut( string lnkPath )
     {
-        try
-        {
-            // Используем динамику, чтобы не тащить тяжелые COM-библиотеки в зависимости
-            Type shellType = Type.GetTypeFromProgID( "WScript.Shell" );
-            dynamic shell = Activator.CreateInstance( shellType );
-            dynamic? shortcut = shell.CreateShortcut( lnkPath );
-            return shortcut.TargetPath;
-        }
-        catch
-        {
-            return lnkPath;
-        }
+        return ShortcutHelper.Resolve( lnkPath );
     }
 
     protected override void Dispose( bool disposing )
@@ -690,99 +679,5 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         base.Dispose( disposing );
     }
 
-    #endregion
-
-    private class OleDropTarget : Win32Api.IDropTarget
-    {
-        private readonly ButtonContainerView _parent;
-        public OleDropTarget( ButtonContainerView parent ) => _parent = parent;
-
-        public void DragEnter( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
-        {
-            DataObject data = new( pDataObj );
-
-            if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
-                pdwEffect = 2; // Move (перетаскивание кнопки)
-            else if ( data.GetDataPresent( DataFormats.FileDrop ) )
-                pdwEffect = 1; // Copy (файлы/ярлыки)
-            else if ( data.GetDataPresent( "UniformResourceLocator" ) || data.GetDataPresent( DataFormats.Text ) )
-                pdwEffect = 4; // Link (ссылки)
-            else
-                pdwEffect = 0;
-
-            _parent.BeginInvoke( () => _parent.StartDragHoverTimer() );
-        }
-
-        public void DragOver( int grfKeyState, Point pt, ref int pdwEffect ) => pdwEffect = 4;
-
-        public void DragLeave()
-        {
-            _parent.BeginInvoke( () => _parent.StopDragHoverTimer() );
-        }
-
-        public void Drop( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
-        {
-            DataObject data = new( pDataObj );
-
-            if ( data.GetDataPresent( DataFormats.FileDrop ) )
-            {
-                string[] files = ( string[] )data.GetData( DataFormats.FileDrop );
-                List<LaunchItem> items = [];
-
-                foreach ( string file in files )
-                {
-                    string targetPath = file;
-                    string name = Path.GetFileNameWithoutExtension( file );
-
-                    // Если это ярлык — резолвим его цель
-                    if ( file.EndsWith( ".lnk", StringComparison.OrdinalIgnoreCase ) )
-                    {
-                        targetPath = _parent.ResolveShortcut( file );
-                    }
-
-                    items.Add( new LaunchItem { Name = name, FilePath = targetPath } );
-                }
-
-                _parent.BeginInvoke( () => {
-                    _parent.AddButtons( items );
-                    _parent.SyncModelOrder();
-                } );
-
-                pdwEffect = 1; // Copy
-                return;
-            }
-
-            if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
-            {
-                LaunchButtonView? droppedBtn = data.GetData( typeof( LaunchButtonView ) ) as LaunchButtonView;
-                if ( droppedBtn != null && droppedBtn.Parent != _parent )
-                {
-                    _parent.BeginInvoke( () => {
-                        _parent.MoveButtonToThisContainer( droppedBtn );
-                    } );
-                    pdwEffect = 2; // Move
-                    return;
-                }
-            }
-
-            string url = "";
-
-            if ( data.GetDataPresent( "UniformResourceLocator" ) )
-            {
-                using MemoryStream? ms = data.GetData( "UniformResourceLocator" ) as MemoryStream;
-                if ( ms != null ) url = Encoding.ASCII.GetString( ms.ToArray() ).Split( '\0' )[ 0 ];
-            }
-
-            if ( string.IsNullOrEmpty( url ) && data.GetDataPresent( DataFormats.Text ) )
-                url = data.GetData( DataFormats.Text )?.ToString();
-
-            if ( !string.IsNullOrEmpty( url ) && url.StartsWith( "http" ) )
-            {
-                _parent.BeginInvoke( () => {
-                    _parent.AddButtons( [ new LaunchItem() { Name = new Uri( url ).Host, FilePath = url } ] );
-                    _parent.SyncModelOrder();
-                } );
-            }
-        }
-    }
+    #endregion    
 }

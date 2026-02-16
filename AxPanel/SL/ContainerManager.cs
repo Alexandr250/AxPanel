@@ -34,7 +34,6 @@ public class ContainerManager
         container.ProcessStartAsAdminRequested += btn => _service.RunProcess( btn, true );
         container.ExplorerOpenRequested += path => _service.OpenLocation( path );
 
-        // ИСПОЛЬЗУЕМ СВОЙСТВО НАПРЯМУЮ, а не замыкание currentName
         container.ItemCollectionChanged += ( items ) => {
             if ( items == null || items.Count == 0 ) return; // Защита от затирания пустотой
 
@@ -50,12 +49,14 @@ public class ContainerManager
         };
 
         _controls.Add( container );
-        if ( Selected == null ) SetSelected( container );
+        if ( Selected == null ) 
+            SetSelected( container );
     }
 
     public void SetSelected( ButtonContainerView container )
     {
-        if ( Selected == container ) return;
+        if ( Selected == container ) 
+            return;
         Selected = container;
         SelectionChanged?.Invoke( container );
     }

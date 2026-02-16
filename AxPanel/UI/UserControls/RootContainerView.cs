@@ -16,10 +16,10 @@ public class RootContainerView : Panel
     private readonly MainConfig _mainConfig;
 
     private ButtonContainerView _selected;
-
-    public event Action OnSaveConfigRequered;
-
+    
     public IEnumerable<ButtonContainerView> Containers => Controls.OfType<ButtonContainerView>();
+
+    public event Action OnSaveConfigRequered;    
 
     public Footer Footer { get; }
 
@@ -32,7 +32,6 @@ public class RootContainerView : Panel
                 return;
 
             _selected = value;
-
             _containerAnimator.StartAnimateArrange();
         }
     }
@@ -50,11 +49,10 @@ public class RootContainerView : Panel
         _containerAnimator.HoverRequested += container => Selected = container;
 
         _buttonContainerFactory = new ButtonContainerFactory( _theme, _mainConfig, this, _containerService, _animator );
-        _buttonContainerFactory.SelectedChangedRequested += panel => Selected = panel;
+        _buttonContainerFactory.SelectedChangedRequested += buttonContainerView => Selected = buttonContainerView;
         _buttonContainerFactory.LayoutUpdateRequested += ArrangeContainers;
         _buttonContainerFactory.MonitorPathsUpdateRequested += UpdateGlobalMonitorPaths;
         _buttonContainerFactory.SaveConfigRequested += () => OnSaveConfigRequered?.Invoke();
-
     }
 
     private void InitializeComponent()
@@ -74,64 +72,6 @@ public class RootContainerView : Panel
     public ButtonContainerView AddContainer( string name, List<LaunchItem>? items )
     {
         return _buttonContainerFactory.AddContainer( name, items );
-
-        //ButtonContainerView container = new( _theme, _mainConfig )
-        //{
-        //    PanelName = name,
-        //    BaseControlPath = name,
-        //    Width = Width,
-        //    Height = _theme.ContainerStyle.HeaderHeight
-        //};
-
-        //container.ContainerSelected += panel => Selected = panel;
-        //container.ContainerDeleteRequested += DeleteContainer; 
-        //container.ContainerDeleteRequested += c => _animator.Unregister( c );
-
-        //container.AddButtons( items );
-
-        //Controls.Add( container );
-
-        //if ( Selected == null ) 
-        //    Selected = container;
-        //else 
-        //    ArrangeContainers();
-
-        //container.ProcessStartRequested += ( btn, args ) => _containerService.RunProcess( btn, false, args );
-        //container.ProcessStartAsAdminRequested += btn => _containerService.RunProcess( btn, true );
-        //container.ExplorerOpenRequested += path => _containerService.OpenLocation( path );
-
-        //container.GroupStartRequested += separator => {
-        //    List<LaunchButtonView> allButtons = container.Controls.OfType<LaunchButtonView>().ToList();
-        //    int startIndex = allButtons.IndexOf( separator );
-        //    if ( startIndex != -1 )
-        //    {
-        //        IEnumerable<LaunchButtonView> group = allButtons.Skip( startIndex + 1 ).TakeWhile( b => !string.IsNullOrEmpty( b.BaseControlPath ) );
-        //        _containerService.RunProcessGroup( group );
-        //    }
-        //};
-
-        //container.ItemCollectionChanged += newItems => {
-        //    if ( newItems == null || newItems.Count == 0 ) 
-        //        return;
-
-        //    MainModel model = ConfigManager.GetModel();
-        //    ContainerItem? target = model.Containers.FirstOrDefault( c => c.Name == container.PanelName );
-        //    if ( target != null )
-        //    {
-        //        target.Items = newItems;
-        //        OnSaveConfigRequered?.Invoke();
-        //    }
-        //    UpdateGlobalMonitorPaths();
-        //};
-
-        //_animator.Register( container );
-
-        //container.DragHoverActivated += ( panel ) => {
-        //    if ( Selected != panel ) 
-        //        Selected = panel;
-        //};
-
-        //return container;
     }
 
     private void UpdateGlobalMonitorPaths()
@@ -262,7 +202,6 @@ public class RootContainerView : Panel
     {
         if ( disposing )
         {
-            //_animationTimer?.Dispose();
             _globalMonitor.Stop();
             _globalMonitor.Dispose();
 
