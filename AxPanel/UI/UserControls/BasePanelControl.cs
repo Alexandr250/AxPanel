@@ -1,3 +1,8 @@
-﻿namespace AxPanel.UI.UserControls;
+﻿// ReSharper disable PublicConstructorInAbstractClass
 
-public abstract class BasePanelControl : BaseControl { }
+namespace AxPanel.UI.UserControls;
+
+public abstract class BasePanelControl : BaseControl
+{
+    public BasePanelControl() {}
+}

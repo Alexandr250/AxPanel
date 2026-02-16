@@ -43,7 +43,7 @@
     "DeleteBtnCrossWidth": 1.5
   },
   "ButtonStyle": {
-    "DefaultHeight": 92,
+    "DefaultHeight": 62,
     "DeleteButtonWidth": 92,
     "SpaceHeight": 2,
     "MinFont": "Segoe UI, 7, Bold",

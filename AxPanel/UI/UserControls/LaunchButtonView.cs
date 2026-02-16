@@ -45,27 +45,21 @@ public class LaunchButtonView : BaseControl
         Dock = DockStyle.None; 
         Anchor = AnchorStyles.None; 
         AutoSize = false;
-
         AllowDrop = true;
-
-        this.GiveFeedback += OnGiveFeedback;
+        GiveFeedback += OnGiveFeedback;
     }
 
     private void OnGiveFeedback( object sender, GiveFeedbackEventArgs e )
     {
-        // Система просит обратную связь - мы используем этот момент, чтобы подвинуть кнопку
         e.UseDefaultCursors = true;
 
         if ( IsDragging && Parent != null )
         {
-            // Получаем текущую позицию мыши (экранную) и переводим в координаты родителя
             Point clientPos = Parent.PointToClient( Cursor.Position );
 
-            // Смещаем кнопку так, чтобы курсор был там же, где в начале захвата
-            this.Left = clientPos.X - _lastLocation.X;
-            this.Top = clientPos.Y - _lastLocation.Y;
+            Left = clientPos.X - _lastLocation.X;
+            Top = clientPos.Y - _lastLocation.Y;
 
-            // Оповещаем контейнер, чтобы он раздвигал другие кнопки
             Dragging?.Invoke( this );
         }
     }
@@ -100,8 +94,7 @@ public class LaunchButtonView : BaseControl
 
         base.OnDragDrop( dragEventArgs );
 
-        // Получаем массив путей (даже если бросили один файл)
-        string[] files = ( string[] )dragEventArgs.Data.GetData( DataFormats.FileDrop );
+        string[] files = ( string[] )dragEventArgs.Data?.GetData( DataFormats.FileDrop )!;
 
         if ( files is { Length: > 0 } && !IsSeparator )
         {
@@ -113,7 +106,7 @@ public class LaunchButtonView : BaseControl
             }
             catch ( Exception ex )
             {
-                MessageBox.Show( $"Ошибка запуска: {ex.Message}" );
+                MessageBox.Show( $@"Ошибка запуска: {ex.Message}" );
             }
         }
     }
@@ -121,7 +114,6 @@ public class LaunchButtonView : BaseControl
     protected override void OnParentChanged( EventArgs e )
     {
         base.OnParentChanged( e );
-        // Удалено принудительное растягивание на всю ширину для поддержки сетки
 
         if ( InvokeRequired )
             BeginInvoke( Invalidate );
@@ -148,7 +140,7 @@ public class LaunchButtonView : BaseControl
         if ( e.Button == MouseButtons.Left )
         {
             _dragStartMousePos = Cursor.Position; // Запоминаем экранную позицию мыши
-            _dragStartControlPos = this.Location; // Запоминаем где стояла кнопка
+            _dragStartControlPos = Location; // Запоминаем где стояла кнопка
             BringToFront();
             Capture = true;
         }
@@ -176,14 +168,13 @@ public class LaunchButtonView : BaseControl
             {
                 _mouseState.MouseInGroupPlay = isInsidePlayZone;
                 Invalidate();
-                // Меняем курсор для визуального отклика
                 Cursor = isInsidePlayZone ? Cursors.Hand : Cursors.Default;
             }
         }
         else
         {
-            // Сброс курсора, если ушли с зоны Play на обычную кнопку
-            if ( Cursor == Cursors.Hand ) Cursor = Cursors.Default;
+            if ( Cursor == Cursors.Hand ) 
+                Cursor = Cursors.Default;
         }
 
         // 3. ЛОГИКА ПЕРЕМЕЩЕНИЯ (Drag & Drop)
@@ -196,39 +187,12 @@ public class LaunchButtonView : BaseControl
             // Если сдвинули хоть немного — двигаем физически
             if ( Math.Abs( deltaX ) > 2 || Math.Abs( deltaY ) > 2 )
             {
-                //if( !_mouseState.ButtonMoved )
-                //    MovingChanged?.Invoke( new Rectangle( Left, Top, Width, Height ) );
-
-                //_mouseState.ButtonMoved = true;
-
-                //if ( !IsDragging )
-                //{
-                //    IsDragging = true;
-                //}
-
-                //// Устанавливаем позицию напрямую от стартовой точки
-                //// Это исключает "накопление ошибки" при быстрых рывках
-                //this.Left = _dragStartControlPos.X + deltaX;
-                //this.Top = _dragStartControlPos.Y + deltaY;
-
-                //Dragging?.Invoke( this );
-
-                //this.Capture = false;
-
-                //// 3. Запускаем системный DragDrop. 
-                //// ВНИМАНИЕ: код ПАУЗИТСЯ здесь до момента отпускания мыши (Drop)
-                //var effect = this.DoDragDrop( this, DragDropEffects.Move );
-
-                //// 4. После того как Drop произошел, сбрасываем флаг
-                //IsDragging = false;
-                //Invalidate();
-
                 _mouseState.ButtonMoved = true;
                 IsDragging = true;
-                this.Capture = false;
+                Capture = false;
 
                 // Запускаем - поток замрет здесь, но OnGiveFeedback будет "простреливать" изнутри
-                this.DoDragDrop( this, DragDropEffects.Move );
+                DoDragDrop( this, DragDropEffects.Move );
 
                 // Сюда попадем только когда отпустим мышь
                 IsDragging = false;
@@ -298,7 +262,6 @@ public class LaunchButtonView : BaseControl
 
     private void StartGroupLaunch()
     {
-        // Находим родительский контейнер и просим его запустить группу
         if ( Parent is ButtonContainerView container )
         {
             container.StartProcessGroup( this );
@@ -316,7 +279,7 @@ public class LaunchButtonView : BaseControl
 
     public void RaiseKeyUp( KeyEventArgs keyArgs )
     {
-        if ( keyArgs.KeyCode == Keys.Menu || keyArgs.KeyCode == Keys.Alt )
+        if ( keyArgs.KeyCode is Keys.Menu or Keys.Alt )
         {
             _keyboardState.AltPressed = false;
             Invalidate();
@@ -325,16 +288,11 @@ public class LaunchButtonView : BaseControl
 
     public void UpdateState( ProcessStats stats )
     {
-        // Добавляем проверку WindowCount != windowCount в общий флаг изменений
-        bool changed = Stats.IsRunning != stats.IsRunning ||
-                       Stats.WindowCount != stats.WindowCount ||
-                       Math.Abs( Stats.CpuUsage - stats.CpuUsage ) > 0.5f ||
-                       Math.Abs( Stats.RamMb - stats.RamMb ) > 0.5f ||
-                       Stats.StartTime != stats.StartTime;
+        bool changed = Stats.HasSignificantChangeFrom( stats );
 
         if ( changed )
         {
-            Stats = new ProcessStats()
+            Stats = new ProcessStats
             {
                 IsRunning = stats.IsRunning,
                 CpuUsage = stats.IsRunning ? stats.CpuUsage : 0,
@@ -344,7 +302,7 @@ public class LaunchButtonView : BaseControl
             };
 
             if ( InvokeRequired )
-                BeginInvoke( ( Action )Invalidate );
+                BeginInvoke( Invalidate );
             else
                 Invalidate();
         }

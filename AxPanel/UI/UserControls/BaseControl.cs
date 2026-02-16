@@ -15,7 +15,7 @@ public abstract class BaseControl : Control
 
     private string _latestTarget = ""; // Флаг актуальности задачи
 
-    public BaseControl()
+    public BaseControl() 
     {
         DoubleBuffered = true;
 

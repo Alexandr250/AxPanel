@@ -11,7 +11,7 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
 
-        MainConfig? config = ConfigManager.GetMainConfig();
+        MainConfig config = ConfigManager.GetMainConfig();
         MainModel panelModel = ConfigManager.GetModel();
 
         MainView view = new();
@@ -48,12 +48,7 @@ internal static class Program
             foreach ( ContainerItem containerItem in panelModel.Containers )
             {
                 ButtonContainerView uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
-                //uiContainer.ItemCollectionChanged += list =>
-                //{
-                //    if( list != null )
-                //        containerItem.Items.AddRange( list );
-                //    ConfigManager.SaveItemsConfig( panelModel );
-                //};
+                
                 uiContainer.ItemCollectionChanged += list =>
                 {
                     // 1. ≈сли list == null, значит это промежуточное перемещение 

@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text;
-using AxPanel.Contracts;
+﻿using AxPanel.Contracts;
 using AxPanel.Model;
 using AxPanel.UI.Drawers;
 using AxPanel.UI.Themes;
+using System.Runtime.InteropServices;
+using System.Text;
 using static AxPanel.Win32Api;
 
 namespace AxPanel.UI.UserControls;
@@ -18,7 +17,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     private readonly ITheme _theme;
 
     // UI Состояние
-    private List<LaunchButtonView> _buttons = [];
+    private readonly List<LaunchButtonView> _buttons = [];
     private int _scrollValue = 0;
     private int _itemsCount = 0;
 
@@ -52,22 +51,22 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         // Базовые стили применяются автоматически через BasePanelControl
         BackColor = _theme.ContainerStyle.BackColor;
-
         
         MouseWheel += HandleMouseWheel;
 
-        this.AllowDrop = true;
-        this.DragEnter += ( s, e ) => {
+        AllowDrop = true;
+
+        DragEnter += ( s, e ) => {
             if ( e.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
                 e.Effect = DragDropEffects.Move;
             else if ( e.Data.GetDataPresent( DataFormats.FileDrop ) )
                 e.Effect = DragDropEffects.Copy;
         };
 
-        this.DragDrop += ( s, e ) => {
+        DragDrop += ( s, e ) => {
             if( e.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
             {
-                var droppedBtn = ( LaunchButtonView )e.Data?.GetData( typeof( LaunchButtonView ) );
+                LaunchButtonView? droppedBtn = ( LaunchButtonView )e.Data?.GetData( typeof( LaunchButtonView ) );
 
                 // Если бросили в другой контейнер
                 if( droppedBtn.Parent != this )
@@ -78,10 +77,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             else if ( e.Data.GetDataPresent( DataFormats.FileDrop ) )
             {
                 string[] files = ( string[] )e.Data.GetData( DataFormats.FileDrop );
-                if ( files != null && files.Length > 0 )
+                if ( files is { Length: > 0 } )
                 {
                     // Вызываем твой стандартный метод добавления
-                    var items = files.Select( f => new LaunchItem
+                    List<LaunchItem> items = files.Select( f => new LaunchItem
                     {
                         FilePath = f,
                         Name = Path.GetFileName( f )
@@ -108,7 +107,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         AllowDrop = false;
 
-        RegisterDragDrop( this.Handle, new OleDropTarget( this ) );
+        RegisterDragDrop( Handle, new OleDropTarget( this ) );
 
         CHANGEFILTERSTRUCT cfs = new() { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
         
@@ -175,11 +174,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
             if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) )
             {
-                var stream = drgevent.Data.GetData( "UniformResourceLocator" ) as Stream;
-                if ( stream != null )
+                if ( drgevent.Data.GetData( "UniformResourceLocator" ) is Stream stream )
                 {
                     // Извлекаем URL (обычно в ASCII/UTF8 до нулевого байта)
-                    using var reader = new StreamReader( stream );
+                    using StreamReader reader = new( stream );
                     url = reader.ReadToEnd().Split( '\0' ).FirstOrDefault() ?? "";
                 }
             }
@@ -187,14 +185,14 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             if ( string.IsNullOrEmpty( url ) && drgevent.Data.GetDataPresent( DataFormats.Text ) )
                 url = drgevent.Data.GetData( DataFormats.Text )?.ToString() ?? "";
 
-            if ( !string.IsNullOrEmpty( url ) && Uri.TryCreate( url, UriKind.Absolute, out var uri ) )
+            if ( !string.IsNullOrEmpty( url ) && Uri.TryCreate( url, UriKind.Absolute, out Uri? uri ) )
             {
-                var newItem = new LaunchItem
+                LaunchItem newItem = new()
                 {
                     Name = uri.Host, // В качестве имени берем домен (напр. youtube.com)
                     FilePath = url
                 };
-                AddButtons( new List<LaunchItem> { newItem } );
+                AddButtons( [ newItem ] );
                 SyncModelOrder();
                 return;
             }
@@ -204,7 +202,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             string[] files = ( string[] )drgevent.Data.GetData( DataFormats.FileDrop );
             if ( files?.Length > 0 )
             {
-                var items = files.Select( f => new LaunchItem
+                List<LaunchItem> items = files.Select( f => new LaunchItem
                 {
                     FilePath = f,
                     Name = Path.GetFileName( f )
@@ -220,32 +218,32 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     private void HandleNativeDrop( IntPtr hDrop )
     {
         uint count = DragQueryFile( hDrop, 0xFFFFFFFF, null, 0 );
-        List<string> files = new();
+        List<string> files = [];
         for ( uint i = 0; i < count; i++ )
         {
-            StringBuilder sb = new StringBuilder( 260 );
+            StringBuilder sb = new( 260 );
             DragQueryFile( hDrop, i, sb, 260 );
             files.Add( sb.ToString() );
         }
 
         if ( files.Count > 0 )
         {
-            var items = files.Select( f => new LaunchItem
+            List<LaunchItem> items = files.Select( f => new LaunchItem
             {
                 FilePath = f,
                 Name = Path.GetFileName( f )
             } ).ToList();
 
-            this.BeginInvoke( new Action( () => {
+            BeginInvoke( () => {
                 AddButtons( items );
                 SyncModelOrder();
-            } ) );
+            } );
         }
     }
 
     private void MoveButtonToThisContainer( LaunchButtonView btn )
     {
-        var oldParent = btn.Parent as ButtonContainerView;
+        ButtonContainerView? oldParent = btn.Parent as ButtonContainerView;
 
         // 1. Удаляем из старой логики
         oldParent?._buttons.Remove( btn );
@@ -253,7 +251,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         // 2. Добавляем в новую логику
         _buttons.Add( btn );
-        this.Controls.Add( btn );
+        Controls.Add( btn );
 
         // 3. Обновляем иерархию и мониторинг
         SyncState();
@@ -268,9 +266,9 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public void ApplyStats( Dictionary<string, ProcessStats> stats )
     {
         bool changed = false;
-        foreach ( var btn in _buttons )
+        foreach ( LaunchButtonView btn in _buttons )
         {
-            if ( btn.BaseControlPath != null && stats.TryGetValue( btn.BaseControlPath, out var s ) )
+            if ( btn.BaseControlPath != null && stats.TryGetValue( btn.BaseControlPath, out ProcessStats s ) )
             {
                 btn.UpdateState( s );
                 changed = true;
@@ -291,7 +289,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     public void ReorderButtons()
     {
-        this.SuspendLayout();
+        SuspendLayout();
 
         for ( int i = 0; i < _buttons.Count; i++ )
         {
@@ -300,7 +298,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             if ( button.IsDragging || button.Capture ) 
                 continue;
 
-            (Point Location, int Width) layout = LayoutEngine.GetLayout( i, _scrollValue, this.Width, _buttons, _theme );
+            (Point Location, int Width) layout = LayoutEngine.GetLayout( i, _scrollValue, Width, _buttons, _theme );
 
             if ( button.Location != layout.Location || button.Width != layout.Width )
             {
@@ -309,7 +307,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             }
         }
 
-        this.ResumeLayout( false );
+        ResumeLayout( false );
         Invalidate();
     }
 
@@ -318,7 +316,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         int delta = e.Delta > 0 ? _theme.ContainerStyle.ScrollValueIncrement : -_theme.ContainerStyle.ScrollValueIncrement;
 
         int totalHeight = LayoutEngine.GetTotalContentHeight( Buttons, Width, _theme );
-        int visibleHeight = this.Height;
+        int visibleHeight = Height;
 
         _scrollValue += delta;
 
@@ -343,16 +341,16 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     private void CreateButtonControls( List<LaunchItem> items )
     {
         // Сортируем входящие элементы по кликам и ID
-        var ordered = SortByGroups( items ); // items.OrderByDescending( i => i.ClicksCount ).ThenBy( i => i.Id );
+        List<LaunchItem> ordered = SortByGroups( items ); // items.OrderByDescending( i => i.ClicksCount ).ThenBy( i => i.Id );
 
-        foreach ( var item in ordered )
+        foreach ( LaunchItem item in ordered )
         {
-            var btn = new LaunchButtonView( _theme )
+            LaunchButtonView btn = new( _theme )
             {
                 // Начальная ширина (будет скорректирована аниматором)
                 Dock = DockStyle.None, // Прямой запрет на стыковку
                 Anchor = AnchorStyles.Top | AnchorStyles.Left, // Фиксируем только левый верхний угол
-                Width = this.Width,
+                Width = Width,
                 Height = /*item.Height > 0 ? item.Height : */_theme.ButtonStyle.DefaultHeight,
                 Text = item.Name,
                 BaseControlPath = item.FilePath,
@@ -408,7 +406,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                 if ( targetIndex != -1 && targetIndex != oldIndex )
                 {
                     // МЕНЯЕМ ПОРЯДОК В СПИСКЕ
-                    var itemToMove = _buttons[ oldIndex ];
+                    LaunchButtonView itemToMove = _buttons[ oldIndex ];
                     _buttons.RemoveAt( oldIndex );
                     _buttons.Insert( targetIndex, itemToMove );
 
@@ -426,7 +424,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             // Устанавливаем начальные координаты сразу через LayoutEngine,
             // чтобы кнопки не "прыгали" из нулевой точки при создании.
             int currentIndex = _buttons.Count - 1;
-            var layout = LayoutEngine.GetLayout( currentIndex, _scrollValue, this.Width, _buttons, _theme );
+            (Point Location, int Width) layout = LayoutEngine.GetLayout( currentIndex, _scrollValue, Width, _buttons, _theme );
 
             btn.Location = layout.Location;
             btn.Width = layout.Width;
@@ -472,8 +470,8 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         int sWidth = _theme.ButtonStyle.SpaceWidth > 0 ? _theme.ButtonStyle.SpaceWidth : 3;
         int sHeight = _theme.ButtonStyle.SpaceHeight > 0 ? _theme.ButtonStyle.SpaceHeight : 3;
         int targetWidth = _theme.ButtonStyle.DefaultWidth > 0 ? _theme.ButtonStyle.DefaultWidth : 60;
-        int columns = Math.Max( 1, this.Width / ( targetWidth + sWidth ) );
-        int btnWidth = ( this.Width - ( sWidth * ( columns + 1 ) ) ) / columns;
+        int columns = Math.Max( 1, Width / ( targetWidth + sWidth ) );
+        int btnWidth = ( Width - ( sWidth * ( columns + 1 ) ) ) / columns;
 
         // Координаты центра перетаскиваемой кнопки
         int centerX = draggedBtn.Left + draggedBtn.Width / 2;
@@ -485,7 +483,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         for ( int i = 0; i < _buttons.Count; i++ )
         {
-            var btn = _buttons[ i ];
+            LaunchButtonView btn = _buttons[ i ];
             Rectangle cellRect;
 
             if ( btn.IsSeparator )
@@ -494,7 +492,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                 if ( currentCol > 0 ) currentY += _theme.ButtonStyle.DefaultHeight + sHeight;
 
                 // Прямоугольник разделителя (на всю ширину)
-                cellRect = new Rectangle( sWidth, currentY, this.Width - ( sWidth * 2 ), btn.Height );
+                cellRect = new Rectangle( sWidth, currentY, Width - ( sWidth * 2 ), btn.Height );
 
                 // Если мышка в верхней половине разделителя — вставляем ПЕРЕД ним
                 if ( centerY < cellRect.Top + cellRect.Height / 2 ) return i;
@@ -545,10 +543,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     private List<LaunchItem> SortByGroups( List<LaunchItem> items )
     {
-        var result = new List<LaunchItem>();
-        var currentGroup = new List<LaunchItem>();
+        List<LaunchItem> result = new();
+        List<LaunchItem> currentGroup = new();
 
-        foreach ( var item in items )
+        foreach ( LaunchItem item in items )
         {
             if ( item.IsSeparator )
             {
@@ -606,7 +604,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     protected override void OnPaint( PaintEventArgs e )
     {
         // Находим кнопку, которая сейчас в режиме перемещения (Capture или IsDragging)
-        var draggedBtn = _buttons.FirstOrDefault( b => b.Capture || b.IsDragging );
+        LaunchButtonView? draggedBtn = _buttons.FirstOrDefault( b => b.Capture || b.IsDragging );
 
         // Передаем её в отрисовщик контейнера
         _containerDrawer.Draw( this, draggedBtn, _mouseState, e );
@@ -647,37 +645,11 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     private void OnDeleteRequested() => 
         ContainerDeleteRequested?.Invoke( this );
 
-    //private void OnElevatedDragDrop( object sender, ElevatedDragDropArgs e )
-    //{
-    //    //if ( e.HWnd != Handle ) 
-    //    //    return;
-
-    //    //List<LaunchItem> items = e.Files.Select( f => new LaunchItem { FilePath = f, Name = System.IO.Path.GetFileName( f ), Id = _itemsCount++ } ).ToList();
-
-    //    //AddButtons( items );
-
-    //    //SyncModelOrder();
-
-    //    if ( e.HWnd != Handle ) 
-    //        return;
-
-    //    if ( e.Files != null && e.Files.Count > 0 )
-    //    {
-    //        var items = e.Files.Select( f => new LaunchItem
-    //        {
-    //            FilePath = f,
-    //            Name = Path.GetFileName( f ),
-    //            Id = _itemsCount++
-    //        } ).ToList();
-
-    //        AddButtons( items );
-    //    }
-    //}
-
     public void StartProcessGroup( LaunchButtonView separator ) => 
         GroupStartRequested?.Invoke( separator );
 
-    public void NotifyDragHover() => DragHoverActivated?.Invoke( this );
+    public void NotifyDragHover() => 
+        DragHoverActivated?.Invoke( this );
 
     public void StartDragHoverTimer()
     {
@@ -700,10 +672,13 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             // Используем динамику, чтобы не тащить тяжелые COM-библиотеки в зависимости
             Type shellType = Type.GetTypeFromProgID( "WScript.Shell" );
             dynamic shell = Activator.CreateInstance( shellType );
-            var shortcut = shell.CreateShortcut( lnkPath );
+            dynamic? shortcut = shell.CreateShortcut( lnkPath );
             return shortcut.TargetPath;
         }
-        catch { return lnkPath; }
+        catch
+        {
+            return lnkPath;
+        }
     }
 
     protected override void Dispose( bool disposing )
@@ -724,7 +699,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         public void DragEnter( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
         {
-            var data = new DataObject( pDataObj );
+            DataObject data = new( pDataObj );
 
             if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
                 pdwEffect = 2; // Move (перетаскивание кнопки)
@@ -735,24 +710,24 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
             else
                 pdwEffect = 0;
 
-            _parent.BeginInvoke( new Action( () => _parent.StartDragHoverTimer() ) );
+            _parent.BeginInvoke( () => _parent.StartDragHoverTimer() );
         }
 
         public void DragOver( int grfKeyState, Point pt, ref int pdwEffect ) => pdwEffect = 4;
 
         public void DragLeave()
         {
-            _parent.BeginInvoke( new Action( () => _parent.StopDragHoverTimer() ) );
+            _parent.BeginInvoke( () => _parent.StopDragHoverTimer() );
         }
 
         public void Drop( object pDataObj, int grfKeyState, Point pt, ref int pdwEffect )
         {
-            var data = new DataObject( pDataObj );
+            DataObject data = new( pDataObj );
 
             if ( data.GetDataPresent( DataFormats.FileDrop ) )
             {
                 string[] files = ( string[] )data.GetData( DataFormats.FileDrop );
-                var items = new List<LaunchItem>();
+                List<LaunchItem> items = [];
 
                 foreach ( string file in files )
                 {
@@ -768,10 +743,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
                     items.Add( new LaunchItem { Name = name, FilePath = targetPath } );
                 }
 
-                _parent.BeginInvoke( new Action( () => {
+                _parent.BeginInvoke( () => {
                     _parent.AddButtons( items );
                     _parent.SyncModelOrder();
-                } ) );
+                } );
 
                 pdwEffect = 1; // Copy
                 return;
@@ -779,12 +754,12 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
             if ( data.GetDataPresent( typeof( LaunchButtonView ) ) )
             {
-                var droppedBtn = data.GetData( typeof( LaunchButtonView ) ) as LaunchButtonView;
+                LaunchButtonView? droppedBtn = data.GetData( typeof( LaunchButtonView ) ) as LaunchButtonView;
                 if ( droppedBtn != null && droppedBtn.Parent != _parent )
                 {
-                    _parent.BeginInvoke( new Action( () => {
+                    _parent.BeginInvoke( () => {
                         _parent.MoveButtonToThisContainer( droppedBtn );
-                    } ) );
+                    } );
                     pdwEffect = 2; // Move
                     return;
                 }
@@ -794,7 +769,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
             if ( data.GetDataPresent( "UniformResourceLocator" ) )
             {
-                using var ms = data.GetData( "UniformResourceLocator" ) as MemoryStream;
+                using MemoryStream? ms = data.GetData( "UniformResourceLocator" ) as MemoryStream;
                 if ( ms != null ) url = Encoding.ASCII.GetString( ms.ToArray() ).Split( '\0' )[ 0 ];
             }
 
@@ -803,10 +778,10 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
             if ( !string.IsNullOrEmpty( url ) && url.StartsWith( "http" ) )
             {
-                _parent.BeginInvoke( new Action( () => {
-                    _parent.AddButtons( new List<LaunchItem> { new LaunchItem { Name = new Uri( url ).Host, FilePath = url } } );
+                _parent.BeginInvoke( () => {
+                    _parent.AddButtons( [ new LaunchItem() { Name = new Uri( url ).Host, FilePath = url } ] );
                     _parent.SyncModelOrder();
-                } ) );
+                } );
             }
         }
     }
