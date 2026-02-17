@@ -37,9 +37,9 @@ public class ButtonContainerFactory
             Height = _theme.ContainerStyle.HeaderHeight
         };
 
-        container.ContainerSelected += panel => SelectedChangedRequested?.Invoke( panel ); // Selected = panel;
-        container.ContainerDeleteRequested += DeleteContainer;
-        container.ContainerDeleteRequested += c => _animator.Unregister( c );
+        container.ButtonContainerEvents.ContainerSelected += panel => SelectedChangedRequested?.Invoke( panel ); // Selected = panel;
+        container.ButtonContainerEvents.ContainerDeleteRequested += DeleteContainer;
+        container.ButtonContainerEvents.ContainerDeleteRequested += c => _animator.Unregister( c );
 
         container.AddButtons( items );
 
@@ -50,11 +50,11 @@ public class ButtonContainerFactory
         else
             LayoutUpdateRequested?.Invoke(); // ArrangeContainers();
 
-        container.ProcessStartRequested += ( btn, args ) => _containerService.RunProcess( btn, false, args );
-        container.ProcessStartAsAdminRequested += btn => _containerService.RunProcess( btn, true );
-        container.ExplorerOpenRequested += path => _containerService.OpenLocation( path );
+        container.ButtonContainerEvents.ProcessStartRequested += ( btn, args ) => _containerService.RunProcess( btn, false, args );
+        container.ButtonContainerEvents.ProcessStartAsAdminRequested += btn => _containerService.RunProcess( btn, true );
+        container.ButtonContainerEvents.ExplorerOpenRequested += path => _containerService.OpenLocation( path );
 
-        container.GroupStartRequested += separator => {
+        container.ButtonContainerEvents.GroupStartRequested += separator => {
             List<LaunchButtonView> allButtons = container.Controls.OfType<LaunchButtonView>().ToList();
             int startIndex = allButtons.IndexOf( separator );
             if ( startIndex != -1 )
@@ -64,7 +64,7 @@ public class ButtonContainerFactory
             }
         };
 
-        container.ItemCollectionChanged += newItems => {
+        container.ButtonContainerEvents.ItemCollectionChanged += newItems => {
             if ( newItems == null || newItems.Count == 0 )
                 return;
 
@@ -81,7 +81,7 @@ public class ButtonContainerFactory
 
         _animator.Register( container );
 
-        container.DragHoverActivated += ( panel ) => {
+        container.ButtonContainerEvents.DragHoverActivated += ( panel ) => {
             if ( _rootContainerView.Selected != panel )
                 SelectedChangedRequested?.Invoke( panel );  //Selected = panel;
         };
@@ -102,7 +102,7 @@ public class ButtonContainerFactory
 
         _rootContainerView.Controls.Remove( container );
 
-        container.ContainerDeleteRequested -= DeleteContainer;
+        container.ButtonContainerEvents.ContainerDeleteRequested -= DeleteContainer;
 
         container.Dispose();
         LayoutUpdateRequested?.Invoke();  //ArrangeContainers();

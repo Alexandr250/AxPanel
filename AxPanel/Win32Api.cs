@@ -259,5 +259,8 @@ namespace AxPanel
 
         [DllImport( "ole32.dll" )]
         public static extern int RegisterDragDrop( IntPtr hwnd, IDropTarget pDropTarget );
+
+        [DllImport( "shell32.dll" )]
+        public static extern void DragFinish( IntPtr hDrop );
     }
 }

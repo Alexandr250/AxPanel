@@ -24,7 +24,7 @@ internal static class Program
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         //ApplicationConfiguration.Initialize();
-        //Application.Run( new Form1() );
+        Application.Run( new Form1() );
 
         //var options = new JsonSerializerOptions
         //{
@@ -71,7 +71,7 @@ internal static class Program
 
         //}
 
-        var portableItems = LoadPortableItems( "portable-apps.json" );
+        //var portableItems = LoadPortableItems( "portable-apps.json" );
     }
 
     public static List<PortableItem> LoadPortableItems( string fileName )

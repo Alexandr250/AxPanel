@@ -49,7 +49,7 @@ internal static class Program
             {
                 ButtonContainerView uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
                 
-                uiContainer.ItemCollectionChanged += list =>
+                uiContainer.ButtonContainerEvents.ItemCollectionChanged += list =>
                 {
                     // 1. Если list == null, значит это промежуточное перемещение 
                     // (например, кнопка просто пролетает над другой). Ничего не сохраняем.

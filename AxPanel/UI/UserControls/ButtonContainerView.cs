@@ -1,22 +1,20 @@
 ﻿using AxPanel.Contracts;
 using AxPanel.Model;
 using AxPanel.UI.Drawers;
+using AxPanel.UI.ElementStyles;
 using AxPanel.UI.Themes;
-using System.Runtime.InteropServices;
-using System.Text;
-using static AxPanel.Win32Api;
 
 namespace AxPanel.UI.UserControls;
 
-public partial class ButtonContainerView : BasePanelControl, IAnimatable
+public class ButtonContainerView : BasePanelControl, IAnimatable
 {
     private readonly System.Windows.Forms.Timer _dragHoverTimer = new() { Interval = 400 }; // 400мс — оптимально
 
-    // Сервисы и отрисовка
-    private readonly ContainerDrawer _containerDrawer;
+    private ContainerDrawer _containerDrawer;
+    private readonly IButtonFactory _buttonFactory;
+    private NativeDropHandler _nativeDrop;
     private readonly ITheme _theme;
 
-    // UI Состояние
     private readonly List<LaunchButtonView> _buttons = [];
     private int _scrollValue = 0;
 
@@ -29,217 +27,146 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     public int ScrollValue => _scrollValue;
     ITheme IAnimatable.Theme => _theme;
 
-    // События
-    public event Action<ButtonContainerView> ContainerSelected;
-    public event Action<List<LaunchItem>> ItemCollectionChanged;
-    public event Action<ButtonContainerView> ContainerDeleteRequested;
-    public event Action<LaunchButtonView, object?> ProcessStartRequested;
-    public event Action<LaunchButtonView> ProcessStartAsAdminRequested;
-    public event Action<LaunchButtonView> GroupStartRequested;
-    public event Action<string> ExplorerOpenRequested;
-    public event Action<ButtonContainerView> DragHoverActivated;
+    public ButtonContainerEvents ButtonContainerEvents { get; } = new();
+
+    public ButtonContainerView()
+    {
+        _theme = new Theme();
+        ( ( Theme )_theme ).ContainerStyle = new ContainerStyle();
+        ( ( Theme )_theme ).ButtonStyle = new ButtonStyle();
+        ( ( Theme )_theme ).WindowStyle = new WindowStyle();
+
+        LayoutEngine = new GridLayoutEngine();
+
+        _containerDrawer = new ContainerDrawer( _theme );
+
+        _buttonFactory = new ButtonFactory( _theme );
+
+        InitContainer();
+    }
 
     public ButtonContainerView( ITheme theme, MainConfig mainConfig )
     {
-        LayoutEngine = mainConfig.LayoutMode == LayoutMode.List ? 
-            new ListLayoutEngine() : 
+        _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
+
+        LayoutEngine = mainConfig.LayoutMode == LayoutMode.List ?
+            new ListLayoutEngine() :
             new GridLayoutEngine();
 
-        _theme = theme ?? throw new ArgumentNullException( nameof( theme ) );
+        _buttonFactory = new ButtonFactory( _theme );
+
+        InitContainer();
+    }
+
+    public void NotifyProcessStart( LaunchButtonView button, object? args )
+        => ButtonContainerEvents.RaiseProcessStart( button, args );
+
+    public void NotifyExplorerOpen( string path )
+        => ButtonContainerEvents.RaiseExplorer( path );
+
+    public void NotifyProcessStartAsAdmin( LaunchButtonView button )
+        => ButtonContainerEvents.RaiseProcessAdminStart( button );
+
+    public void HandleButtonDragMove()
+    {
+        _mouseState.ButtonMoved = true;
+        ReorderButtons();
+    }
+
+    public void HandleButtonDragEnd()
+    {
+        if ( _mouseState.ButtonMoved )
+        {
+            SyncModelOrder();
+            _mouseState.ButtonMoved = false;
+        }
+    }
+
+    public void RemoveButton( LaunchButtonView b )
+    {
+        _buttons.Remove( b );
+        Controls.Remove( b );
+        b.Dispose();
+        SyncState();
+    }
+
+    public void HandleButtonReorder( LaunchButtonView b )
+    {
+        Point center = new( b.Left + b.Width / 2, b.Top + b.Height / 2 );
+        int targetIndex = LayoutEngine.GetIndexAt( center, _scrollValue, Width, _buttons, _theme );
+        int oldIndex = _buttons.IndexOf( b );
+
+        if ( targetIndex != -1 && targetIndex != oldIndex )
+        {
+            _buttons.RemoveAt( oldIndex );
+            _buttons.Insert( targetIndex, b );
+            ReorderButtons();
+            ButtonContainerEvents.RaiseCollectionChanged( null );
+        }
+    }
+
+    private void InitContainer()
+    {
         _containerDrawer = new ContainerDrawer( _theme );
 
-        // Базовые стили применяются автоматически через BasePanelControl
         BackColor = _theme.ContainerStyle.BackColor;
-        
         MouseWheel += HandleMouseWheel;
-
         AllowDrop = true;
-
-        DragEnter += ( s, e ) => {
-            if ( e.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
-                e.Effect = DragDropEffects.Move;
-            else if ( e.Data.GetDataPresent( DataFormats.FileDrop ) )
-                e.Effect = DragDropEffects.Copy;
-        };
-
-        DragDrop += ( s, e ) => {
-            if( e.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
-            {
-                LaunchButtonView? droppedBtn = ( LaunchButtonView )e.Data?.GetData( typeof( LaunchButtonView ) );
-
-                // Если бросили в другой контейнер
-                if( droppedBtn.Parent != this )
-                {
-                    MoveButtonToThisContainer( droppedBtn );
-                }
-            }
-            else if ( e.Data.GetDataPresent( DataFormats.FileDrop ) )
-            {
-                string[] files = ( string[] )e.Data.GetData( DataFormats.FileDrop );
-                if ( files is { Length: > 0 } )
-                {
-                    // Вызываем твой стандартный метод добавления
-                    List<LaunchItem> items = files.Select( f => new LaunchItem
-                    {
-                        FilePath = f,
-                        Name = Path.GetFileName( f )
-                    } ).ToList();
-
-                    AddButtons( items );
-                }
-            }
-        };
 
         _dragHoverTimer.Tick += ( s, e ) =>
         {
             _dragHoverTimer.Stop();
-            DragHoverActivated?.Invoke( this ); // Раскрываем панель
+            ButtonContainerEvents.RaiseDragHover( this );
         };
-
-        //ElevatedDragDropManager.Instance.EnableDragDrop( Handle );
-        //ElevatedDragDropManager.Instance.ElevatedDragDrop += OnElevatedDragDrop;
     }
 
     protected override void OnHandleCreated( EventArgs e )
     {
         base.OnHandleCreated( e );
 
-        AllowDrop = false;
-
-        RegisterDragDrop( Handle, new OleDropTarget( this ) );
-
-        CHANGEFILTERSTRUCT cfs = new() { cbSize = ( uint )Marshal.SizeOf( typeof( CHANGEFILTERSTRUCT ) ) };
-        
-        ChangeWindowMessageFilterEx( Handle, WM_DROPFILES, 1, ref cfs );
-        ChangeWindowMessageFilterEx( Handle, WM_COPYGLOBALDATA, 1, ref cfs );
-        ChangeWindowMessageFilterEx( Handle, WM_COPYDATA, 1, ref cfs );
-
-        DragAcceptFiles( Handle, true );
-    }
-
-    protected override void WndProc( ref Message m )
-    {
-        if ( m.Msg == WM_DROPFILES )
-        {
-            HandleNativeDrop( m.WParam );
-            return;
-        }
-        if ( m.Msg == WM_COPYDATA )
-        {
-            if ( HandleNativeCopyData( m.LParam ) ) return;
-        }
-        if ( m.Msg == WM_COPYGLOBALDATA )
-        {
-            if ( HandleNativeCopyData( m.LParam ) ) return;
-        }
-
-        base.WndProc( ref m );
-    }
-
-    private bool HandleNativeCopyData( IntPtr mLParam )
-    {
-        return true;
-    }
-
-    protected override void OnDragEnter( DragEventArgs drgevent )
-    {
-        // Принудительно разрешаем, игнорируя стандартные проверки
-        if ( drgevent.Data.GetDataPresent( DataFormats.FileDrop ) )
-        {
-            drgevent.Effect = DragDropEffects.Copy;
-        }
-        else if ( drgevent.Data.GetDataPresent( typeof( LaunchButtonView ) ) )
-        {
-            drgevent.Effect = DragDropEffects.Move;
-        }
-        else if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) ||
-                  drgevent.Data.GetDataPresent( DataFormats.Text ) ||
-                  drgevent.Data.GetDataPresent( DataFormats.UnicodeText ) )
-        {
-            drgevent.Effect = DragDropEffects.Link;
-        }
-        else
-        {
-            drgevent.Effect = DragDropEffects.None;
-        }
-        // Не вызываем base.OnDragEnter(drgevent), если хотим исключить влияние родителя
-    }
-
-    protected override void OnDragDrop( DragEventArgs drgevent )
-    {
-        if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) || drgevent.Data.GetDataPresent( DataFormats.Text ) )
-        {
-            string url = string.Empty;
-
-            if ( drgevent.Data.GetDataPresent( "UniformResourceLocator" ) )
-            {
-                if ( drgevent.Data.GetData( "UniformResourceLocator" ) is Stream stream )
-                {
-                    // Извлекаем URL (обычно в ASCII/UTF8 до нулевого байта)
-                    using StreamReader reader = new( stream );
-                    url = reader.ReadToEnd().Split( '\0' ).FirstOrDefault() ?? "";
-                }
-            }
-
-            if ( string.IsNullOrEmpty( url ) && drgevent.Data.GetDataPresent( DataFormats.Text ) )
-                url = drgevent.Data.GetData( DataFormats.Text )?.ToString() ?? "";
-
-            if ( !string.IsNullOrEmpty( url ) && Uri.TryCreate( url, UriKind.Absolute, out Uri? uri ) )
-            {
-                LaunchItem newItem = new()
-                {
-                    Name = uri.Host, // В качестве имени берем домен (напр. youtube.com)
-                    FilePath = url
-                };
-                AddButtons( [ newItem ] );
-                SyncModelOrder();
-                return;
-            }
-        }
-        if ( drgevent.Data.GetDataPresent( DataFormats.FileDrop ) )
-        {
-            string[] files = ( string[] )drgevent.Data.GetData( DataFormats.FileDrop );
-            if ( files?.Length > 0 )
-            {
-                List<LaunchItem> items = files.Select( f => new LaunchItem
-                {
-                    FilePath = f,
-                    Name = Path.GetFileName( f )
-                } ).ToList();
-                AddButtons( items );
-                SyncModelOrder();
-            }
-        }
-        // Здесь уже можно вызвать базу для внутренних кнопок
-        base.OnDragDrop( drgevent );
-    }
-
-    private void HandleNativeDrop( IntPtr hDrop )
-    {
-        uint count = DragQueryFile( hDrop, 0xFFFFFFFF, null, 0 );
-        List<string> files = [];
-        for ( uint i = 0; i < count; i++ )
-        {
-            StringBuilder sb = new( 260 );
-            DragQueryFile( hDrop, i, sb, 260 );
-            files.Add( sb.ToString() );
-        }
-
-        if ( files.Count > 0 )
-        {
+        _nativeDrop = new NativeDropHandler( Handle, files => {
             List<LaunchItem> items = files.Select( f => new LaunchItem
             {
                 FilePath = f,
                 Name = Path.GetFileName( f )
             } ).ToList();
 
-            BeginInvoke( () => {
-                AddButtons( items );
+            BeginInvoke( () =>
+            {
+                AddButtons( items ); 
                 SyncModelOrder();
             } );
-        }
+        } );
     }
 
+    protected override void WndProc( ref Message m )
+    {
+        if ( _nativeDrop != null && _nativeDrop.HandleWndProc( ref m ) ) 
+            return;
+
+        base.WndProc( ref m );
+    }
+
+    protected override void OnDragEnter( DragEventArgs drgevent )
+    {
+        if( _nativeDrop != null )
+            drgevent.Effect = _nativeDrop.GetDragEffect( drgevent );
+    }
+
+    protected override void OnDragDrop( DragEventArgs drgevent )
+    {
+        List<LaunchItem> items = _nativeDrop.ParseDroppedData( drgevent );
+
+        if ( items.Count > 0 )
+        {
+            AddButtons( items );
+            SyncModelOrder();
+            return;
+        }
+
+        base.OnDragDrop( drgevent );
+    }
+    
     public void MoveButtonToThisContainer( LaunchButtonView btn )
     {
         ButtonContainerView? oldParent = btn.Parent as ButtonContainerView;
@@ -257,10 +184,8 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         oldParent?.SyncState();
 
         // 4. Генерируем событие для сохранения конфига (если нужно)
-        ItemCollectionChanged?.Invoke( null );
+        ButtonContainerEvents.RaiseCollectionChanged( null );
     }
-
-    #region Логика обновления состояния
 
     public void ApplyStats( Dictionary<string, ProcessStats> stats )
     {
@@ -276,15 +201,11 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
         if ( changed ) Invalidate( true );
     }
 
-    private void SyncState()
+    public void SyncState()
     {
         ReorderButtons();
-        ItemCollectionChanged?.Invoke( null ); // Оповещаем MainContainer об изменении путей
+        ButtonContainerEvents.RaiseCollectionChanged( null );
     }
-
-    #endregion
-
-    #region Анимация и позиционирование
 
     public void ReorderButtons()
     {
@@ -325,269 +246,54 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
         ReorderButtons();
     }
-    #endregion
-
-    #region Управление кнопками
-
+    
     public void AddButtons( List<LaunchItem> items )
     {
-        if ( items == null || items.Count == 0 ) 
+        if ( items is not { Count: not 0 } ) 
             return;
 
-        CreateButtonControls( items );
-        SyncState();
-    }
+        List<LaunchButtonView> newButtons = _buttonFactory.CreateAll( items, this );
 
-    private void CreateButtonControls( List<LaunchItem> items )
-    {
-        // Сортируем входящие элементы по кликам и ID
-        List<LaunchItem> ordered = SortByGroups( items ); // items.OrderByDescending( i => i.ClicksCount ).ThenBy( i => i.Id );
-
-        foreach ( LaunchItem item in ordered )
+        foreach ( LaunchButtonView btn in newButtons )
         {
-            LaunchButtonView btn = new( _theme )
-            {
-                // Начальная ширина (будет скорректирована аниматором)
-                Dock = DockStyle.None, // Прямой запрет на стыковку
-                Anchor = AnchorStyles.Top | AnchorStyles.Left, // Фиксируем только левый верхний угол
-                Width = Width,
-                Height = /*item.Height > 0 ? item.Height : */_theme.ButtonStyle.DefaultHeight,
-                Text = item.Name,
-                BaseControlPath = item.FilePath,
-                Arguments = item.Arguments
-            };
-
-            if( item is PortableItem portable )
-            {
-                btn.DownloadUrl = portable.DownloadUrl;
-                btn.IsArchive = portable.IsArchive;
-            }
-
-            // Остальные подписки
-            btn.ButtonLeftClick += ( button, args ) => ProcessStartRequested?.Invoke( button, args );
-            btn.ButtonRightClick += b => ExplorerOpenRequested?.Invoke( b.BaseControlPath );
-            btn.ButtonMiddleClick += ( button ) => ProcessStartAsAdminRequested?.Invoke( button );
-
-            btn.DeleteButtonClick += b => {
-                _buttons.Remove( b ); // Убираем из внутреннего списка
-                Controls.Remove( b );
-                b.Dispose();
-                SyncState(); // Обновляем пути монитора и вызываем пересчет
-            };
-
-            btn.MouseMove += ( s, e ) =>
-            {
-                // Если кнопку тянут, ReorderButtons позволит аниматору знать, 
-                // что нужно пересчитывать позиции
-                if( e.Button == MouseButtons.Left )
-                {
-                    _mouseState.ButtonMoved = true;
-                    ReorderButtons();
-                }
-            };
-
-            btn.MouseUp += ( s, e ) =>
-            {
-                if ( _mouseState.ButtonMoved )
-                {
-                    SyncModelOrder();
-                    _mouseState.ButtonMoved = false;
-                }
-            };
-
-            btn.Dragging += ( b ) => {
-                // Вычисляем индекс в зависимости от текущего движка
-                int targetIndex = ( LayoutEngine is GridLayoutEngine )
-                    ? CalculateGridIndex( b )
-                    : CalculateListIndex( b );
-
-                int oldIndex = _buttons.IndexOf( b );
-
-                if ( targetIndex != -1 && targetIndex != oldIndex )
-                {
-                    // МЕНЯЕМ ПОРЯДОК В СПИСКЕ
-                    LaunchButtonView itemToMove = _buttons[ oldIndex ];
-                    _buttons.RemoveAt( oldIndex );
-                    _buttons.Insert( targetIndex, itemToMove );
-
-                    // СРАЗУ ПЕРЕРАСЧИТЫВАЕМ ПОЗИЦИИ ВСЕХ ОСТАЛЬНЫХ
-                    ReorderButtons();
-
-                    // Оповещаем систему, что порядок изменился (для сохранения в JSON)
-                    ItemCollectionChanged?.Invoke( null );
-                }
-            };
-
             _buttons.Add( btn );
             Controls.Add( btn );
-
-            // Устанавливаем начальные координаты сразу через LayoutEngine,
-            // чтобы кнопки не "прыгали" из нулевой точки при создании.
-            int currentIndex = _buttons.Count - 1;
-            (Point Location, int Width) layout = LayoutEngine.GetLayout( currentIndex, _scrollValue, Width, _buttons, _theme );
-
-            btn.Location = layout.Location;
-            btn.Width = layout.Width;
         }
 
-        // После добавления всех кнопок один раз пересчитываем их логическое состояние
         ReorderButtons();
-    }
-
-    private int CalculateListIndex( LaunchButtonView draggedBtn )
-    {
-        if ( _buttons.Count <= 1 ) return 0;
-
-        // Начальная точка отсчета (заголовок + отступы)
-        int currentY = _theme.ContainerStyle.HeaderHeight;
-        int sHeight = _theme.ButtonStyle.SpaceHeight > 0 ? _theme.ButtonStyle.SpaceHeight : 3;
-
-        // Центр перетаскиваемой кнопки (её текущее положение на экране)
-        int dragCenterY = draggedBtn.Top + ( draggedBtn.Height / 2 );
-
-        for ( int i = 0; i < _buttons.Count; i++ )
-        {
-            int btnHeight = _buttons[ i ].Height;
-
-            // Если центр перетаскиваемой кнопки выше середины текущей кнопки в цикле
-            if ( dragCenterY < currentY + ( btnHeight / 2 ) )
-            {
-                return i;
-            }
-
-            // Прибавляем высоту текущей кнопки и зазор для следующей итерации
-            currentY += btnHeight + sHeight;
-        }
-
-        // Если мы ниже всех кнопок — возвращаем последний индекс
-        return _buttons.Count - 1;
-    }
-
-    private int CalculateGridIndex( LaunchButtonView draggedBtn )
-    {
-        if ( _buttons.Count <= 1 ) return 0;
-
-        int sWidth = _theme.ButtonStyle.SpaceWidth > 0 ? _theme.ButtonStyle.SpaceWidth : 3;
-        int sHeight = _theme.ButtonStyle.SpaceHeight > 0 ? _theme.ButtonStyle.SpaceHeight : 3;
-        int targetWidth = _theme.ButtonStyle.DefaultWidth > 0 ? _theme.ButtonStyle.DefaultWidth : 60;
-        int columns = Math.Max( 1, Width / ( targetWidth + sWidth ) );
-        int btnWidth = ( Width - ( sWidth * ( columns + 1 ) ) ) / columns;
-
-        // Координаты центра перетаскиваемой кнопки
-        int centerX = draggedBtn.Left + draggedBtn.Width / 2;
-        int centerY = draggedBtn.Top + draggedBtn.Height / 2 - _scrollValue;
-
-        // Имитируем логику размещения GridLayoutEngine
-        int currentY = _theme.ContainerStyle.HeaderHeight + sHeight;
-        int currentCol = 0;
-
-        for ( int i = 0; i < _buttons.Count; i++ )
-        {
-            LaunchButtonView btn = _buttons[ i ];
-            Rectangle cellRect;
-
-            if ( btn.IsSeparator )
-            {
-                // Если перед разделителем был неполный ряд — закрываем его
-                if ( currentCol > 0 ) currentY += _theme.ButtonStyle.DefaultHeight + sHeight;
-
-                // Прямоугольник разделителя (на всю ширину)
-                cellRect = new Rectangle( sWidth, currentY, Width - ( sWidth * 2 ), btn.Height );
-
-                // Если мышка в верхней половине разделителя — вставляем ПЕРЕД ним
-                if ( centerY < cellRect.Top + cellRect.Height / 2 ) return i;
-
-                currentY += btn.Height + sHeight;
-                currentCol = 0;
-            }
-            else
-            {
-                // Прямоугольник обычной кнопки в сетке
-                int x = sWidth + ( currentCol * ( btnWidth + sWidth ) );
-                cellRect = new Rectangle( x, currentY, btnWidth, _theme.ButtonStyle.DefaultHeight );
-
-                // Если центр перетаскиваемой кнопки попал в эту ячейку (или левее/выше неё)
-                if ( centerY < cellRect.Bottom && centerX < cellRect.Right ) return i;
-
-                currentCol++;
-                if ( currentCol >= columns )
-                {
-                    currentCol = 0;
-                    currentY += _theme.ButtonStyle.DefaultHeight + sHeight;
-                }
-            }
-        }
-
-        return _buttons.Count - 1;
+        SyncState();
     }
 
     public void SyncModelOrder()
     {
-        // Извлекаем LaunchItem из каждой кнопки в их текущем порядке
-        // (Убедись, что у тебя в LaunchButtonView есть ссылка на исходный LaunchItem или все его данные)
         List<LaunchItem> updatedItems = _buttons.Select( ( btn, index ) => new LaunchItem
         {
             Name = btn.Text,
             FilePath = btn.BaseControlPath,
             Height = btn.Height,
             IsSeparator = string.IsNullOrEmpty( btn.BaseControlPath ),
-            // ВАЖНО: Перезаписываем ID и обнуляем ClicksCount (или ставим по порядку), 
-            // чтобы SortByGroups не разбросал их обратно при загрузке
             Id = index,
             ClicksCount = _buttons.Count - index // Искусственный вес для сохранения порядка
         } ).ToList();
 
-        // Вызываем событие, на которое подписан MainController/MainForm
-        ItemCollectionChanged?.Invoke( updatedItems );
+        ButtonContainerEvents.RaiseCollectionChanged( updatedItems ); 
     }
 
-    private List<LaunchItem> SortByGroups( List<LaunchItem> items )
+    public void StartProcessGroup( LaunchButtonView separator ) =>
+        ButtonContainerEvents.RaiseGroupStart( separator ); 
+
+    public void StartDragHoverTimer()
     {
-        List<LaunchItem> result = new();
-        List<LaunchItem> currentGroup = new();
-
-        foreach ( LaunchItem item in items )
-        {
-            if ( item.IsSeparator )
-            {
-                if ( currentGroup.Count > 0 )
-                {
-                    result.AddRange( currentGroup.OrderByDescending( i => i.ClicksCount ) );
-                    currentGroup.Clear();
-                }
-                result.Add( item );
-            }
-            else
-            {
-                currentGroup.Add( item );
-            }
-        }
-
-        result.AddRange( currentGroup.OrderByDescending( i => i.ClicksCount ) );
-
-        return result;
+        _dragHoverTimer.Start();
+        IsWaitingForExpand = true;
+        Invalidate();
     }
 
-    #endregion
-
-    #region Переопределения WinForms
-
-    protected override void OnMouseMove( MouseEventArgs e )
+    public void StopDragHoverTimer()
     {
-        base.OnMouseMove( e );
-
-        // Определяем прямоугольник кнопки удаления
-        Rectangle deleteRect = DeleteButtonRect;
-
-        // Обновляем MouseState
-        bool wasInDeleteButton = _mouseState.MouseInDeleteButton;
-        _mouseState.MouseInDeleteButton = deleteRect.Contains( e.Location );
-
-        if ( wasInDeleteButton != _mouseState.MouseInDeleteButton )
-        {
-            // Перерисовываем только заголовок
-            Invalidate( new Rectangle( 0, 0, Width, _theme.ContainerStyle.HeaderHeight ) );
-        }
+        _dragHoverTimer.Stop();
+        IsWaitingForExpand = false;
+        Invalidate();
     }
 
     protected override void OnMouseLeave( EventArgs e )
@@ -603,10 +309,7 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
 
     protected override void OnPaint( PaintEventArgs e )
     {
-        // Находим кнопку, которая сейчас в режиме перемещения (Capture или IsDragging)
         LaunchButtonView? draggedBtn = _buttons.FirstOrDefault( b => b.Capture || b.IsDragging );
-
-        // Передаем её в отрисовщик контейнера
         _containerDrawer.Draw( this, draggedBtn, _mouseState, e );
     }
 
@@ -621,63 +324,24 @@ public partial class ButtonContainerView : BasePanelControl, IAnimatable
     protected override void OnMouseClick( MouseEventArgs e )
     {
         base.OnMouseClick( e );
-        
-        Rectangle deleteRect = DeleteButtonRect;
-
-        if ( e.Button == MouseButtons.Left && deleteRect.Contains( e.Location ) )
-        {
-            OnDeleteRequested();
-            return; // Не вызываем ContainerSelected при клике на удаление
-        }
-
         SyncState();
-
-        ContainerSelected?.Invoke( this );
-    }
-
-    private Rectangle DeleteButtonRect => new(
-        Width - _theme.ContainerStyle.ButtonSize - _theme.ContainerStyle.ButtonMargin,
-        ( _theme.ContainerStyle.HeaderHeight - _theme.ContainerStyle.ButtonSize ) / 2,
-        _theme.ContainerStyle.ButtonSize,
-        _theme.ContainerStyle.ButtonSize
-    );
-
-    private void OnDeleteRequested() => 
-        ContainerDeleteRequested?.Invoke( this );
-
-    public void StartProcessGroup( LaunchButtonView separator ) => 
-        GroupStartRequested?.Invoke( separator );
-
-    public void NotifyDragHover() => 
-        DragHoverActivated?.Invoke( this );
-
-    public void StartDragHoverTimer()
-    {
-        _dragHoverTimer.Start();
-        IsWaitingForExpand = true; 
-        Invalidate();
-    }
-
-    public void StopDragHoverTimer()
-    {
-        _dragHoverTimer.Stop();
-        IsWaitingForExpand = false; 
-        Invalidate();
-    }
-
-    public string ResolveShortcut( string lnkPath )
-    {
-        return ShortcutHelper.Resolve( lnkPath );
+        ButtonContainerEvents.RaiseSelected( this );
     }
 
     protected override void Dispose( bool disposing )
     {
-        if ( disposing )
+        if( disposing )
         {
-            //ElevatedDragDropManager.Instance.ElevatedDragDrop -= OnElevatedDragDrop;
+            ButtonContainerEvents?.Dispose();
+
+            _dragHoverTimer?.Stop();
+            _dragHoverTimer?.Dispose();
+
+            foreach ( LaunchButtonView btn in _buttons ) 
+                btn.Dispose();
+
+            _buttons.Clear();
         }
         base.Dispose( disposing );
     }
-
-    #endregion    
 }

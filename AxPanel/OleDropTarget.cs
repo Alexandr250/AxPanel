@@ -53,7 +53,7 @@ namespace AxPanel
                     // Если это ярлык — резолвим его цель
                     if ( file.EndsWith( ".lnk", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        targetPath = _parent.ResolveShortcut( file );
+                        targetPath = ShortcutHelper.Resolve( file ); // _parent.ResolveShortcut( file );
                     }
 
                     items.Add( new LaunchItem { Name = name, FilePath = targetPath } );

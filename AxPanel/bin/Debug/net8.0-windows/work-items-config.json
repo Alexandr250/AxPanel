@@ -1,13 +1,221 @@
 {
+  "ConfigSignature": "AxPanel items config file",
   "Containers": [
     {
       "Items": [
         {
-          "Name": "replay_pid18780",
-          "FilePath": "C:\\Users\\17264\\Desktop\\replay_pid18780.log",
+          "Name": "Work",
+          "FilePath": "",
+          "Arguments": null,
+          "ClicksCount": 24,
+          "Id": 0,
+          "Height": 62,
+          "IsSeparator": true
+        },
+        {
+          "Name": "Visual Studio",
+          "FilePath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
+          "Arguments": null,
+          "ClicksCount": 23,
+          "Id": 1,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "vivaldi.exe",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+          "Arguments": null,
+          "ClicksCount": 22,
+          "Id": 2,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Other",
+          "FilePath": "",
+          "Arguments": null,
+          "ClicksCount": 21,
+          "Id": 3,
+          "Height": 62,
+          "IsSeparator": true
+        },
+        {
+          "Name": "Rider",
+          "FilePath": "C:\\Program Files\\JetBrains\\JetBrains Rider 2025.1\\bin\\rider64.exe",
+          "Arguments": null,
+          "ClicksCount": 20,
+          "Id": 4,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "VS Code",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+          "Arguments": null,
+          "ClicksCount": 19,
+          "Id": 5,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "WinMerge",
+          "FilePath": "C:\\Program Files\\WinMerge\\WinMergeU.exe",
+          "Arguments": null,
+          "ClicksCount": 18,
+          "Id": 6,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "dbeaver.exe",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\DBeaver\\dbeaver.exe",
+          "Arguments": null,
+          "ClicksCount": 17,
+          "Id": 7,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "SQL Server Management Studio 20",
+          "FilePath": "C:\\Program Files (x86)\\Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe",
+          "Arguments": null,
+          "ClicksCount": 16,
+          "Id": 8,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Cube IDE",
+          "FilePath": "C:\\ST\\STM32CubeIDE_1.13.1\\STM32CubeIDE\\stm32cubeide.exe",
+          "Arguments": null,
+          "ClicksCount": 15,
+          "Id": 9,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Embarcadero IDE",
+          "FilePath": "D:\\Program Files (x86)\\Embarcadero\\Studio\\23.0\\bin\\bds.exe",
+          "Arguments": null,
+          "ClicksCount": 14,
+          "Id": 10,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "QtCreator",
+          "FilePath": "C:\\Qt\\Qt5.12.12\\Tools\\QtCreator\\bin\\qtcreator.exe",
+          "Arguments": null,
+          "ClicksCount": 13,
+          "Id": 11,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Delphi 7",
+          "FilePath": "C:\\Program Files (x86)\\Borland\\Delphi7\\Bin\\delphi32.exe",
+          "Arguments": null,
+          "ClicksCount": 12,
+          "Id": 12,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Lazarus",
+          "FilePath": "C:\\lazarus\\lazarus.exe",
+          "Arguments": null,
+          "ClicksCount": 11,
+          "Id": 13,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "HEX Editor HxD",
+          "FilePath": "C:\\Program Files\\HxD\\HxD.exe",
+          "Arguments": null,
+          "ClicksCount": 10,
+          "Id": 14,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Notepad PP",
+          "FilePath": "C:\\Program Files\\Notepad\u002B\u002B\\notepad\u002B\u002B.exe",
+          "Arguments": null,
+          "ClicksCount": 9,
+          "Id": 15,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "SourceTree",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\SourceTree\\SourceTree.exe",
+          "Arguments": null,
+          "ClicksCount": 8,
+          "Id": 16,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Unity.exe",
+          "FilePath": "C:\\Program Files\\Unity\\Hub\\Editor\\2022.3.46f1\\Editor\\Unity.exe",
+          "Arguments": null,
+          "ClicksCount": 7,
+          "Id": 17,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "EXCEL.EXE",
+          "FilePath": "C:\\Program Files\\Microsoft Office\\Office16\\EXCEL.EXE",
+          "Arguments": null,
+          "ClicksCount": 6,
+          "Id": 18,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "SDFViewer.exe",
+          "FilePath": "C:\\Program Files (x86)\\Flyhoward\\SDF Viewer\\SDFViewer.exe",
+          "Arguments": null,
+          "ClicksCount": 5,
+          "Id": 19,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Total commander",
+          "FilePath": "C:\\Program Files\\Total Commander 9.50\\TOTALCMD64.EXE",
+          "Arguments": null,
+          "ClicksCount": 4,
+          "Id": 20,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Cursor",
+          "FilePath": "D:\\cursor\\Cursor.exe",
+          "Arguments": null,
+          "ClicksCount": 3,
+          "Id": 21,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Arduino IDE",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Programs\\Arduino IDE\\Arduino IDE.exe",
+          "Arguments": null,
+          "ClicksCount": 2,
+          "Id": 22,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Antigravity",
+          "FilePath": "D:\\Program Files (x86)\\Antigravity\\Antigravity.exe",
           "Arguments": null,
           "ClicksCount": 1,
-          "Id": 0,
+          "Id": 23,
           "Height": 62,
           "IsSeparator": false
         }
@@ -16,7 +224,179 @@
       "Type": 0
     },
     {
-      "Items": null,
+      "Items": [
+        {
+          "Name": "stepper.exe",
+          "FilePath": "D:\\CersysAnalytic\\Cersys.Stepper\\stepper.exe",
+          "Arguments": null,
+          "ClicksCount": 19,
+          "Id": 0,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Acrobat.exe",
+          "FilePath": "C:\\Program Files (x86)\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe",
+          "Arguments": null,
+          "ClicksCount": 18,
+          "Id": 1,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "vivaldi.exe",
+          "FilePath": "C:\\Users\\17264\\AppData\\Local\\Vivaldi\\Application\\vivaldi.exe",
+          "Arguments": null,
+          "ClicksCount": 17,
+          "Id": 2,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "PDFXCview.exe",
+          "FilePath": "C:\\Program Files\\Tracker Software\\PDF Viewer\\PDFXCview.exe",
+          "Arguments": null,
+          "ClicksCount": 16,
+          "Id": 3,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "SolarLS.Lab.exe",
+          "FilePath": "D:\\Solar LS\\SolarLS.Lab\\SolarLS.Lab.exe",
+          "Arguments": null,
+          "ClicksCount": 15,
+          "Id": 4,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSCapture.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Capture\\FSCapture.exe",
+          "Arguments": null,
+          "ClicksCount": 14,
+          "Id": 5,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSViewer.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Image Viewer\\FSViewer.exe",
+          "Arguments": null,
+          "ClicksCount": 13,
+          "Id": 6,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Thorlabs Optical Power Monitor.exe",
+          "FilePath": "D:\\trol\\OPM\\Thorlabs Optical Power Monitor.exe",
+          "Arguments": null,
+          "ClicksCount": 12,
+          "Id": 7,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "qbittorrent.exe",
+          "FilePath": "C:\\Program Files\\qBittorrent\\qbittorrent.exe",
+          "Arguments": null,
+          "ClicksCount": 11,
+          "Id": 8,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "PlanetVPN.exe",
+          "FilePath": "C:\\Program Files (x86)\\PlanetVPN\\PlanetVPN.exe",
+          "Arguments": null,
+          "ClicksCount": 10,
+          "Id": 9,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Bitrix24.exe",
+          "FilePath": "C:\\Program Files (x86)\\Bitrix24\\Bitrix24.exe",
+          "Arguments": null,
+          "ClicksCount": 9,
+          "Id": 10,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "OpenVPNConnect.exe",
+          "FilePath": "C:\\Program Files\\OpenVPN Connect\\OpenVPNConnect.exe",
+          "Arguments": null,
+          "ClicksCount": 8,
+          "Id": 11,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "LINQPad8.exe",
+          "FilePath": "C:\\Program Files\\LINQPad8\\LINQPad8.exe",
+          "Arguments": null,
+          "ClicksCount": 7,
+          "Id": 12,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "Tor",
+          "FilePath": "D:\\Tor Browser\\Browser\\firefox.exe",
+          "Arguments": null,
+          "ClicksCount": 6,
+          "Id": 13,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "MaxView.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone MaxView\\MaxView.exe",
+          "Arguments": null,
+          "ClicksCount": 5,
+          "Id": 14,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "FSResizer.exe",
+          "FilePath": "C:\\Program Files (x86)\\FastStone Photo Resizer\\FSResizer.exe",
+          "Arguments": null,
+          "ClicksCount": 4,
+          "Id": 15,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "palemoon.exe",
+          "FilePath": "C:\\Program Files\\Pale Moon\\palemoon.exe",
+          "Arguments": null,
+          "ClicksCount": 3,
+          "Id": 16,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "x32dbg.exe",
+          "FilePath": "D:\\Downloads\\x64dbg\\release\\x32\\x32dbg.exe",
+          "Arguments": null,
+          "ClicksCount": 2,
+          "Id": 17,
+          "Height": 62,
+          "IsSeparator": false
+        },
+        {
+          "Name": "x64dbg.exe",
+          "FilePath": "D:\\Downloads\\x64dbg\\release\\x64\\x64dbg.exe",
+          "Arguments": null,
+          "ClicksCount": 1,
+          "Id": 18,
+          "Height": 62,
+          "IsSeparator": false
+        }
+      ],
       "Name": "Desktop",
       "Type": 0
     }
