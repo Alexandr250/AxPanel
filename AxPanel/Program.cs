@@ -9,6 +9,10 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
+        AppDomain.CurrentDomain.UnhandledException += ( s, e ) => {
+            MessageBox.Show( e.ExceptionObject.ToString(), "Критическая ошибка" );
+        };
+
         ApplicationConfiguration.Initialize();
 
         MainConfig config = ConfigManager.GetMainConfig();

@@ -1,13 +1,6 @@
 ﻿using AxPanel.Model;
-using AxPanel.UI.UserControls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms.Layout;
-using System.Windows.Forms;
 using AxPanel.UI.Themes;
+using AxPanel.UI.UserControls;
 
 namespace AxPanel;
 
@@ -29,17 +22,14 @@ public class ButtonFactory : IButtonFactory
 
     public List<LaunchButtonView> CreateAll( List<LaunchItem> items, ButtonContainerView parent )
     {
-        // 1. Сортируем (теперь это внутренняя деталь фабрики)
-        var orderedItems = SortByGroups( items );
-
-        // 2. Превращаем данные в контролы
+        List<LaunchItem> orderedItems = SortByGroups( items );
         return orderedItems.Select( item => CreateSingle( item, parent ) ).ToList();
     }
 
     public LaunchButtonView CreateSingle( LaunchItem item, ButtonContainerView parent )
     {
 
-        var btn = new LaunchButtonView( _theme )
+        LaunchButtonView btn = new( _theme )
         {
             Dock = DockStyle.None,
             Anchor = AnchorStyles.Top | AnchorStyles.Left,
@@ -48,6 +38,7 @@ public class ButtonFactory : IButtonFactory
             Text = item.Name,
             BaseControlPath = item.FilePath,
             Arguments = item.Arguments,
+            IconPath = item.Icon
             //IsSeparator = item.IsSeparator
         };
 
@@ -65,32 +56,21 @@ public class ButtonFactory : IButtonFactory
 
     private void BindEvents( LaunchButtonView btn, ButtonContainerView parent )
     {
-        btn.ButtonLeftClick += ( b, args ) => parent.NotifyProcessStart( b, args );
+        btn.ButtonLeftClick += parent.NotifyProcessStart;
         btn.ButtonRightClick += b => parent.NotifyExplorerOpen( b.BaseControlPath );
-        btn.ButtonMiddleClick += b => parent.NotifyProcessStartAsAdmin( b );
+        btn.ButtonMiddleClick += parent.NotifyProcessStartAsAdmin;
 
-        btn.DeleteButtonClick += b =>
-        {
-            parent.RemoveButton( b );
-        };
+        btn.DeleteButtonClick += parent.RemoveButton;
 
         btn.MouseMove += ( s, e ) =>
         {
-            if ( e.Button == MouseButtons.Left )
-            {
+            if ( e.Button == MouseButtons.Left ) 
                 parent.HandleButtonDragMove();
-            }
         };
 
-        btn.MouseUp += ( s, e ) =>
-        {
-            parent.HandleButtonDragEnd();
-        };
+        btn.MouseUp += ( s, e ) => parent.HandleButtonDragEnd();
 
-        btn.Dragging += ( b ) =>
-        {
-            parent.HandleButtonReorder( b );
-        };
+        btn.Dragging += parent.HandleButtonReorder;
     }
 
     //private void BindEvents( LaunchButtonView btn, ButtonContainerInteractionManager interactions )
@@ -120,8 +100,8 @@ public class ButtonFactory : IButtonFactory
 
     public List<LaunchItem> SortByGroups( List<LaunchItem> items )
     {
-        List<LaunchItem> result = new();
-        List<LaunchItem> currentGroup = new();
+        List<LaunchItem> result = [];
+        List<LaunchItem> currentGroup = [];
 
         foreach ( LaunchItem item in items )
         {

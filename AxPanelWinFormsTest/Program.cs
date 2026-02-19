@@ -7,17 +7,49 @@ using AxPanel.SL;
 using AxPanel.UI.ElementStyles;
 using AxPanel.Model;
 using System.IO;
+using System.Runtime.InteropServices;
+using Windows.Media.Control;
+using Windows.Media;
 
 namespace AxPanelWinFormsTest;
 
 internal static class Program
 {
+    [DllImport( "user32.dll" )]
+    public static extern void keybd_event( byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo );
+
+    public static async void RequestMediaToggle()
+    {
+        try
+        {
+            var manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
+            var session = manager.GetCurrentSession();
+
+            if ( session != null )
+            {
+                GlobalSystemMediaTransportControlsSessionPlaybackStatus status = session.GetPlaybackInfo().PlaybackStatus;
+
+                if ( status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing )
+                    await session.TryPauseAsync();
+                else
+                    await session.TryPlayAsync();
+            }
+        }
+        catch ( Exception ex ) { Debug.WriteLine( $"Media Error: {ex.Message}" ); }
+    }
+
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>
     [STAThread]
     static void Main()
     {
+
+        RequestMediaToggle();
+        //const byte VK_MEDIA_PLAY_PAUSE = 0xB3;
+        //keybd_event( VK_MEDIA_PLAY_PAUSE, 0, 0, UIntPtr.Zero );
+        //keybd_event( VK_MEDIA_PLAY_PAUSE, 0, 2, UIntPtr.Zero );
+
         /*var c = ConfigManager.ReadItemsConfig();
         return;*/
 

@@ -15,4 +15,6 @@ public class LaunchItem
     public int Height { get; set; }
 
     public bool IsSeparator { get; set; }
+
+    public string Icon { get; set; }
 }

@@ -13,7 +13,7 @@ public class GlobalAnimator : IDisposable
 
     private readonly List<IAnimatable> _targets = [];
     private readonly Timer _timer;
-    private const float LerpSpeed = 0.25f;
+    private const float LerpSpeed = 0.15f;
 
     public GlobalAnimator()
     {
@@ -44,7 +44,7 @@ public class GlobalAnimator : IDisposable
         {
             LaunchButtonView btn = buttons[ i ];
 
-            if ( btn.Capture || btn.IsDragging ) 
+            if ( btn.Capture || btn.IsDragging )
                 continue;
 
             (Point Location, int Width) layout = container.LayoutEngine.GetLayout( i, container.ScrollValue, container.Width, buttons, container.Theme );
@@ -56,7 +56,7 @@ public class GlobalAnimator : IDisposable
             if ( m1 || m2 || m3 ) moved = true;
         }
 
-        if ( moved ) 
+        if ( moved )
             container.UpdateVisual();
     }
 
