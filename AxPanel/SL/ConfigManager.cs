@@ -170,7 +170,8 @@ public class ConfigManager
         }
 
         // 4. Принудительное добавление системного контейнера
-        if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) ) 
+        var systemContainer = BuildStandartContainer();
+        if ( !panelModel.Containers.Any( c => c.Type == ContainerType.System ) && systemContainer != null ) 
             panelModel.Containers.Add( BuildStandartContainer() );
 
         panelModel.Containers.Add( BuildPortableContainer() );
