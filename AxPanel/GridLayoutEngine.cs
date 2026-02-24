@@ -1,160 +1,170 @@
-﻿using System.Diagnostics;
-using AxPanel.Contracts;
+﻿using AxPanel.Contracts;
 using AxPanel.UI.Themes;
 using AxPanel.UI.UserControls;
 
-namespace AxPanel
+namespace AxPanel;
+
+public class GridLayoutEngine : ILayoutEngine
 {
-    public class GridLayoutEngine : ILayoutEngine
+    private const int _defaultButtonWidth = 80;
+    public int Gap { get; set; } = 3;
+
+    public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )
     {
-        private int _defaultButtonWidth = 80;
-        public int Gap { get; set; } = 3;
+        int spaceWidth = theme.ButtonStyle.SpaceWidth > 0 ? theme.ButtonStyle.SpaceWidth : Gap;
+        int spaceHeight = theme.ButtonStyle.SpaceHeight;
+        int targetWidth = theme.ButtonStyle.DefaultWidth > 0 ? theme.ButtonStyle.DefaultWidth : _defaultButtonWidth;
 
-        public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )
+        // Рассчитываем количество колонок, учитывая ширину кнопки и отступ
+        int columnsCount = Math.Max( 1, containerWidth / ( targetWidth + spaceWidth ) );
+
+        // Вычисляем реальную ширину кнопки, чтобы заполнить контейнер без остатка
+        int buttonWidth = ( containerWidth - ( spaceWidth * ( columnsCount + 1 ) ) ) / columnsCount;
+
+        int currentY = theme.ContainerStyle.HeaderHeight + spaceHeight + scrollValue;
+        int currentCol = 0;
+
+        for ( int i = 0; i < index; i++ )
         {
-            int sWidth = theme.ButtonStyle.SpaceWidth > 0 ? theme.ButtonStyle.SpaceWidth : Gap; ;
-            int sHeight = theme.ButtonStyle.SpaceHeight;
-            int targetWidth = theme.ButtonStyle.DefaultWidth > 0 ? theme.ButtonStyle.DefaultWidth : _defaultButtonWidth;
-
-            // Рассчитываем количество колонок, учитывая ширину кнопки и отступ
-            int columns = Math.Max( 1, containerWidth / ( targetWidth + sWidth ) );
-
-            // Вычисляем реальную ширину кнопки, чтобы заполнить контейнер без остатка
-            int btnWidth = ( containerWidth - ( sWidth * ( columns + 1 ) ) ) / columns;
-
-            int currentY = theme.ContainerStyle.HeaderHeight + sHeight + scrollValue;
-            int currentCol = 0;
-
-            for ( int i = 0; i < index; i++ )
+            LaunchButtonView prevBtn = allButtons[ i ];
+            if ( prevBtn.IsSeparator )
             {
-                var prevBtn = allButtons[ i ];
-                if ( prevBtn.IsSeparator )
+                if ( currentCol > 0 ) currentY += theme.ButtonStyle.DefaultHeight + spaceHeight;
+                currentY += theme.ButtonStyle.SeparatorHeight + spaceHeight;
+                currentCol = 0;
+            }
+            else
+            {
+                currentCol++;
+                if ( currentCol >= columnsCount )
                 {
-                    if ( currentCol > 0 ) currentY += theme.ButtonStyle.DefaultHeight + sHeight;
-                    currentY += prevBtn.Height + sHeight;
+                    currentCol = 0;
+                    currentY += theme.ButtonStyle.DefaultHeight + spaceHeight;
+                }
+            }
+        }
+
+        LaunchButtonView currentBtn = allButtons[ index ];
+        if ( currentBtn.IsSeparator )
+        {
+            currentBtn.Height = theme.ButtonStyle.SeparatorHeight;
+            if ( currentCol > 0 ) 
+                currentY += theme.ButtonStyle.DefaultHeight + spaceHeight;
+
+            return ( new Point( spaceWidth, currentY ), containerWidth - ( spaceWidth * 2 ) );
+        }
+
+        currentBtn.Height = theme.ButtonStyle.DefaultHeight;
+
+        int x = spaceWidth + ( currentCol * ( buttonWidth + spaceWidth ) );
+        return (new Point( x, currentY ), buttonWidth);
+    }
+
+    public int GetTotalContentHeight( IReadOnlyList<LaunchButtonView> allButtons, int containerWidth, ITheme theme )
+    {
+        if ( allButtons == null || allButtons.Count == 0 )
+            return theme.ContainerStyle.HeaderHeight;
+
+        int columns = Math.Max( 1, containerWidth / ( _defaultButtonWidth + Gap ) );
+
+        // Начальная высота — заголовок контейнера + верхний отступ
+        int totalHeight = theme.ContainerStyle.HeaderHeight + Gap;
+        int currentCol = 0;
+
+        foreach( LaunchButtonView button in allButtons )
+        {
+            if ( button.IsSeparator )
+            {
+                // 1. Если до разделителя были кнопки в неполном ряду, закрываем этот ряд
+                if ( currentCol > 0 )
+                {
+                    totalHeight += theme.ButtonStyle.DefaultHeight + Gap;
                     currentCol = 0;
                 }
-                else
+
+                // 2. Добавляем высоту самого разделителя
+                totalHeight += theme.ButtonStyle.SeparatorHeight + Gap;
+            }
+            else
+            {
+                // Если это первая кнопка в ряду, резервируем под неё высоту
+                if ( currentCol == 0 )
                 {
-                    currentCol++;
-                    if ( currentCol >= columns )
-                    {
-                        currentCol = 0;
-                        currentY += theme.ButtonStyle.DefaultHeight + sHeight;
-                    }
+                    totalHeight += theme.ButtonStyle.DefaultHeight + Gap;
+                }
+
+                currentCol++;
+
+                // Если ряд заполнился, сбрасываем счетчик колонок
+                if ( currentCol >= columns )
+                {
+                    currentCol = 0;
                 }
             }
-
-            var currentBtn = allButtons[ index ];
-            if ( currentBtn.IsSeparator )
-            {
-                if ( currentCol > 0 ) currentY += theme.ButtonStyle.DefaultHeight + sHeight;
-                return (new Point( sWidth, currentY ), containerWidth - ( sWidth * 2 ));
-            }
-
-            int x = sWidth + ( currentCol * ( btnWidth + sWidth ) );
-            return (new Point( x, currentY ), btnWidth);
         }
 
-        //public (Point Location, int Width) GetLayout( int index, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )
-        //{
-        //    int columns = Math.Max( 1, containerWidth / ( _defaultButtonWidth + Gap ) );
-        //    int btnWidth = ( containerWidth - ( Gap * ( columns + 1 ) ) ) / columns;
+        // Если список закончился на неполном ряду кнопок, высота уже учтена в (currentCol == 0)
+        return totalHeight + Gap;
+    }
 
-        //    int currentY = theme.ContainerStyle.HeaderHeight + Gap + scrollValue;
-        //    int currentCol = 0;
+    public int GetIndexAt( Point mouseLocation, int scrollValue, int containerWidth, IReadOnlyList<LaunchButtonView> allButtons, ITheme theme )
+    {
+        if ( allButtons.Count <= 1 ) return 0;
 
-        //    for ( int i = 0; i < index; i++ )
-        //    {
-        //        var prevBtn = allButtons[ i ];
+        int spaceWidth = theme.ButtonStyle.SpaceWidth > 0 ? theme.ButtonStyle.SpaceWidth : Gap;
+        int spaceHeight = theme.ButtonStyle.SpaceHeight > 0 ? theme.ButtonStyle.SpaceHeight : Gap;
+        int targetWidth = theme.ButtonStyle.DefaultWidth > 0 ? theme.ButtonStyle.DefaultWidth : _defaultButtonWidth;
 
-        //        if ( prevBtn.IsSeparator )
-        //        {
-        //            // Разделитель всегда завершает текущую строку (если она была) и добавляет свою высоту
-        //            // Если currentCol > 0, значит до разделителя были кнопки, которые уже заняли строку
-        //            if ( currentCol > 0 ) currentY += theme.ButtonStyle.DefaultHeight + Gap;
+        int columns = Math.Max( 1, containerWidth / ( targetWidth + spaceWidth ) );
+        int btnWidth = ( containerWidth - ( spaceWidth * ( columns + 1 ) ) ) / columns;
 
-        //            currentY += prevBtn.Height + Gap;
-        //            currentCol = 0;
-        //        }
-        //        else
-        //        {
-        //            currentCol++;
-        //            if ( currentCol >= columns )
-        //            {
-        //                currentCol = 0;
-        //                currentY += prevBtn.Height + Gap; // Здесь prevBtn.Height — это высота обычной кнопки
-        //            }
-        //        }
-        //    }
+        // Координаты мыши (или центра кнопки) с учетом прокрутки
+        int centerX = mouseLocation.X;
+        int centerY = mouseLocation.Y - scrollValue;
 
-        //    // Если мы дошли до нужного индекса, а currentCol > 0, 
-        //    // значит мы стоим в новой строке, Y которой уже вычислен верно.
+        int currentY = theme.ContainerStyle.HeaderHeight + spaceHeight;
+        int currentCol = 0;
 
-        //    var currentBtn = allButtons[ index ];
-
-        //    if ( currentBtn.IsSeparator )
-        //    {
-        //        // Если перед разделителем остались кнопки в неполном ряду, 
-        //        // разделитель должен прыгнуть под них
-        //        if ( currentCol > 0 ) currentY += theme.ButtonStyle.DefaultHeight + Gap;
-
-        //        return (new Point( Gap, currentY ), containerWidth - ( Gap * 2 ));
-        //    }
-        //    else
-        //    {
-        //        int x = Gap + ( currentCol * ( btnWidth + Gap ) );
-        //        return (new Point( x, currentY ), btnWidth);
-        //    }
-        //}
-
-        public int GetTotalContentHeight( IReadOnlyList<LaunchButtonView> allButtons, int containerWidth, ITheme theme )
+        for ( int i = 0; i < allButtons.Count; i++ )
         {
-            if ( allButtons == null || allButtons.Count == 0 )
-                return theme.ContainerStyle.HeaderHeight;
+            LaunchButtonView btn = allButtons[ i ];
+            Rectangle cellRect;
 
-            int columns = Math.Max( 1, containerWidth / ( _defaultButtonWidth + Gap ) );
-
-            // Начальная высота — заголовок контейнера + верхний отступ
-            int totalHeight = theme.ContainerStyle.HeaderHeight + Gap;
-            int currentCol = 0;
-
-            for ( int i = 0; i < allButtons.Count; i++ )
+            if ( btn.IsSeparator )
             {
-                var btn = allButtons[ i ];
+                // Если перед разделителем был неполный ряд — переходим на новую строку
+                if ( currentCol > 0 ) 
+                    currentY += theme.ButtonStyle.DefaultHeight + spaceHeight;
 
-                if ( btn.IsSeparator )
+                cellRect = new Rectangle( spaceWidth, currentY, containerWidth - ( spaceWidth * 2 ), theme.ButtonStyle.SeparatorHeight );
+
+                // Если мышка выше середины разделителя — вставляем перед ним
+                if ( centerY < cellRect.Top + cellRect.Height / 2 ) 
+                    return i;
+
+                currentY += theme.ButtonStyle.SeparatorHeight + spaceHeight;
+                currentCol = 0;
+            }
+            else
+            {
+                int x = spaceWidth + ( currentCol * ( btnWidth + spaceWidth ) );
+                cellRect = new Rectangle( x, currentY, btnWidth, theme.ButtonStyle.DefaultHeight );
+
+                // Проверка попадания: если мышка выше нижней границы текущей ячейки 
+                // И левее её правой границы — это наш целевой индекс
+                if ( centerY < cellRect.Bottom && centerX < cellRect.Right ) 
+                    return i;
+
+                currentCol++;
+
+                if ( currentCol >= columns )
                 {
-                    // 1. Если до разделителя были кнопки в неполном ряду, закрываем этот ряд
-                    if ( currentCol > 0 )
-                    {
-                        totalHeight += theme.ButtonStyle.DefaultHeight + Gap;
-                        currentCol = 0;
-                    }
-
-                    // 2. Добавляем высоту самого разделителя
-                    totalHeight += btn.Height + Gap;
-                }
-                else
-                {
-                    // Если это первая кнопка в ряду, резервируем под неё высоту
-                    if ( currentCol == 0 )
-                    {
-                        totalHeight += btn.Height + Gap;
-                    }
-
-                    currentCol++;
-
-                    // Если ряд заполнился, сбрасываем счетчик колонок
-                    if ( currentCol >= columns )
-                    {
-                        currentCol = 0;
-                    }
+                    currentCol = 0;
+                    currentY += theme.ButtonStyle.DefaultHeight + spaceHeight;
                 }
             }
-
-            // Если список закончился на неполном ряду кнопок, высота уже учтена в (currentCol == 0)
-            return totalHeight + Gap;
         }
+
+        return allButtons.Count - 1;
     }
 }

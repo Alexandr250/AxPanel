@@ -13,6 +13,13 @@ public class ContainerService
         if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
             return;
 
+        // 1. ПРОВЕРКА ВНУТРЕННИХ КОМАНД (Actions)
+        if ( btn.BaseControlPath.StartsWith( "action://", StringComparison.OrdinalIgnoreCase ) )
+        {
+            HandleInternalAction( btn.BaseControlPath );
+            return; // Выходим, так как это не файл
+        }
+
         if ( !File.Exists( btn.BaseControlPath ) && !string.IsNullOrEmpty( btn.DownloadUrl ) )
         {
             // Визуальный фидбек: можно временно изменить текст или включить флаг загрузки
@@ -54,6 +61,15 @@ public class ContainerService
         else
         {
             MessageBox.Show( $"Файл не найден: {btn.BaseControlPath}", "Ошибка запуска", MessageBoxButtons.OK, MessageBoxIcon.Warning );
+        }
+    }
+
+    private void HandleInternalAction( string actionPath )
+    {
+        // Регистронезависимое сравнение конкретных команд
+        if ( actionPath.Equals( "action://media-toggle", StringComparison.OrdinalIgnoreCase ) )
+        {
+            MediaInteractionService.TogglePlayPauseAsync();
         }
     }
 

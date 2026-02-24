@@ -96,27 +96,6 @@ public class RootContainerView : Panel
         }
     }
 
-    private void DeleteContainer( ButtonContainerView container )
-    {
-        if ( Controls.OfType<ButtonContainerView>().Count() <= 1 )
-            return;
-
-        if ( Selected == container )
-        {
-            ButtonContainerView? firstContainer = Controls.OfType<ButtonContainerView>().FirstOrDefault( c => c != container );
-            Selected = firstContainer;
-        }
-
-        Controls.Remove( container );
-
-        container.ContainerDeleteRequested -= DeleteContainer;
-
-        container.Dispose();
-        ArrangeContainers();
-
-        UpdateGlobalMonitorPaths();
-    }
-
     public void ArrangeContainers()
     {
         _containerAnimator.StopAnimateArrange();

@@ -16,7 +16,7 @@ public class ContainerDrawer
     /// <summary>
     /// Основной метод отрисовки контейнера
     /// </summary>
-    public void Draw( ButtonContainerView container, LaunchButtonView draggedBtn, MouseState mouseState, PaintEventArgs e )
+    public void Draw( ButtonContainerView container, LaunchButtonView? draggedBtn, MouseState mouseState, PaintEventArgs e )
     {
         Graphics g = e.Graphics;
 
@@ -68,9 +68,10 @@ public class ContainerDrawer
         if ( draggedBtn != null )
         {
             int index = container.Buttons.ToList().IndexOf( draggedBtn );
+
             if ( index != -1 )
             {
-                var layout = container.LayoutEngine.GetLayout(
+                (Point Location, int Width) layout = container.LayoutEngine.GetLayout(
                     index,
                     container.ScrollValue,
                     container.Width,

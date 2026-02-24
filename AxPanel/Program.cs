@@ -9,6 +9,10 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
+        AppDomain.CurrentDomain.UnhandledException += ( s, e ) => {
+            MessageBox.Show( e.ExceptionObject.ToString(), "Критическая ошибка" );
+        };
+
         ApplicationConfiguration.Initialize();
 
         MainConfig config = ConfigManager.GetMainConfig();
@@ -49,7 +53,7 @@ internal static class Program
             {
                 ButtonContainerView uiContainer = mainView.MainContainer.AddContainer( containerItem.Name, containerItem.Items );
                 
-                uiContainer.ItemCollectionChanged += list =>
+                uiContainer.ButtonContainerEvents.ItemCollectionChanged += list =>
                 {
                     // 1. Если list == null, значит это промежуточное перемещение 
                     // (например, кнопка просто пролетает над другой). Ничего не сохраняем.

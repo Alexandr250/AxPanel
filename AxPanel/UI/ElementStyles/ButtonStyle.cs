@@ -12,14 +12,15 @@ public class ButtonStyle : IDisposable
     // Группировка констант
     public int DefaultHeight { get; set; } = 62; // 42
     public int DefaultWidth { get; set; } = 100;
+    public int SeparatorHeight { get; set; } = 28;
 
     public int DeleteButtonWidth { get; set; } = 50;
     public int SpaceHeight { get; set; } = 1;
     public int SpaceWidth { get; set; } = 3;
 
     // Ресурсы для объемной обводки бейджа
-    [JsonIgnore] public Pen BadgeBorderLightPen { get; set; } = new Pen( Color.FromArgb( 200, Color.White ), 1.5f );
-    [JsonIgnore] public Pen BadgeBorderDarkPen { get; set; } = new Pen( Color.FromArgb( 200, Color.Black ), 1.5f );
+    [JsonIgnore] public Pen BadgeBorderLightPen { get; set; } = new( Color.FromArgb( 200, Color.White ), 1.5f );
+    [JsonIgnore] public Pen BadgeBorderDarkPen { get; set; } = new( Color.FromArgb( 200, Color.Black ), 1.5f );
 
     [JsonPropertyName( "BadgeBorderLightColor" )]
     public string BadgeBorderLightHex
@@ -36,9 +37,9 @@ public class ButtonStyle : IDisposable
     }
 
     // --- Ресурсы бейджа ---
-    [JsonIgnore] public SolidBrush BadgeBrush { get; set; } = new SolidBrush( Color.FromArgb( 200, 0, 120, 215 ) );
+    [JsonIgnore] public SolidBrush BadgeBrush { get; set; } = new( Color.FromArgb( 200, 0, 120, 215 ) );
     [JsonIgnore] public Color BadgeTextColor { get; set; } = Color.White;
-    [JsonIgnore] public Font BadgeFont { get; set; } = new Font( "Segoe UI", 7f, FontStyle.Bold );
+    [JsonIgnore] public Font BadgeFont { get; set; } = new( "Segoe UI", 7f, FontStyle.Bold );
 
     // --- HEX-обертки для JSON ---
     [JsonPropertyName( "BadgeColor" )]
@@ -61,7 +62,6 @@ public class ButtonStyle : IDisposable
         get => $"{BadgeFont.Name}, {BadgeFont.Size}, {BadgeFont.Style}";
         set { BadgeFont?.Dispose(); /* Логика парсинга шрифта */ }
     }
-
 
     // Использование автосвойств с инициализацией
     [JsonIgnore]
@@ -93,7 +93,7 @@ public class ButtonStyle : IDisposable
     public Pen DeleteButtonBorderPen { get; private set; } = new( Color.FromArgb( 150, 80, 80, 80 ) );
 
     [JsonIgnore]
-    public Font MinFont { get; private set; } = new Font( FontFamily.GenericSerif, 6, FontStyle.Regular, GraphicsUnit.Pixel );
+    public Font MinFont { get; private set; } = new( FontFamily.GenericSerif, 6, FontStyle.Regular, GraphicsUnit.Pixel );
 
 
     [JsonPropertyName( "BorderLightColor" )]
@@ -202,7 +202,7 @@ public class ButtonStyle : IDisposable
         {
             try
             {
-                var parts = value.Split( ',' );
+                string[] parts = value.Split( ',' );
                 string name = parts[ 0 ].Trim();
                 float size = float.Parse( parts[ 1 ].Trim(), System.Globalization.CultureInfo.InvariantCulture );
                 FontStyle style = ( FontStyle )Enum.Parse( typeof( FontStyle ), parts[ 2 ].Trim() );
@@ -233,9 +233,9 @@ public class ButtonStyle : IDisposable
     public int ActivityMarkerWidth { get; set; } = 3;
 
     // --- Параметры разделителя (Separator) ---
-    [JsonIgnore] public SolidBrush GroupPlayBrush { get; set; } = new SolidBrush( Color.FromArgb( 180, Color.LimeGreen ) );
+    [JsonIgnore] public SolidBrush GroupPlayBrush { get; set; } = new( Color.FromArgb( 180, Color.LimeGreen ) );
     [JsonIgnore] public Color GroupPlayGlowColor { get; set; } = Color.FromArgb( 100, Color.LimeGreen );
-    [JsonIgnore] public Font SeparatorFont { get; set; } = new Font( "Segoe UI", 7f, FontStyle.Bold );
+    [JsonIgnore] public Font SeparatorFont { get; set; } = new( "Segoe UI", 7f, FontStyle.Bold );
 
     [JsonPropertyName( "GroupPlayColor" )]
     public string GroupPlayHex
@@ -261,7 +261,7 @@ public class ButtonStyle : IDisposable
 
             try
             {
-                var parts = value.Split( ',' );
+                string[] parts = value.Split( ',' );
                 if ( parts.Length < 3 ) return;
 
                 string name = parts[ 0 ].Trim();
@@ -280,7 +280,7 @@ public class ButtonStyle : IDisposable
                     style = parsedStyle;
                 }
 
-                var oldFont = SeparatorFont;
+                Font? oldFont = SeparatorFont;
                 SeparatorFont = new Font( name, size, style );
                 oldFont?.Dispose();
             }
@@ -307,10 +307,10 @@ public class ButtonStyle : IDisposable
 
     // Ресурсы для метров (индикаторов)
     [JsonIgnore]
-    public SolidBrush MeterBgBrush { get; set; } = new SolidBrush( Color.FromArgb( 100, 0, 0, 0 ) );
+    public SolidBrush MeterBgBrush { get; set; } = new( Color.FromArgb( 100, 0, 0, 0 ) );
 
     [JsonIgnore]
-    public Font MeterFont { get; set; } = new Font( "Segoe UI", 6.5f, FontStyle.Bold );
+    public Font MeterFont { get; set; } = new( "Segoe UI", 6.5f, FontStyle.Bold );
 
     [JsonIgnore]
     public Color MeterTextColor { get; set; } = Color.White;
@@ -345,7 +345,7 @@ public class ButtonStyle : IDisposable
             if ( string.IsNullOrWhiteSpace( value ) ) return;
             try
             {
-                var parts = value.Split( ',' );
+                string[] parts = value.Split( ',' );
                 string name = parts[ 0 ].Trim();
                 float size = float.Parse( parts[ 1 ].Trim(), System.Globalization.CultureInfo.InvariantCulture );
                 FontStyle style = ( FontStyle )Enum.Parse( typeof( FontStyle ), parts[ 2 ].Trim() );
@@ -357,8 +357,8 @@ public class ButtonStyle : IDisposable
         }
     }
 
-    [JsonIgnore] public Pen MeterBorderLightPen { get; set; } = new Pen( Color.FromArgb( 200, Color.White ), 1f );
-    [JsonIgnore] public Pen MeterBorderDarkPen { get; set; } = new Pen( Color.FromArgb( 200, Color.Gray ), 1f );
+    [JsonIgnore] public Pen MeterBorderLightPen { get; set; } = new( Color.FromArgb( 200, Color.White ), 1f );
+    [JsonIgnore] public Pen MeterBorderDarkPen { get; set; } = new( Color.FromArgb( 200, Color.Gray ), 1f );
 
     [JsonPropertyName( "MeterBorderLightColor" )]
     public string MeterBorderLightHex

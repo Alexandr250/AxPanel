@@ -27,19 +27,19 @@ public class ContainerManager
 
     public void Register( ButtonContainerView container )
     {
-        container.ContainerSelected += SetSelected;
-        container.DragHoverActivated += SetSelected;
+        container.ButtonContainerEvents.ContainerSelected += SetSelected;
+        container.ButtonContainerEvents.DragHoverActivated += SetSelected;
 
-        container.ProcessStartRequested += ( btn, args ) => _service.RunProcess( btn, false, args );
-        container.ProcessStartAsAdminRequested += btn => _service.RunProcess( btn, true );
-        container.ExplorerOpenRequested += path => _service.OpenLocation( path );
+        container.ButtonContainerEvents.ProcessStartRequested += ( btn, args ) => _service.RunProcess( btn, false, args );
+        container.ButtonContainerEvents.ProcessStartAsAdminRequested += btn => _service.RunProcess( btn, true );
+        container.ButtonContainerEvents.ExplorerOpenRequested += path => _service.OpenLocation( path );
 
-        container.ItemCollectionChanged += ( items ) => {
+        container.ButtonContainerEvents.ItemCollectionChanged += ( items ) => {
             if ( items == null || items.Count == 0 ) return; // Защита от затирания пустотой
 
-            var model = ConfigManager.GetModel();
+            MainModel model = ConfigManager.GetModel();
             
-            var target = model.Containers.FirstOrDefault( c => c.Name == container.PanelName );
+            ContainerItem? target = model.Containers.FirstOrDefault( c => c.Name == container.PanelName );
 
             if ( target != null )
             {
@@ -74,7 +74,7 @@ public class ContainerManager
 
     private void UpdateModelData( string name, List<LaunchItem> items )
     {
-        var target = ConfigManager.GetModel().Containers.FirstOrDefault( c => c.Name == name );
+        ContainerItem? target = ConfigManager.GetModel().Containers.FirstOrDefault( c => c.Name == name );
         if ( target != null ) target.Items = items;
     }
 }

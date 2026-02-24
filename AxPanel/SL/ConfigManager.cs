@@ -31,10 +31,7 @@ public class ConfigManager
     {
         if ( _cachedMainConfig == null )
         {
-            lock ( _lock )
-            {
-                _cachedMainConfig ??= ReadMainConfigFromDisk();
-            }
+            lock ( _lock ) _cachedMainConfig ??= ReadMainConfigFromDisk();
         }
         return _cachedMainConfig;
     }
@@ -118,10 +115,26 @@ public class ConfigManager
             {
                 string json = File.ReadAllText( path );
                 panelModel = JsonSerializer.Deserialize<MainModel>( json );
+
+                if( panelModel == null )
+                    throw new JsonException( "Файл пуст или некорректен" );
             }
-            catch ( Exception ex )
+            catch( Exception ex )
             {
                 Debug.WriteLine( $"[ConfigManager] Ошибка загрузки: {ex.Message}" );
+
+                try
+                {
+                    string backupPath = GetFullPath( $"{Path.GetFileNameWithoutExtension( fileName )}_corrupted_{DateTime.Now:yyyyMMdd_HHmmss}.json" );
+                    File.Copy( path, backupPath, true );
+                    Debug.WriteLine( $"[ConfigManager] Создана копия битого конфига: {backupPath}" );
+                }
+                catch( Exception copyEx )
+                {
+                    Debug.WriteLine( $"Не удалось создать бэкап: {copyEx.Message}" );
+                }
+
+                panelModel = null;
             }
         }
 
@@ -167,7 +180,6 @@ public class ConfigManager
 
     private static ContainerItem? BuildStandartContainer()
     {
-        // Регистрируем переменную для корректного ExpandEnvironmentVariables
         Environment.SetEnvironmentVariable( "SystemDirectory", Environment.SystemDirectory );
 
         try
@@ -184,12 +196,11 @@ public class ConfigManager
             if ( container == null ) 
                 return null;
 
-            // Фильтруем элементы: раскрываем пути и проверяем наличие файлов
             container.Items = container.Items
                 .Where( item =>
                 {
                     if ( item.IsSeparator ) 
-                        return true; // Разделители оставляем
+                        return true;
 
                     // Раскрываем %windir%, %SystemDirectory% и т.д.
                     string expandedPath = Environment.ExpandEnvironmentVariables( item.FilePath );
@@ -203,7 +214,6 @@ public class ConfigManager
                 } )
                 .ToList();
 
-            // Пересчитываем ID, чтобы после фильтрации (например, без gpedit) они шли по порядку
             for ( int i = 0; i < container.Items.Count; i++ )
                 container.Items[ i ].Id = i;
 
@@ -247,7 +257,6 @@ public class ConfigManager
 
             string json = File.ReadAllText( path );
 
-            // Прямая десериализация в список портативок
             List<PortableItem>? items = JsonSerializer.Deserialize<List<PortableItem>>( json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -258,7 +267,6 @@ public class ConfigManager
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 foreach ( PortableItem item in items )
                 {
-                    // Приводим относительный путь Apps\... к абсолютному
                     if ( !string.IsNullOrEmpty( item.FilePath ) )
                         item.FilePath = Path.GetFullPath( Path.Combine( baseDir, item.FilePath ) );
                 }
@@ -349,5 +357,37 @@ public class ConfigManager
                 Debug.WriteLine( $"Ошибка обновления JSON: {ex.Message}" );
             }
         }
+    }
+
+    public static bool IsAxPanelItemsConfig( string filePath )
+    {
+        try
+        {
+            using var fs = new FileStream( filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
+            using var reader = new StreamReader( fs );
+
+            // 1. Пропускаем первую строку (обычно это '{')
+            string? firstLine = reader.ReadLine();
+            if ( string.IsNullOrWhiteSpace( firstLine ) ) 
+                return false;
+
+            // 2. Читаем вторую строку, где должна быть сигнатура
+            string? secondLine = reader.ReadLine();
+            if ( string.IsNullOrWhiteSpace( secondLine ) ) 
+                return false;
+
+            // 3. Чистим строку от "шума" (пробелы, табы, кавычки, запятые) для надежного поиска
+            string cleanLine = secondLine.Replace( " ", "" )
+                .Replace( "\t", "" )
+                .Replace( "\"", "" )
+                .Replace( ",", "" )
+                .Trim();
+
+            // 4. Проверяем наличие сигнатуры без учета регистра
+            const string expected = "ConfigSignature:AxPanelitemsconfigfile";
+
+            return cleanLine.Contains( expected, StringComparison.OrdinalIgnoreCase );
+        }
+        catch { return false; }
     }
 }

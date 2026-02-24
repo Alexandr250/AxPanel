@@ -1,7 +1,7 @@
 {
   "version": 3,
   "targets": {
-    "net8.0-windows7.0": {
+    "net8.0-windows10.0.19041": {
       "AxPanel/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
@@ -25,33 +25,33 @@
     }
   },
   "projectFileDependencyGroups": {
-    "net8.0-windows7.0": [
+    "net8.0-windows10.0.19041": [
       "AxPanel >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\av.bushkevich\\.nuget\\packages\\": {},
+    "C:\\Users\\17264\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
+      "projectUniqueName": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
       "projectName": "AxPanelWinFormsTest",
-      "projectPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
-      "packagesPath": "C:\\Users\\av.bushkevich\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanelWinFormsTest\\obj\\",
+      "projectPath": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
+      "packagesPath": "C:\\Users\\17264\\.nuget\\packages\\",
+      "outputPath": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\av.bushkevich\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\17264\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net8.0-windows"
+        "net8.0-windows10.0.19041.0"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -59,11 +59,11 @@
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net8.0-windows7.0": {
-          "targetAlias": "net8.0-windows",
+        "net8.0-windows10.0.19041": {
+          "targetAlias": "net8.0-windows10.0.19041.0",
           "projectReferences": {
-            "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\AxPanel.csproj": {
-              "projectPath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\AxPanel.csproj"
+            "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanel.csproj": {
+              "projectPath": "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanel.csproj"
             }
           }
         }
@@ -72,11 +72,16 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
-      "net8.0-windows7.0": {
-        "targetAlias": "net8.0-windows",
+      "net8.0-windows10.0.19041": {
+        "targetAlias": "net8.0-windows10.0.19041.0",
         "imports": [
           "net461",
           "net462",
@@ -88,15 +93,24 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.Windows.SDK.NET.Ref",
+            "version": "[10.0.19041.44, 10.0.19041.44]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          },
+          "Microsoft.Windows.SDK.NET.Ref": {
             "privateAssets": "all"
           },
           "Microsoft.WindowsDesktop.App.WindowsForms": {
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

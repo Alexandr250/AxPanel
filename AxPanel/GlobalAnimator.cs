@@ -1,4 +1,5 @@
 ﻿using AxPanel.Contracts;
+using AxPanel.UI.UserControls;
 using Timer = System.Windows.Forms.Timer;
 
 namespace AxPanel;
@@ -10,9 +11,9 @@ public class GlobalAnimator : IDisposable
     public static float SpringStiffness = 0.15f; // Жесткость
     public static float SpringDamping = 0.5f;    // Затухание (0.8 - вязко, 0.3 - прыгуче)
 
-    private readonly List<IAnimatable> _targets = new();
+    private readonly List<IAnimatable> _targets = [];
     private readonly Timer _timer;
-    private const float LerpSpeed = 0.25f;
+    private const float LerpSpeed = 0.15f;
 
     public GlobalAnimator()
     {
@@ -28,7 +29,7 @@ public class GlobalAnimator : IDisposable
     {
         if ( _targets.Count == 0 ) return;
 
-        foreach ( var target in _targets.ToList() ) // ToList для безопасности при удалении на лету
+        foreach ( IAnimatable target in _targets.ToList() )
         {
             AnimateContainer( target );
         }
@@ -36,15 +37,17 @@ public class GlobalAnimator : IDisposable
 
     private static void AnimateContainer( IAnimatable container )
     {
-        var buttons = container.Buttons;
+        IReadOnlyList<LaunchButtonView> buttons = container.Buttons;
         bool moved = false;
 
         for ( int i = 0; i < buttons.Count; i++ )
         {
-            var btn = buttons[ i ];
-            if ( btn.Capture || btn.IsDragging ) continue;
+            LaunchButtonView btn = buttons[ i ];
 
-            var layout = container.LayoutEngine.GetLayout( i, container.ScrollValue, container.Width, buttons, container.Theme );
+            if ( btn.Capture || btn.IsDragging )
+                continue;
+
+            (Point Location, int Width) layout = container.LayoutEngine.GetLayout( i, container.ScrollValue, container.Width, buttons, container.Theme );
 
             btn.Left = ( int )Lerp( btn.Left, layout.Location.X, out bool m1 );
             btn.Top = ( int )Lerp( btn.Top, layout.Location.Y, out bool m2 );
@@ -53,7 +56,8 @@ public class GlobalAnimator : IDisposable
             if ( m1 || m2 || m3 ) moved = true;
         }
 
-        if ( moved ) container.UpdateVisual();
+        if ( moved )
+            container.UpdateVisual();
     }
 
     private static float Lerp( float current, float target, out bool moved )

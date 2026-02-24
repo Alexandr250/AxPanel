@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "iNbk3mtZfA7bhS7ze4nGNguK7YmKFG3pRRLIGckPxzPXcGYTZYiFrdo/lkC79iBYKvEvsQESR/WLdGiVy9QCfQ==",
+  "dgSpecHash": "fjh+eCPcroI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\av.bushkevich\\source\\repos\\AxPanel\\AxPanel\\AxPanel.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanel.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.44\\microsoft.windows.sdk.net.ref.10.0.19041.44.nupkg.sha512"
+  ],
   "logs": []
 }

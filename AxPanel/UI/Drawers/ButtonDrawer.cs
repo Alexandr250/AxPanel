@@ -277,7 +277,9 @@ public class ButtonDrawer
 
     private void DrawSeparator( Graphics g, BaseControl control, Rectangle rect, MouseState mouseState )
     {
-        g.FillRectangle( _theme.ButtonStyle.UnselectedBrush, rect );
+        using SolidBrush backBrush = new( _theme.ContainerStyle.BackColor );
+        g.FillRectangle( /*_theme.ButtonStyle.UnselectedBrush*/ backBrush, rect );
+
         string cleanText = control.Text.Replace( "-", "" ).Trim().ToUpper();
         var font = _theme.ButtonStyle.SeparatorFont; //new Font( "Segoe UI", 7f, FontStyle.Bold );
         var size = g.MeasureString( cleanText, font );

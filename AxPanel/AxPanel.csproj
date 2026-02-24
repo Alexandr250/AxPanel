@@ -2,7 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+	  <!-- <TargetFramework>net8.0-windows</TargetFramework> -->
+
+	  <!-- 1. Указываем конкретную версию Windows SDK (19041 - это Win10 2004+) -->
+	  <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+
+	  <!-- 2. Указываем минимальную поддерживаемую ОС (чтобы убрать ошибку 1135) -->
+	  <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
