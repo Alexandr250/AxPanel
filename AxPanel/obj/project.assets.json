@@ -1,11 +1,43 @@
 {
   "version": 3,
   "targets": {
-    "net8.0-windows10.0.19041": {}
+    "net8.0-windows10.0.19041": {
+      "SevenZipExtractor/1.0.19": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/SevenZipExtractor.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SevenZipExtractor.dll": {}
+        },
+        "build": {
+          "build/SevenZipExtractor.targets": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "SevenZipExtractor/1.0.19": {
+      "sha512": "tU9H3d8M6zx0u/0II/xecBKVjzX3BMB1v0NTSliSwlO+ryof7BIaiY0pMHd2eRqCWvyleFSERtQm4zQVG6fxAQ==",
+      "type": "package",
+      "path": "sevenzipextractor/1.0.19",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "build/SevenZipExtractor.targets",
+        "build/x64/7z.dll",
+        "build/x86/7z.dll",
+        "lib/net45/SevenZipExtractor.dll",
+        "lib/netstandard2.0/SevenZipExtractor.dll",
+        "sevenzipextractor.1.0.19.nupkg.sha512",
+        "sevenzipextractor.nuspec"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net8.0-windows10.0.19041": []
+    "net8.0-windows10.0.19041": [
+      "SevenZipExtractor >= 1.0.19"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\17264\\.nuget\\packages\\": {},
@@ -56,6 +88,12 @@
     "frameworks": {
       "net8.0-windows10.0.19041": {
         "targetAlias": "net8.0-windows10.0.19041.0",
+        "dependencies": {
+          "SevenZipExtractor": {
+            "target": "Package",
+            "version": "[1.0.19, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

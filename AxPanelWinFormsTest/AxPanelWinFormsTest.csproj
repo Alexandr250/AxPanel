@@ -17,6 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="squid-box.SevenZipSharp" Version="1.6.2.24" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AxPanel\AxPanel.csproj" />
   </ItemGroup>
 

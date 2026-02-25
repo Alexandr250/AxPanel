@@ -10,6 +10,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Media.Control;
 using Windows.Media;
+using SevenZip;
 
 namespace AxPanelWinFormsTest;
 
@@ -44,7 +45,6 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-
         RequestMediaToggle();
         //const byte VK_MEDIA_PLAY_PAUSE = 0xB3;
         //keybd_event( VK_MEDIA_PLAY_PAUSE, 0, 0, UIntPtr.Zero );

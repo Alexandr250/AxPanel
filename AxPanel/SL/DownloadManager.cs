@@ -1,4 +1,5 @@
 ﻿using AxPanel.Model;
+using SevenZipExtractor;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
@@ -52,9 +53,17 @@ public static class DownloadManager
             {
                 onStatusChanged?.Invoke( "Распаковка..." );
 
-                ZipFile.ExtractToDirectory( tempFile, targetDir!, overwriteFiles: true );
+                if ( item.DownloadUrl.EndsWith( ".7z", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    using ArchiveFile archiveFile = new( tempFile );
+                    archiveFile.Extract( targetDir, overwrite: true );
+                }
+                else
+                {
+                    ZipFile.ExtractToDirectory( tempFile, targetDir!, overwriteFiles: true );
+                }
 
-                if( !File.Exists( item.FilePath ) )
+                if ( !File.Exists( item.FilePath ) )
                     NormalizeDirectoryStructure( targetDir! );
 
                 if( !File.Exists( item.FilePath ) )
