@@ -13,23 +13,20 @@ public class ContainerService
         if ( string.IsNullOrWhiteSpace( btn.BaseControlPath ) )
             return;
 
-        // 1. ПРОВЕРКА ВНУТРЕННИХ КОМАНД (Actions)
         if ( btn.BaseControlPath.StartsWith( "action://", StringComparison.OrdinalIgnoreCase ) )
         {
             HandleInternalAction( btn.BaseControlPath );
-            return; // Выходим, так как это не файл
+            return;
         }
 
         if ( !File.Exists( btn.BaseControlPath ) && !string.IsNullOrEmpty( btn.DownloadUrl ) )
         {
-            // Визуальный фидбек: можно временно изменить текст или включить флаг загрузки
             string originalText = btn.Text;
 
             PortableItem portable = new() { DownloadUrl = btn.DownloadUrl, FilePath = btn.BaseControlPath, Name = btn.Text, IsArchive = btn.IsArchive };
 
             bool success = await DownloadManager.DownloadAndPrepare( portable, status =>
             {
-                // Обновляем статус прямо на кнопке через Invoke (т.к. асинхронно)
                 btn.BeginInvoke( () => {
                     btn.Text = status;
                     btn.Invalidate();
@@ -43,20 +40,22 @@ public class ContainerService
                 return;
             }
 
-            btn.Text = originalText; // Возвращаем название после загрузки
+            btn.Text = originalText;
         }
 
-        // 2. Если файл теперь существует (или был сразу) — запускаем
         if ( File.Exists( btn.BaseControlPath ) )
         {
             if ( ProcessManager.Start( btn.BaseControlPath, runAsAdmin, args ) )
             {
-                // Обновляем статистику "запущенности" (монитор подхватит остальное)
                 ProcessStats currentStats = btn.Stats;
                 currentStats.IsRunning = true;
                 btn.Stats = currentStats;
                 btn.Invalidate();
             }
+        }
+        else if( Directory.Exists( btn.BaseControlPath ) )
+        {
+            ProcessManager.OpenFolderInExplorer( btn.BaseControlPath );
         }
         else
         {
@@ -66,7 +65,6 @@ public class ContainerService
 
     private void HandleInternalAction( string actionPath )
     {
-        // Регистронезависимое сравнение конкретных команд
         if ( actionPath.Equals( "action://media-toggle", StringComparison.OrdinalIgnoreCase ) )
         {
             MediaInteractionService.TogglePlayPauseAsync();
@@ -78,13 +76,10 @@ public class ContainerService
     /// </summary>
     public void RunProcessGroup( IEnumerable<LaunchButtonView> groupButtons )
     {
-        // Групповой запуск делаем через Task.Run, чтобы не фризить UI, если файлов много
         Task.Run( () =>
         {
             foreach ( LaunchButtonView btn in groupButtons )
             {
-                // Вызываем обычный запуск для каждой кнопки
-                // (BeginInvoke внутри RunProcess позаботится о потокобезопасности UI)
                 RunProcess( btn, false );
             }
         } );

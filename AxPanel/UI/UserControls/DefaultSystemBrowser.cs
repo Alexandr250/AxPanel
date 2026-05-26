@@ -8,7 +8,8 @@ public static class DefaultSystemBrowser
     public static Icon GetBrowserIcon()
     {
         // Кэшируем иконку, чтобы не дергать диск и реестр постоянно
-        if ( _cachedIcon != null ) return _cachedIcon;
+        if ( _cachedIcon != null ) 
+            return _cachedIcon;
 
         Determine();
 

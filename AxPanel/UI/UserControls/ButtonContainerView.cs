@@ -184,7 +184,7 @@ public class ButtonContainerView : BasePanelControl, IAnimatable
         oldParent?.SyncState();
 
         // 4. Генерируем событие для сохранения конфига (если нужно)
-        ButtonContainerEvents.RaiseCollectionChanged( null );
+        ButtonContainerEvents.RaiseCollectionChanged( null! );
     }
 
     public void ApplyStats( Dictionary<string, ProcessStats> stats )
@@ -204,7 +204,7 @@ public class ButtonContainerView : BasePanelControl, IAnimatable
     public void SyncState()
     {
         ReorderButtons();
-        ButtonContainerEvents.RaiseCollectionChanged( null );
+        ButtonContainerEvents.RaiseCollectionChanged( null! );
     }
 
     public void ReorderButtons()

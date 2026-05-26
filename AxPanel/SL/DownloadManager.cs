@@ -77,7 +77,7 @@ public static class DownloadManager
                 File.Move( tempFile, targetFile );
             }
 
-            // Чистим временный файл, если он остался (после Move его не будет)
+            // Чистим временный файл, если он остался
             if ( File.Exists( tempFile ) ) 
                 File.Delete( tempFile );
 
@@ -110,36 +110,6 @@ public static class DownloadManager
             }
         }
     }
-
-    //private static void UpdatePortableJson( string fileName, string itemName, string newPath )
-    //{
-    //    try
-    //    {
-    //        string fullPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, fileName );
-            
-    //        if( !File.Exists( fullPath ) ) 
-    //            return;
-
-    //        string json = File.ReadAllText( fullPath );
-    //        List<PortableItem>? items = JsonSerializer.Deserialize<List<PortableItem>>( json );
-
-    //        PortableItem? target = items?.FirstOrDefault( i => i.Name == itemName );
-
-    //        if( target != null )
-    //        {
-    //            // Сохраняем путь в ОТНОСИТЕЛЬНОМ виде (как он был в JSON изначально)
-    //            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-    //            target.FilePath = Path.GetRelativePath( baseDir, newPath );
-
-    //            string updatedJson = JsonSerializer.Serialize( items, new JsonSerializerOptions { WriteIndented = true } );
-    //            File.WriteAllText( fullPath, updatedJson );
-    //        }
-    //    }
-    //    catch( Exception ex )
-    //    {
-    //        Debug.WriteLine( $"Ошибка обновления JSON: {ex.Message}" );
-    //    }
-    //}
 
     private static void NormalizeDirectoryStructure( string targetDir )
     {
