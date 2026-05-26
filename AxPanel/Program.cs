@@ -12,7 +12,7 @@ internal static class Program
     private static void Main()
     {
         AppDomain.CurrentDomain.UnhandledException += ( s, e ) => {
-            MessageBox.Show( e.ExceptionObject.ToString(), "Критическая ошибка" );
+            MessageBox.Show( e.ExceptionObject.ToString(), "РќРµРѕР±СЂР°Р±РѕС‚Р°РЅРЅР°СЏ РѕС€РёР±РєР°" );
         };
 
         ApplicationConfiguration.Initialize();
@@ -35,7 +35,7 @@ internal static class Program
 
         try
         {
-            _telegramBot = new AxPanelTelegramBot();
+            _telegramBot = new AxPanelTelegramBot( config );
             _telegramBot.StartAsync().GetAwaiter().GetResult();
         }
         catch ( Exception ex ) { }
@@ -67,16 +67,16 @@ internal static class Program
                 
                 uiContainer.ButtonContainerEvents.ItemCollectionChanged += list =>
                 {
-                    // 1. Если list == null, значит это промежуточное перемещение 
-                    // (например, кнопка просто пролетает над другой). Ничего не сохраняем.
+                    // 1. Р•СЃР»Рё list == null, Р·РЅР°С‡РёС‚ СЌС‚Рѕ РїСЂРѕРіСЂР°РјРјРЅРѕРµ РёР·РјРµРЅРµРЅРёРµ 
+                    // (РЅР°РїСЂРёРјРµСЂ, СѓРґР°Р»РµРЅРёРµ РєРѕРЅС‚РµР№РЅРµСЂР° РёР»Рё РєРЅРѕРїРєРё). Р’С‹С…РѕРґ Р±РµР· СЃРѕС…СЂР°РЅРµРЅРёСЏ.
                     if ( list == null ) 
                         return;
 
-                    // 2. Если пришел заполненный список — это ФИНАЛЬНЫЙ порядок (после MouseUp или DragDrop)
-                    // Просто заменяем старый список в модели на новый
+                    // 2. Р•СЃР»Рё СЃРїРёСЃРѕРє РїРѕР»СѓС‡РµРЅ РѕС‚ UI СЃ РёР·РјРµРЅС‘РЅРЅС‹Рј РїРѕСЂСЏРґРєРѕРј (РїРѕСЃР»Рµ MouseUp РёР»Рё DragDrop)
+                    // РєРѕРїРёСЂСѓРµРј РЅРѕРІС‹Р№ СЃРїРёСЃРѕРє РІ РјРѕРґРµР»СЊ Рё СЃРѕС…СЂР°РЅСЏРµРј РЅР° РґРёСЃРє
                     containerItem.Items = list;
 
-                    // 3. Теперь сохраняем актуальную модель
+                    // 3. РЎРѕС…СЂР°РЅСЏРµРј РёР·РјРµРЅС‘РЅРЅСѓСЋ РєРѕРЅС„РёРіСѓСЂР°С†РёСЋ
                     ConfigManager.SaveItemsConfig( panelModel );
                 };
             }

@@ -26,4 +26,8 @@ public class MainConfig
 
     [JsonConverter( typeof( JsonStringEnumConverter ) )]
     public LayoutMode LayoutMode { get; set; } = LayoutMode.List;
+
+    public List<long> AllowedChatIds { get; set; } = new();
+
+    public string? TelegramBotTokenFile { get; set; }
 }
