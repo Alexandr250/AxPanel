@@ -1,9 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "CMwfsQzc72U=",
+  "dgSpecHash": "xYuqGzEwK5Y=",
   "success": true,
   "projectFilePath": "D:\\projects\\git-source\\AxPanel\\AxPanelWinFormsTest\\AxPanelWinFormsTest.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.configuration.binder\\8.0.0\\microsoft.extensions.configuration.binder.8.0.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.options\\8.0.0\\microsoft.extensions.options.8.0.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\8.0.0\\microsoft.extensions.options.configurationextensions.8.0.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\microsoft.netcore.platforms\\2.0.0\\microsoft.netcore.platforms.2.0.0.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\sevenzipextractor\\1.0.19\\sevenzipextractor.1.0.19.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\squid-box.sevenzipsharp\\1.6.2.24\\squid-box.sevenzipsharp.1.6.2.24.nupkg.sha512",
@@ -12,6 +18,8 @@
     "C:\\Users\\17264\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.5.0\\system.security.cryptography.protecteddata.4.5.0.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\system.security.permissions\\4.5.0\\system.security.permissions.4.5.0.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\system.security.principal.windows\\4.5.0\\system.security.principal.windows.4.5.0.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\system.text.json\\8.0.5\\system.text.json.8.0.5.nupkg.sha512",
+    "C:\\Users\\17264\\.nuget\\packages\\telegram.bot\\22.10.0.1\\telegram.bot.22.10.0.1.nupkg.sha512",
     "C:\\Users\\17264\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.44\\microsoft.windows.sdk.net.ref.10.0.19041.44.nupkg.sha512"
   ],
   "logs": []

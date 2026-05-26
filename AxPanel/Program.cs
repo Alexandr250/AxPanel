@@ -6,6 +6,8 @@ namespace AxPanel;
 
 internal static class Program
 {
+    private static AxPanelTelegramBot? _telegramBot;
+
     [STAThread]
     private static void Main()
     {
@@ -31,7 +33,17 @@ internal static class Program
             ConfigManager.SaveMainConfig( config );
         };
 
+        try
+        {
+            _telegramBot = new AxPanelTelegramBot();
+            _telegramBot.StartAsync().GetAwaiter().GetResult();
+        }
+        catch ( Exception ex ) { }
+
+
         Application.Run( view );
+
+        _telegramBot?.StopAsync().GetAwaiter().GetResult();
     }
 
     private static void ConfigureMainPanelView( MainView? mainView, MainConfig? config, MainModel panelModel )

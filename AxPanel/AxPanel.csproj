@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="SevenZipExtractor" Version="1.0.19" />
+    <PackageReference Include="Telegram.Bot" Version="22.10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
