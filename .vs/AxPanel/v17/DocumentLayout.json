@@ -96,7 +96,7 @@
               "RelativeDocumentMoniker": "AxPanel\\AxPanelTelegramBot.cs",
               "ToolTip": "D:\\projects\\git-source\\AxPanel\\AxPanel\\AxPanelTelegramBot.cs",
               "RelativeToolTip": "AxPanel\\AxPanelTelegramBot.cs",
-              "ViewState": "AgIAAMEAAAAAAAAAAAAAACQAAAAGAAAAAAAAAA==",
+              "ViewState": "AgIAAFYDAAAAAAAAAAAAAG0DAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-26T14:32:52.471Z",
               "EditorCaption": ""
@@ -135,8 +135,7 @@
               "RelativeToolTip": "AxPanel\\SL\\ContainerService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAGQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-30T08:32:50.263Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-30T08:32:50.263Z"
             },
             {
               "$type": "Document",
@@ -172,8 +171,7 @@
               "RelativeToolTip": "AxPanel\\Program.cs",
               "ViewState": "AgIAABUAAAAAAAAAAAAAABwAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-24T09:09:52.868Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-24T09:09:52.868Z"
             },
             {
               "$type": "Document",
@@ -257,8 +255,7 @@
               "RelativeToolTip": "AxPanelWinFormsTest\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAC4AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-18T12:08:51.535Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-18T12:08:51.535Z"
             }
           ]
         }
