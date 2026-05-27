@@ -8,6 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace AxPanel;
 
@@ -114,22 +115,25 @@ public class AxPanelTelegramBot : IDisposable
 
         long chatId = update.Message.Chat.Id;
 
-        if ( _config.AllowedChatIds?.Count > 0 && !_config.AllowedChatIds.Contains( chatId ) )
+        if ( _config.AllowedChatIds == null || !_config.AllowedChatIds.Contains( chatId ) )
         {
+            Debug.WriteLine( $"⛔ Доступ запрещён для chatId={chatId}" );
             await botClient.SendMessage( chatId, "⛔ У вас нет доступа к этому боту.", cancellationToken: cancellationToken );
             return;
         }
 
         string fullCommand = messageText.Trim();
-        string lowerCommand = fullCommand.ToLowerInvariant();
+        int slashIdx = fullCommand.IndexOf( '/' );
+        string effectiveCmd = slashIdx >= 0 ? fullCommand[slashIdx..] : fullCommand;
+        string lowerCommand = effectiveCmd.ToLowerInvariant();
 
         if ( lowerCommand.StartsWith( "/tree" ) )
         {
-            await HandleTreeCommand( botClient, chatId, fullCommand, cancellationToken );
+            await HandleTreeCommand( botClient, chatId, effectiveCmd, cancellationToken );
             return;
         }
 
-        string[] parts = fullCommand.Split( ' ', 2, StringSplitOptions.RemoveEmptyEntries );
+        string[] parts = effectiveCmd.Split( ' ', 2, StringSplitOptions.RemoveEmptyEntries );
         string cmd = parts[0].ToLowerInvariant();
         string args = parts.Length > 1 ? parts[1].Trim() : "";
 
@@ -139,6 +143,7 @@ public class AxPanelTelegramBot : IDisposable
                 await botClient.SendMessage( chatId,
                     "Привет! Я бот для управления AxPanel.\n" +
                     "Используйте /help для списка команд.",
+                    replyMarkup: GetMainMenuKeyboard(),
                     cancellationToken: cancellationToken );
                 break;
 
@@ -290,6 +295,18 @@ public class AxPanelTelegramBot : IDisposable
                "/find <маска> — поиск файлов\n" +
                "/tree[N] [путь] — дерево папок\n\n" +
                "/help — это сообщение";
+    }
+
+    private ReplyKeyboardMarkup GetMainMenuKeyboard()
+    {
+        return new ReplyKeyboardMarkup( new[]
+        {
+            new[] { new KeyboardButton( "🔍 /help" ), new KeyboardButton( "📊 /status" ) },
+            new[] { new KeyboardButton( "🔒 /lock" ), new KeyboardButton( "📸 /screenshot" ) }
+        } )
+        {
+            ResizeKeyboard = true
+        };
     }
 
     private FileBrowserSession GetOrCreateSession( long chatId )
@@ -453,10 +470,14 @@ public class AxPanelTelegramBot : IDisposable
             shown = 0;
             sb.AppendLine();
             sb.AppendLine( "📄 **Файлы:**" );
+
+            int maxNameLen = files.Count > 0 ? files.Max( f => f.Name.Length ) : 0;
+            int padWidth = Math.Min( maxNameLen, 40 );
+
             foreach ( var (name, size) in files )
             {
                 if ( shown >= maxItems ) break;
-                sb.AppendLine( $"  📄 {name}    [{size}]" );
+                sb.AppendLine( $"  📄 {name.PadRight( padWidth )} [{size}]" );
                 shown++;
             }
 
